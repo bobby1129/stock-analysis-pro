@@ -22,7 +22,7 @@ A股全维度分析 + ETF 期权分析工具 — 个股深度分析、概念板�
 全市场 ETF 期权合约扫描，寻找高胜率交易机会：
 - **卖方机会** — IV > HV 的虚值期权，按时间价值衰减速度排序
 - **买方机会** — IV < HV 的平值/浅虚值期权，按性价比排序
-- **风险指标** — Delta/Gamma/Theta/Vega 完整希腊字母分析
+- **风险指标** — Delta归一化安全边际 + IV/HV价差
 
 支持多标的扫描（50ETF、300ETF、500ETF 等），自动过滤流动性差的合约。
 
@@ -162,7 +162,9 @@ stock-analysis-pro/
 │   ├── sentiment.py        # 舆情 (股吧/新闻/互动易)
 │   ├── em_concept.py       # 概念板块 (HTTP API + Cookie + JSONP)
 │   ├── em_browser.py       # 共享Playwright浏览器会话
-│   ├── macro.py            # 宏观数据 (akshare)
+│   ├── macro.py            # 宏观数据 (akshare + 新浪)
+│   ├── options.py          # 期权数据 (新浪hq.sinajs.cn)
+│   ├── breadth.py          # 涨跌家数 (HTTP API + Cookie)
 │   └── cache.py            # 通用缓存
 ├── analysis/               # 分析引擎层
 │   ├── technical.py        # 技术面分析
@@ -178,7 +180,8 @@ stock-analysis-pro/
 ├── plans/                  # 编排层
 │   ├── stock_analysis.py   # 个股分析流程
 │   ├── concept_analysis.py # 概念分析流程
-│   └── daily_review.py     # 宏观概览流程
+│   ├── daily_report.py     # 每日复盘流程
+│   └── options_scan.py     # 期权扫描流程
 ├── templates/              # HTML报告模板
 ├── config/
 │   ├── config.example.yaml # 配置模板 (提交git)
@@ -196,6 +199,7 @@ stock-analysis-pro/
 | 数据源 | 用途 | 访问方式 | 状态 |
 |--------|------|----------|------|
 | 腾讯 (qt.gtimg.cn) | 实时行情 | 直连 | ✅ |
+| 新浪 (hq.sinajs.cn) | 期权/ETF行情/K线 | 直连 | ✅ |
 | 新浪 (money.finance) | K线数据 | 直连 | ✅ |
 | 东财 (emweb/guba) | 公司F10/股吧 | Playwright拦截 | ✅ |
 | 东财 (search-api) | 概念新闻 | 直连 | ✅ |
@@ -221,7 +225,7 @@ export HTTPS_PROXY=http://your-proxy:port
 | 格式 | 参数 | 适用场景 |
 |------|------|---------|
 | 文本 | (默认) | 终端查看 |
-| HTML | `--html` | 微信/浏览器查看，暗色主题 |
+| HTML | `--html` | 微信/浏览器查看，复盘浅色/其他暗色 |
 | JSON | `--json` | 程序对接 |
 | 摘要 | `--summary` | 快速概览 (~200 token) |
 

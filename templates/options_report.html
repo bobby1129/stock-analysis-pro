@@ -137,7 +137,7 @@ h3 { font-size: 14px; color: #ffd93d; margin: 12px 0 6px; }
 </div>
 
 <!-- ==================== 卖方机会榜 ==================== -->
-<h2>🔻 卖方机会 Top{{ seller_top|length }}</h2>
+<h2>🔻 卖方机会 Top{{ data.seller_top|length }}</h2>
 <p style="font-size:12px;color:#a0a0a0;margin-bottom:8px;">
   按单位风险收益排序 · 过滤: 7-90天, 成交额>10万, |Δ|<0.4, 年化>50%, 单张>100元, σ≥1.0
 </p>
@@ -181,7 +181,7 @@ h3 { font-size: 14px; color: #ffd93d; margin: 12px 0 6px; }
 </div>
 
 <!-- ==================== 买方机会榜 ==================== -->
-<h2>🔺 买方机会 Top{{ buyer_top|length }}</h2>
+<h2>🔺 买方机会 Top{{ data.buyer_top|length }}</h2>
 <p style="font-size:12px;color:#a0a0a0;margin-bottom:8px;">
   按性价比排序 · 过滤: 14-90天, 成交额>10万, Δ∈[0.15,0.70], IV/HV<1.0, 买方σ<1.5
 </p>

@@ -1,4 +1,18 @@
 
+## ✅ v3.1 文档与代码一致性修复 — 已完成 (2026-07-17)
+
+### 代码修复
+| 改动 | 说明 |
+|------|------|
+| `options_report.html` 模板 | 修复2处 `data.` 前缀遗漏 (seller_top\|length, buyer_top\|length) |
+
+### 文档修复
+| 文件 | 修改内容 |
+|------|----------|
+| DESIGN.md | 架构图: 补充daily_report.py/options_scan.py/breadth.py/options.py; CLI补充review/options命令; Plans表补充2个模块; 概念采集v6→v7; 关键经验重写; macro数据源改为akshare+新浪; Playwright用途限定 |
+| README.md | Plans补充daily_report.py/options_scan.py; Collectors补充options.py/breadth.py; macro.py数据源; 期权Greeks描述修正; HTML主题说明; 数据源补充新浪期权 |
+| USAGE.md | 复盘功能补充宏观环境/持仓详情; 数据源Playwright→HTTP API; 期权Greeks→Delta+IV/HV; 期权数据源修正; HTML主题说明 |
+
 ## ✅ v3.0 三项目合并 — 已完成 (2026-07-16)
 
 将 `stock_review`、`stock-analysis-pro`、`etf-options-analyzer` 合并为统一仓库。

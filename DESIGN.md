@@ -9,7 +9,7 @@
 
 **Stock Analysis Pro** 是一个完整的 A 股多维分析 + ETF 期权分析工具，作为 Hermes Agent 的 skill 使用。
 
-四大核心能力：
+五大核心能力：
 1. **个股全维度分析** — 技术面/基本面/估值面/资金面/舆情面 → 综合评分
 2. **概念板块扫描** — 热板排行/趋势定性/新闻归因/机会筛选
 3. **宏观市场概览** — 国际宏观/国内宏观/事件驱动/综合研判
@@ -23,10 +23,10 @@
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    CLI (core/cli.py)                     │
-│     analyze | concept | market | add | rm | list        │
+│     analyze | concept | market | review | options        │
 ├─────────────────────────────────────────────────────────┤
 │                  Plans (编排层)                           │
-│  stock_analysis.py  |  concept_analysis.py  |  daily_review.py │
+│  stock_analysis.py | concept_analysis.py | daily_report.py | options_scan.py │
 ├────────────────────────┬────────────────────────────────┤
 │   Analysis (维度层)     │   Collectors (采集层)           │
 │   technical.py         │   quote.py (行情/K线)           │
@@ -34,18 +34,21 @@
 │   valuation.py         │   flow.py (成交额/北向)         │
 │   capital.py           │   info.py (公司F10)             │
 │   sentiment.py         │   sentiment.py (股吧+互动易+新闻+评级) │
-│   company.py           │   em_concept.py (概念采集v6)    │
+│   company.py           │   em_concept.py (概念采集v7)    │
 │   scorer.py (综合评分)  │   em_browser.py (共享Playwright) │
-│   concept.py (概念分析)  │   concept.py (旧版,已废弃)      │
+│   concept.py (概念分析)  │   concept.py (概念排行+K线+新闻) │
 │   concept_rank.py       │   macro.py (宏观数据)          │
-│   macro.py             │   cache.py (缓存)              │
+│   macro.py             │   options.py (期权数据)        │
+│   breadth.py           │   breadth.py (涨跌家数)        │
+│   scorer.py (综合评分)  │   cache.py (缓存)              │
 ├────────────────────────┼────────────────────────────────┤
 │   Templates (HTML报告)  │   Config (配置管理)            │
 │   base.html            │   config/__init__.py           │
 │   stock_report.html    │   config/config.yaml           │
 │   concept_report.html  │   config/config.example.yaml   │
 │   market_report.html   │                                │
-│   6 组件模板           │                                │
+│   review_report.html   │                                │
+│   options_report.html  │                                │
 └────────────────────────┴────────────────────────────────┘
 ```
 
@@ -74,7 +77,7 @@ CLI command
 | `em_concept.py` | 770 | 东财push2+Cookie+JSONP | 概念列表(按资金流入排序) + 成分股(按涨幅,前100只) + 离线增量缓存 | ✅ |
 | `em_browser.py` | 376 | Playwright Chromium | 共享浏览器会话(F10/股吧/搜索/研报)，避免重复启动浏览器 | ✅ |
 | `concept.py` | 215 | 东财push2 HTTP API | 概念排行 + 成分股(100只) + 新闻 | ✅ |
-| `macro.py` | 354 | akshare + 东财 | global_macro(美债/利率/金银油) + domestic_macro(CPI/PMI/M2/LPR) + zt_pool(涨停复盘) | ✅ |
+| `macro.py` | 354 | akshare + 新浪 | global_macro(美债/利率) + 新浪(金银油) + domestic_macro(CPI/PMI/M2/LPR) + zt_pool(涨停复盘) | ✅ |
 | `cache.py` | 40 | 本地JSON文件 | TTL缓存(默认1小时)，减少重复请求 | ✅ |
 
 **em_concept.py 核心逻辑 (v7)**:
@@ -111,7 +114,8 @@ CLI command
 |------|------|----------|------|
 | `stock_analysis.py` | 152 | 行情→公司概况→技术面→基本面→资金面→舆情面→估值→综合评分 | ✅ |
 | `concept_analysis.py` | 332 | 概念排行→趋势定性(100只成分股)→新闻归因→机会筛选(涨跌分布+综合评分), 含地域过滤+龙头去重 | ✅ |
-| `daily_review.py` | 191 | 宏观市场概览: 国际宏观→国内宏观→事件驱动→综合研判→HTML/文本输出 | ✅ |
+| `daily_report.py` | 619 | 每日复盘: 指数行情→涨跌家数→概念资金流→宏观数据→持仓分析→自选股→格式化输出 | ✅ |
+| `options_scan.py` | ~200 | ETF期权全市场扫描: 合约数据→HV计算→IV/HV价差→卖方/买方排名 | ✅ |
 
 ### 3.4 CLI (core/cli.py)
 
@@ -126,6 +130,10 @@ CLI command
 | `concept --html` | HTML报告输出 | ✅ |
 | `market` | 宏观市场概览 | ✅ |
 | `market --html` | HTML报告输出 | ✅ |
+| `review` | 每日复盘 | ✅ |
+| `review --html` | HTML报告输出 | ✅ |
+| `options` | ETF期权扫描 | ✅ |
+| `options --html` | HTML报告输出 | ✅ |
 | `analyze-all` | 自选批量分析 | ✅ (简单循环) |
 | `add <code>` | 加入自选 | ✅ |
 | `rm <code>` | 移除自选 | ✅ |
@@ -368,7 +376,7 @@ Playwright Chromium
 - **OS**: Linux (6.1.84)
 - **Python**: 3.11
 - **Proxy**: Xray @ 127.0.0.1:10809 (HTTP, 用户态 systemd, whitelist 路由)
-- **Playwright**: Chromium (用于东财页面导航拦截)
+- **Playwright**: Chromium (仅用于F10/股吧/搜索/研报，概念/涨跌家数/期权均用HTTP API)
 - **Dependencies**: `akshare>=1.10.0`, `requests>=2.28.0`, `pyyaml>=6.0`, `jinja2>=3.1.0`, `playwright>=1.40.0`
 - **Working Dir**: `/tmp/stock-analysis-pro/`
 - **Config**: `config/config.yaml` (Cookie在此管理, 不提交git)
@@ -379,9 +387,9 @@ Playwright Chromium
 
 ## 8. 关键经验
 
-1. **东财push2直连频繁限流** — 服务器IP上ERR_EMPTY_RESPONSE，Cookie无法根治，改用Playwright页面导航拦截
-2. **东财push2直连方案** — HTTP API + Cookie，避免Playwright滑块验证风险
-3. **Playwright共享会话** — `em_browser.py`避免重复启动浏览器，F10/股吧/搜索/研报复用同一会话
+1. **东财push2方案** — HTTP API + Cookie，概念/涨跌家数均走此路，间隔1秒防限流
+2. **Playwright仅用于F10/股吧** — `em_browser.py`共享会话，概念/涨跌家数不走Playwright
+3. **K线用新浪** — `hq.sinajs.cn`无限流，可线程池并发拉取
 4. **akshare的stock_board_concept_*系列** — 在服务器上被封(RemoteDisconnected)
 5. **涨跌停数据用akshare** — `stock_zt_pool_em`，不依赖东财push2
 6. **东财搜索API可用** — JSONP格式需去掉jQuery()包装，支持概念关键词搜索新闻
