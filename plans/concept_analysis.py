@@ -128,12 +128,14 @@ def run(target_count=10, verbose=True, use_cache=True):
         print(f"  → 过滤后{len(top)}个概念, 开始拉成分股...")
 
     # 对每个概念拉成分股 (HTTP)
-    for c in top:
+    for i, c in enumerate(top):
         bk_code = c['bk_code']
         if verbose:
             print(f"    拉取 {c['name']} 成分股...")
-        stocks = fetch_concept_stocks(bk_code, c['name'], limit=10, verbose=False)
+        stocks = fetch_concept_stocks(bk_code, c['name'], limit=100, verbose=False)
         stocks_map[bk_code] = stocks
+        if i < len(top) - 1:
+            time.sleep(1.0)  # 避免东财限流
 
     for c in top:
         bk_code = c['bk_code']

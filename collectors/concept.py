@@ -116,31 +116,37 @@ def concept_leader_kline(symbol, datalen=60):
 _kline_cache = {}  # {symbol: [{day, close, volume}, ...]}
 
 
-def batch_klines(symbols: list, datalen=30, delay=0.15, verbose=False) -> dict:
+def batch_klines(symbols: list, datalen=30, delay=0.15, verbose=False, max_workers=10) -> dict:
     """
-    批量获取日K线，带内存缓存去重
+    批量获取日K线，带内存缓存去重 + 并发加速
     symbols: list of symbol strings (e.g. ['sz300068', 'sh603893'])
     返回: {symbol: [{day, close, volume}, ...]} 只保留close和volume节省带宽
     """
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
     results = {}
     new_symbols = [s for s in symbols if s not in _kline_cache]
 
     if verbose and new_symbols:
         print(f"    K线缓存: {len(symbols) - len(new_symbols)}只命中, {len(new_symbols)}只待拉取")
 
-    for i, sym in enumerate(new_symbols):
-        klines = concept_leader_kline(sym, datalen=datalen)
-        if klines:
-            # 保留 close/volume/low (low用于刚启动判定)
-            _kline_cache[sym] = [{'day': k['day'], 'close': float(k['close']), 'volume': float(k['volume']), 'low': float(k['low'])} for k in klines]
-        else:
-            _kline_cache[sym] = []
+    if new_symbols:
+        def _fetch_one(sym):
+            klines = concept_leader_kline(sym, datalen=datalen)
+            return sym, klines
 
-        if i < len(new_symbols) - 1:
-            time.sleep(delay)
-
-        if verbose and (i + 1) % 20 == 0:
-            print(f"    K线进度: {i+1}/{len(new_symbols)}")
+        done_count = 0
+        with ThreadPoolExecutor(max_workers=max_workers) as pool:
+            futures = {pool.submit(_fetch_one, sym): sym for sym in new_symbols}
+            for fut in as_completed(futures):
+                sym, klines = fut.result()
+                if klines:
+                    _kline_cache[sym] = [{'day': k['day'], 'close': float(k['close']), 'volume': float(k['volume']), 'low': float(k['low'])} for k in klines]
+                else:
+                    _kline_cache[sym] = []
+                done_count += 1
+                if verbose and done_count % 20 == 0:
+                    print(f"    K线进度: {done_count}/{len(new_symbols)}")
 
     # 返回结果
     for sym in symbols:
