@@ -2,118 +2,100 @@
 """市场宽度采集 — 涨跌家数 + 涨跌停统计
 
 数据源:
-  1. Playwright 拦截 ulist.np API (上证+深证合并)
-  2. akshare 涨跌停池 (备选)
+  1. 东财 push2 API (上证+深证合并) — 带Cookie防限流
+  2. akshare 涨跌停池
 
 用法:
     from collectors.breadth import fetch_breadth, fetch_limit_stats
     breadth = fetch_breadth()  # {up, down, flat, limit_up, limit_down}
-    limits = fetch_limit_stats(date='20260716')  # {zt_count, dt_count, zt_stocks: [...]}
+    limits = fetch_limit_stats(date='20260716')
 """
 
-import asyncio
 import json
+import time
+import requests
 from datetime import datetime
 from typing import Optional
 
+# 复用config中的cookie
+def _get_cookie():
+    try:
+        import sys, os
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from config import load_config
+        cfg = load_config()
+        return cfg.get('eastmoney', {}).get('cookie', '')
+    except Exception:
+        return ''
+
+
+def _east_breadth(secid, retries=3):
+    """查询单个市场的涨跌家数，带重试 (使用 Cookie 绕过拦截)"""
+    url = (
+        "https://push2.eastmoney.com/api/qt/ulist.np/get?"
+        f"fltt=2&fields=f104,f105,f106,f107,f108&secids={secid}"
+    )
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Referer": "https://quote.eastmoney.com/",
+    }
+    cookie = _get_cookie()
+    if cookie:
+        headers["Cookie"] = cookie
+
+    for attempt in range(retries):
+        try:
+            time.sleep(0.5)  # 防抖
+            r = requests.get(url, headers=headers, timeout=10)
+            if r.status_code == 200:
+                data = r.json()
+                items = data.get("data", {}).get("diff", [])
+                if items:
+                    i = items[0]
+                    return {
+                        "up": i.get("f104", 0) or 0,
+                        "down": i.get("f105", 0) or 0,
+                        "flat": i.get("f106", 0) or 0,
+                        "limit_up": i.get("f107", 0) or 0,
+                        "limit_down": i.get("f108", 0) or 0,
+                    }
+        except Exception as e:
+            if attempt < retries - 1:
+                time.sleep(2)
+            continue
+    return {}
+
 
 def fetch_breadth() -> dict:
-    """获取涨跌家数 (Playwright 拦截 ulist.np API)"""
-    try:
-        return asyncio.run(_fetch_breadth_async())
-    except Exception as e:
-        print(f"[breadth] Playwright异常: {e}")
-        return {'up': 0, 'down': 0, 'flat': 0, 'limit_up': 0, 'limit_down': 0}
-
-
-async def _fetch_breadth_async() -> dict:
-    """拦截东财 center 页面的 ulist.np API 响应"""
-    from playwright.async_api import async_playwright
-
-    breadth_api_data = {}
-
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
-
-        async def on_response(response):
-            url = response.url
-            if response.status != 200:
-                return
-            if 'ulist.np/get' in url or ('push2' in url and 'f104' in url):
-                try:
-                    body = await response.json()
-                    breadth_api_data['raw'] = body
-                except:
-                    pass
-
-        page.on('response', on_response)
-
-        try:
-            await page.goto(
-                'https://quote.eastmoney.com/center.html',
-                wait_until='domcontentloaded',
-                timeout=20000,
-            )
-            # 等待 API 响应到达
-            try:
-                await page.wait_for_event(
-                    'response',
-                    lambda r: 'ulist.np' in r.url or ('push2' in r.url and 'f104' in r.url),
-                    timeout=10000,
-                )
-            except:
-                pass
-            await page.wait_for_timeout(3000)
-        except Exception as e:
-            print(f"[breadth] 页面加载异常: {e}")
-        finally:
-            await browser.close()
-
+    """获取涨跌家数 (东财HTTP API, 带Cookie)"""
     result = {'up': 0, 'down': 0, 'flat': 0, 'limit_up': 0, 'limit_down': 0}
 
-    if 'raw' in breadth_api_data:
-        items = breadth_api_data['raw'].get('data', {}).get('diff', [])
-        for item in items:
-            secid = item.get('f1')
-            if secid in (0, 1):  # 上证 or 深证
-                result['up'] += item.get('f104', 0) or 0
-                result['down'] += item.get('f105', 0) or 0
-                result['flat'] += item.get('f106', 0) or 0
-                result['limit_up'] += item.get('f107', 0) or 0
-                result['limit_down'] += item.get('f108', 0) or 0
+    sh = _east_breadth("1.000001")
+    time.sleep(0.5)
+    sz = _east_breadth("0.399001")
+
+    result['up'] = sh.get('up', 0) + sz.get('up', 0)
+    result['down'] = sh.get('down', 0) + sz.get('down', 0)
+    result['flat'] = sh.get('flat', 0) + sz.get('flat', 0)
+    result['limit_up'] = sh.get('limit_up', 0) + sz.get('limit_up', 0)
+    result['limit_down'] = sh.get('limit_down', 0) + sz.get('limit_down', 0)
 
     return result
 
 
 def fetch_limit_stats(date: Optional[str] = None) -> dict:
-    """涨跌停统计 (akshare)
-
-    Args:
-        date: YYYYMMDD, 默认今天
-
-    Returns:
-        {
-            'zt_count': int,     # 涨停家数
-            'dt_count': int,     # 跌停家数
-            'zt_stocks': [...],  # 涨停股票列表
-            'dt_stocks': [...],  # 跌停股票列表
-        }
-    """
+    """涨跌停统计 (akshare)"""
     import akshare as ak
 
     if not date:
         date = datetime.now().strftime("%Y%m%d")
 
     result = {
-        'zt_count': 0,
-        'dt_count': 0,
-        'zt_stocks': [],
-        'dt_stocks': [],
+        'zt_count': 0, 'dt_count': 0,
+        'zt_stocks': [], 'dt_stocks': [],
         'date': date,
     }
 
-    # 涨停池
     try:
         zt_df = ak.stock_zt_pool_em(date=date)
         if zt_df is not None and not zt_df.empty:
@@ -132,7 +114,6 @@ def fetch_limit_stats(date: Optional[str] = None) -> dict:
     except Exception as e:
         print(f"[breadth] 涨停池获取异常: {e}")
 
-    # 跌停池
     try:
         dt_df = ak.stock_zt_pool_dtgc_em(date=date)
         if dt_df is not None and not dt_df.empty:

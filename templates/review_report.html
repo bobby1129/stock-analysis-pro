@@ -1,220 +1,340 @@
-{% extends "base.html" %}
-{% block title %}每日复盘 — {{ data.get('date', '') }}{% endblock %}
-{% block body %}
-{% macro fmt_pct(v) %}{% if v is not none and v != 0 %}{{ '%+.2f'|format(v) }}%{% else %}--{% endif %}{% endmacro %}
-{% macro fmt_yi(v) %}{% if v is not none and v != 0 %}{{ '%.2f'|format(v / 100000000) }}亿{% else %}--{% endif %}{% endmacro %}
-{% macro pct_color(v) %}{% if v is not none and v > 0 %}up{% elif v is not none and v < 0 %}down{% else %}flat{% endif %}{% endmacro %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>股票复盘 - {{ data.fetch_time[:10] }}</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; background: #f5f6f8; color: #1a1a2e; font-size: 14px; line-height: 1.5; padding-bottom: 30px; }
+.header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; padding: 18px 16px 14px; text-align: center; }
+.header h1 { font-size: 18px; font-weight: 600; }
+.header .time { font-size: 12px; opacity: 0.7; margin-top: 4px; }
+.section { margin: 10px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.section-title { font-size: 15px; font-weight: 600; padding: 12px 16px 8px; }
+.index-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #f0f2f5; }
+.index-item { background: #fff; padding: 12px; }
+.index-item .name { font-size: 13px; color: #666; }
+.index-item .price { font-size: 16px; font-weight: 600; margin: 2px 0; }
+.index-item .pct { font-size: 12px; }
+.macro-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: #f0f2f5; }
+.macro-item { background: #fff; padding: 10px 8px; text-align: center; }
+.macro-item .label { font-size: 11px; color: #999; margin-bottom: 4px; }
+.macro-item .value { font-size: 14px; font-weight: 600; color: #1a1a2e; }
+.macro-item .unit { font-size: 10px; color: #999; }
+.flow-list { padding: 0 12px 12px; }
+.flow-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f5f5f5; }
+.flow-row:last-child { border-bottom: none; }
+.flow-row .name { flex: 1; font-size: 13px; }
+.flow-row .change { width: 55px; text-align: right; font-size: 12px; }
+.flow-row .amount { width: 70px; text-align: right; font-size: 12px; font-weight: 500; }
+.stock-card { border-bottom: 1px solid #f5f5f5; }
+.stock-card:last-child { border-bottom: none; }
+.stock-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; cursor: pointer; }
+.stock-header .left { flex: 1; }
+.stock-header .stock-name { font-size: 15px; font-weight: 600; }
+.stock-header .stock-code { font-size: 11px; color: #999; margin-left: 6px; }
+.stock-header .stock-note { font-size: 11px; color: #999; margin-top: 2px; }
+.stock-header .right { text-align: right; }
+.stock-header .stock-price { font-size: 17px; font-weight: 700; }
+.stock-header .stock-change { font-size: 13px; }
+.expand-icon { display: inline-block; transition: transform 0.2s; color: #999; font-size: 12px; margin-left: 8px; }
+.expand-icon.open { transform: rotate(90deg); }
+.stock-detail { display: none; padding: 0 16px 12px; }
+.stock-detail.show { display: block; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.detail-item { background: #f8f9fa; padding: 8px 10px; border-radius: 8px; }
+.detail-item .d-label { font-size: 11px; color: #999; }
+.detail-item .d-value { font-size: 14px; font-weight: 600; margin-top: 2px; }
+.info-section { margin-top: 8px; }
+.info-section .info-title { font-size: 12px; font-weight: 600; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid #eee; }
+.info-item { font-size: 12px; padding: 4px 0; border-bottom: 1px dashed #f0f0f0; line-height: 1.4; color: #333; }
+.info-item:last-child { border-bottom: none; }
+.info-item .info-date { color: #999; font-size: 11px; margin-left: 4px; }
+.info-item .info-org { color: #666; font-size: 11px; }
+.up { color: #e74c3c; }
+.down { color: #27ae60; }
+</style>
+</head>
+<body>
 
-{# ===== HEADER ===== #}
 <div class="header">
-  <h1>📋 每日复盘</h1>
-  <div class="subtitle">{{ data.get('date', '') }}</div>
+<h1>📊 每日股票复盘</h1>
+<div class="time">{{ data.fetch_time }}</div>
 </div>
 
-{# ===== 1. 指数概览 ===== #}
-{% set indices = data.get('indices', []) %}
-{% if indices %}
+{# ── 大盘指数 ── #}
 <div class="section">
-  <div class="section-title"><span class="icon">📊</span> 指数概览</div>
-  <div class="metric-grid cols-{{ [indices|length, 4]|min }}">
-    {% for idx in indices %}
-    <div class="metric-item">
-      <div class="label">{{ idx.name }}</div>
-      <div class="value {{ pct_color(idx.change_pct) }}">{{ '%.2f'|format(idx.price) }}</div>
-      <div class="item-meta {{ pct_color(idx.change_pct) }}">{{ fmt_pct(idx.change_pct) }}</div>
-    </div>
-    {% endfor %}
-  </div>
+<div class="section-title">📈 大盘指数</div>
+<div class="index-grid">
+{% for idx in data.indices %}
+{% set cp = idx.change_pct|default(0) %}
+<div class="index-item">
+<div class="name">{{ idx.name }}</div>
+<div class="price {{ 'up' if cp > 0 else 'down' if cp < 0 else '' }}">{{ "{:,.2f}".format(idx.price|default(0)) }}</div>
+<div class="pct {{ 'up' if cp > 0 else 'down' if cp < 0 else '' }}">{{ "{:+.2f}%".format(cp) }}</div>
+</div>
+{% endfor %}
+</div>
+</div>
+
+{# ── 宏观环境 ── #}
+{% set macro = data.macro|default({}) %}
+<div class="section">
+<div class="section-title">🌐 宏观环境</div>
+<div class="macro-grid">
+<div class="macro-item">
+<div class="label">10Y美债</div>
+<div class="value">{% if macro.us_treasury_10y %}{{ "%.3f"|format(macro.us_treasury_10y) }}{% else %}--{% endif %}<span class="unit">%</span></div>
+</div>
+<div class="macro-item">
+<div class="label">美联储利率</div>
+<div class="value">{% if macro.fed_rate %}{{ "%.2f"|format(macro.fed_rate) }}{% else %}--{% endif %}<span class="unit">%</span></div>
+</div>
+<div class="macro-item">
+<div class="label">美元/人民币</div>
+<div class="value">{% if macro.usd_cny %}{{ "%.4f"|format(macro.usd_cny) }}{% else %}--{% endif %}</div>
+</div>
+</div>
+
+{# 大宗商品 #}
+{% set gold = data.macro.gold|default({}) %}
+{% set silver = data.macro.silver|default({}) %}
+{% set crude = data.macro.crude|default({}) %}
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: #f0f2f5;">
+{% for label, item, unit in [("COMEX黄金", gold, "美元"), ("COMEX白银", silver, "美元"), ("WTI原油", crude, "美元")] %}
+{% set ip = item.price|default(0) if item else 0 %}
+{% set icp = item.change_pct|default(0) if item else 0 %}
+<div style="background:#fff; padding:10px 8px; text-align:center;">
+<div style="font-size:11px;color:#999;">{{ label }}</div>
+<div style="font-size:15px;font-weight:600;margin-top:4px;" class="{{ 'up' if icp > 0 else 'down' if icp < 0 else '' }}">
+{{ "{:,.2f}".format(ip) }}<span style="font-size:11px;color:#999;"> {{ unit }}</span>
+</div>
+<div style="font-size:12px;margin-top:2px;" class="{{ 'up' if icp > 0 else 'down' if icp < 0 else '' }}">{{ "{:+.2f}%".format(icp) }}</div>
+</div>
+{% endfor %}
+</div>
+
+{# A股总成交额 #}
+<div style="padding: 8px 16px 12px;">
+<div style="background:#f8f9fa; padding:10px; text-align:center; border-radius:8px;">
+<div style="font-size:11px;color:#999;">A股总成交额</div>
+<div style="font-size:15px;font-weight:600;margin-top:4px;">
+{{ "{:,.2f}".format(macro.total_market_amount|default(0)) }}<span style="font-size:11px;color:#999;"> 亿</span>
+</div>
+</div>
+</div>
+</div>
+
+{# ── 市场情绪 ── #}
+{% set breadth = data.breadth|default({}) %}
+{% set up = data.breadth.up|default(0) %}
+{% set down = data.breadth.down|default(0) %}
+{% set flat = data.breadth.flat|default(0) %}
+{% set limit_up = data.breadth.limit_up|default(0) %}
+{% set limit_down = data.breadth.limit_down|default(0) %}
+{% set total = up + down + flat %}
+{% if total > 0 %}
+{% set up_pct = (up / total * 100)|round(0)|int %}
+{% set down_pct = (down / total * 100)|round(0)|int %}
+{% set flat_pct = 100 - up_pct - down_pct %}
+<div class="section">
+<div class="section-title">🎯 市场情绪</div>
+
+{# 涨跌条形图 #}
+<div style="display:flex;gap:4px;padding:8px 16px 12px;">
+{% if up_pct > 0 %}
+<div style="background:#e74c3c;height:20px;border-radius:4px;width:{{ up_pct }}%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;">{{ up }}</div>
+{% endif %}
+{% if flat_pct > 0 %}
+<div style="background:#888;height:20px;border-radius:4px;width:{{ flat_pct }}%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;">{{ flat }}</div>
+{% endif %}
+{% if down_pct > 0 %}
+<div style="background:#27ae60;height:20px;border-radius:4px;width:{{ down_pct }}%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;">{{ down }}</div>
+{% endif %}
+</div>
+
+<div class="macro-grid">
+<div class="macro-item"><div class="label">🔴 上涨</div><div class="value up">{{ up }}</div></div>
+<div class="macro-item"><div class="label">⚪ 平盘</div><div class="value">{{ flat }}</div></div>
+<div class="macro-item"><div class="label">🟢 下跌</div><div class="value down">{{ down }}</div></div>
+</div>
+
+<div style="padding: 0 16px 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #f0f2f5;">
+<div style="background:#fff; padding:10px; text-align:center;">
+<div style="font-size:11px;color:#999;">🔴 涨停</div>
+<div style="font-size:15px;font-weight:600;margin-top:4px;" class="up">{{ limit_up }}</div>
+</div>
+<div style="background:#fff; padding:10px; text-align:center;">
+<div style="font-size:11px;color:#999;">🟢 跌停</div>
+<div style="font-size:15px;font-weight:600;margin-top:4px;" class="down">{{ limit_down }}</div>
+</div>
+</div>
+</div>
+{% else %}
+<div class="section">
+<div class="section-title">🎯 市场情绪</div>
+<div style="padding:16px;text-align:center;color:#999;font-size:13px;">数据接口暂不可用</div>
 </div>
 {% endif %}
 
-{# ===== 2. 市场宽度 ===== #}
-{% set breadth = data.get('breadth', {}) %}
-{% if breadth.up or breadth.down %}
-<div class="section">
-  <div class="section-title"><span class="icon">📈</span> 市场宽度</div>
-  <div class="metric-grid cols-5">
-    <div class="metric-item">
-      <div class="label">上涨</div>
-      <div class="value up">{{ breadth.up }}</div>
-    </div>
-    <div class="metric-item">
-      <div class="label">下跌</div>
-      <div class="value down">{{ breadth.down }}</div>
-    </div>
-    <div class="metric-item">
-      <div class="label">平盘</div>
-      <div class="value flat">{{ breadth.get('flat', 0) }}</div>
-    </div>
-    <div class="metric-item">
-      <div class="label">涨停</div>
-      <div class="value up">{{ breadth.get('limit_up', 0) }}</div>
-    </div>
-    <div class="metric-item">
-      <div class="label">跌停</div>
-      <div class="value down">{{ breadth.get('limit_down', 0) }}</div>
-    </div>
-  </div>
-  {% set total = breadth.up + breadth.down + breadth.get('flat', 0) %}
-  {% if total > 0 %}
-  <div style="padding:8px 16px;font-size:12px;color:var(--text-secondary);border-top:1px solid var(--card-border);">
-    涨跌比: {{ breadth.up }}:{{ breadth.down }}
-    {% if breadth.up > breadth.down * 2 %}
-    <span class="up"> · 强势市场</span>
-    {% elif breadth.down > breadth.up * 2 %}
-    <span class="down"> · 弱势市场</span>
-    {% else %}
-    <span class="flat"> · 均衡</span>
-    {% endif %}
-  </div>
-  {% endif %}
-</div>
-{% endif %}
-
-{# ===== 3. 涨跌停统计 ===== #}
-{% set limits = data.get('limits', {}) %}
-{% set zt_stocks = limits.get('zt_stocks', []) %}
-{% if limits.get('zt_count') or limits.get('dt_count') %}
-<div class="section">
-  <div class="section-title"><span class="icon">🔥</span> 涨跌停统计</div>
-  <div class="metric-grid cols-2">
-    <div class="metric-item">
-      <div class="label">涨停</div>
-      <div class="value up">{{ limits.zt_count }}家</div>
-    </div>
-    <div class="metric-item">
-      <div class="label">跌停</div>
-      <div class="value down">{{ limits.dt_count }}家</div>
-    </div>
-  </div>
-  {% if zt_stocks %}
-  <table class="data-table" style="margin-top:4px;">
-    <tr style="background:rgba(255,255,255,0.02);">
-      <td style="font-size:11px;color:var(--text-muted);">股票</td>
-      <td style="font-size:11px;color:var(--text-muted);">涨幅</td>
-      <td style="font-size:11px;color:var(--text-muted);">连板</td>
-      <td style="font-size:11px;color:var(--text-muted);">行业</td>
-    </tr>
-    {% for s in zt_stocks[:10] %}
-    <tr>
-      <td><span class="accent">{{ s.name }}</span><span style="color:var(--text-muted);font-size:11px;">({{ s.code }})</span></td>
-      <td class="up">{{ '%+.1f'|format(s.change_pct) }}%</td>
-      <td>{% if s.lianban > 1 %}<span class="up" style="font-weight:700;">{{ s.lianban }}板</span>{% else %}首板{% endif %}</td>
-      <td style="font-size:12px;color:var(--text-secondary);">{{ s.reason or '--' }}</td>
-    </tr>
-    {% endfor %}
-  </table>
-  {% endif %}
-</div>
-{% endif %}
-
-{# ===== 4. 概念资金流 ===== #}
-{% set concepts = data.get('concepts', []) %}
-{% if concepts %}
-<div class="section">
-  <div class="section-title"><span class="icon">💰</span> 概念资金流 Top10</div>
-  <table class="data-table">
-    <tr style="background:rgba(255,255,255,0.02);">
-      <td style="font-size:11px;color:var(--text-muted);">概念</td>
-      <td style="font-size:11px;color:var(--text-muted);">涨跌</td>
-      <td style="font-size:11px;color:var(--text-muted);">净流入</td>
-    </tr>
-    {% for c in concepts %}
-    <tr>
-      <td><span class="accent">{{ c.name }}</span></td>
-      <td class="{{ pct_color(c.change_pct) }}">{{ fmt_pct(c.change_pct) }}</td>
-      <td class="{{ pct_color(c.net_inflow) }}">{{ fmt_yi(c.net_inflow) }}</td>
-    </tr>
-    {% endfor %}
-  </table>
-</div>
-{% endif %}
-
-{# ===== 5. 持仓明细 ===== #}
-{% set portfolio = data.get('portfolio', []) %}
+{# ── 持仓个股 ── #}
+{% set portfolio = data.portfolio|default([]) %}
 {% if portfolio %}
 <div class="section">
-  <div class="section-title"><span class="icon">💼</span> 持仓明细</div>
-  <table class="data-table">
-    <tr style="background:rgba(255,255,255,0.02);">
-      <td style="font-size:11px;color:var(--text-muted);">股票</td>
-      <td style="font-size:11px;color:var(--text-muted);">现价</td>
-      <td style="font-size:11px;color:var(--text-muted);">涨跌</td>
-      <td style="font-size:11px;color:var(--text-muted);">持仓</td>
-    </tr>
-    {% for p in portfolio %}
-    <tr>
-      <td>
-        <span class="accent">{{ p.name }}</span>
-        {% if p.note %}<span style="font-size:11px;color:var(--text-muted);margin-left:4px;">{{ p.note }}</span>{% endif %}
-      </td>
-      <td>¥{{ '%.2f'|format(p.price) }}</td>
-      <td class="{{ pct_color(p.change_pct) }}">{{ fmt_pct(p.change_pct) }}</td>
-      <td style="font-size:12px;">{{ p.shares }}股</td>
-    </tr>
-    {% endfor %}
-  </table>
+<div class="section-title">💼 持仓个股</div>
+
+{% for s in data.portfolio %}
+{% set cp = s.change_pct|default(0) %}
+{% set price = s.price|default(0) %}
+{% set pe = s.pe %}
+{% set pb = s.pb %}
+{% set mv = s.total_mv %}
+{% set vol = s.volume|default(0) %}
+{% set amt = s.amount|default(0) %}
+{% set amp = s.amplitude|default(0) %}
+{% set vr = s.volume_ratio|default(0) %}
+{% set chg5 = s.chg_5d %}
+{% set chg20 = s.chg_20d %}
+{% set ann = s.announcements|default([]) %}
+{% set reports = s.research_reports|default([]) %}
+{% set news = s.news|default([]) %}
+
+<div class="stock-card">
+<div class="stock-header" onclick="toggleDetail(this)">
+<div class="left">
+<span class="stock-name">{{ s.name }}</span>
+<span class="stock-code">{{ s.code }}</span>
+<div class="stock-note">{{ s.note|default('') }}</div>
+</div>
+<div class="right">
+<div class="stock-price {{ 'up' if cp > 0 else 'down' if cp < 0 else '' }}">{{ "{:,.2f}".format(price) }}</div>
+<div class="stock-change {{ 'up' if cp > 0 else 'down' if cp < 0 else '' }}">{{ "{:+.2f}%".format(cp) }}</div>
+</div>
+<span class="expand-icon">▶</span>
+</div>
+
+<div class="stock-detail">
+<div class="detail-grid">
+<div class="detail-item"><div class="d-label">PE(动)</div><div class="d-value">{% if pe is not none %}{{ "%.2f"|format(pe) }}{% else %}--{% endif %}</div></div>
+<div class="detail-item"><div class="d-label">PB</div><div class="d-value">{% if pb is not none %}{{ "%.2f"|format(pb) }}{% else %}--{% endif %}</div></div>
+<div class="detail-item"><div class="d-label">总市值</div><div class="d-value">{% if mv is not none %}{{ "%.1f"|format(mv) }}亿{% else %}--{% endif %}</div></div>
+<div class="detail-item"><div class="d-label">成交量</div><div class="d-value">{% if vol %}{{ "%.1f"|format(vol/10000) }}万手{% else %}--{% endif %}</div></div>
+<div class="detail-item"><div class="d-label">成交额</div><div class="d-value">{% if amt %}{{ "%.2f"|format(amt/1e8) }}亿{% else %}--{% endif %}</div></div>
+<div class="detail-item"><div class="d-label">振幅</div><div class="d-value">{{ "%.2f"|format(amp) }}%</div></div>
+<div class="detail-item"><div class="d-label">量比</div><div class="d-value">{% if vr %}{{ "%.2f"|format(vr) }}{% else %}--{% endif %}</div></div>
+<div class="detail-item"><div class="d-label">5日涨跌</div><div class="d-value">{% if chg5 is not none %}<span class="{{ 'up' if chg5 > 0 else 'down' if chg5 < 0 else '' }}">{{ "{:+.2f}%".format(chg5) }}</span>{% else %}--{% endif %}</div></div>
+<div class="detail-item"><div class="d-label">20日涨跌</div><div class="d-value">{% if chg20 is not none %}<span class="{{ 'up' if chg20 > 0 else 'down' if chg20 < 0 else '' }}">{{ "{:+.2f}%".format(chg20) }}</span>{% else %}--{% endif %}</div></div>
+</div>
+
+{# 公告 #}
+<div class="info-section">
+<div class="info-title">📢 最新公告</div>
+{% if ann %}
+{% for a in ann %}
+<div class="info-item">{{ a.title }}<span class="info-date">{{ a.date }}</span></div>
+{% endfor %}
+{% else %}
+<div class="info-item" style="color:#999;">暂无</div>
+{% endif %}
+</div>
+
+{# 研报 #}
+<div class="info-section">
+<div class="info-title">📝 最新研报</div>
+{% if reports %}
+{% for r in reports %}
+<div class="info-item">{{ r.title }}<span class="info-date">{{ r.date }}</span><br><span class="info-org">机构: {{ r.org }}{% if r.rating %} | 评级: {{ r.rating }}{% endif %}</span></div>
+{% endfor %}
+{% else %}
+<div class="info-item" style="color:#999;">暂无</div>
+{% endif %}
+</div>
+
+{# 新闻 #}
+<div class="info-section">
+<div class="info-title">📰 最新新闻</div>
+{% if news %}
+{% for n in news %}
+<div class="info-item">{{ n.title }}<span class="info-date">{{ n.date }}</span>{% if n.media %}<span class="info-org"> | {{ n.media }}</span>{% endif %}</div>
+{% endfor %}
+{% else %}
+<div class="info-item" style="color:#999;">暂无</div>
+{% endif %}
+</div>
+
+</div>
+</div>
+{% endfor %}
+
 </div>
 {% endif %}
 
-{# ===== 6. 自选股 ===== #}
-{% set watchlist = data.get('watchlist', []) %}
+{# ── 自选股 ── #}
+{% set watchlist = data.watchlist|default([]) %}
 {% if watchlist %}
 <div class="section">
-  <div class="collapsible">
-    <div class="collapsible-toggle">
-      <span class="toggle-label">👀 自选股 ({{ watchlist|length }}只)</span>
-      <span class="toggle-arrow">▼</span>
-    </div>
-    <div class="collapsible-content">
-      <table class="data-table">
-        {% for w in watchlist %}
-        <tr>
-          <td><span class="accent">{{ w.name }}</span><span style="color:var(--text-muted);font-size:11px;margin-left:4px;">{{ w.code }}</span></td>
-          <td>¥{{ '%.2f'|format(w.price) }}</td>
-          <td class="{{ pct_color(w.change_pct) }}">{{ fmt_pct(w.change_pct) }}</td>
-        </tr>
-        {% endfor %}
-      </table>
-    </div>
-  </div>
+<div class="section-title">👀 自选股</div>
+{% for s in data.watchlist %}
+{% set cp = s.change_pct|default(0) %}
+<div class="stock-card">
+<div class="stock-header" onclick="toggleDetail(this)">
+<div class="left">
+<span class="stock-name">{{ s.name }}</span>
+<span class="stock-code">{{ s.code }}</span>
+</div>
+<div class="right">
+<div class="stock-price {{ 'up' if cp > 0 else 'down' if cp < 0 else '' }}">{{ "{:,.2f}".format(s.price|default(0)) }}</div>
+<div class="stock-change {{ 'up' if cp > 0 else 'down' if cp < 0 else '' }}">{{ "{:+.2f}%".format(cp) }}</div>
+</div>
+<span class="expand-icon">▶</span>
+</div>
+<div class="stock-detail">
+<div class="detail-grid">
+<div class="detail-item"><div class="d-label">PE(动)</div><div class="d-value">{% if s.pe is not none and s.pe %}{{ "%.2f"|format(s.pe) }}{% else %}--{% endif %}</div></div>
+<div class="detail-item"><div class="d-label">PB</div><div class="d-value">{% if s.pb is not none and s.pb %}{{ "%.2f"|format(s.pb) }}{% else %}--{% endif %}</div></div>
+<div class="detail-item"><div class="d-label">振幅</div><div class="d-value">{{ "%.2f"|format(s.amplitude|default(0)) }}%</div></div>
+<div class="detail-item"><div class="d-label">成交额</div><div class="d-value">{% if s.amount %}{{ "%.2f"|format(s.amount/1e8) }}亿{% else %}--{% endif %}</div></div>
+<div class="detail-item"><div class="d-label">5日涨跌</div><div class="d-value">{% if s.chg_5d is not none %}<span class="{{ 'up' if s.chg_5d > 0 else 'down' if s.chg_5d < 0 else '' }}">{{ "{:+.2f}%".format(s.chg_5d) }}</span>{% else %}--{% endif %}</div></div>
+<div class="detail-item"><div class="d-label">20日涨跌</div><div class="d-value">{% if s.chg_20d is not none %}<span class="{{ 'up' if s.chg_20d > 0 else 'down' if s.chg_20d < 0 else '' }}">{{ "{:+.2f}%".format(s.chg_20d) }}</span>{% else %}--{% endif %}</div></div>
+</div>
+</div>
+</div>
+{% endfor %}
 </div>
 {% endif %}
 
-{# ===== 7. 宏观快照 ===== #}
-{% set macro = data.get('macro', {}) %}
-{% if macro %}
+{# ── 概念板块资金流入 TOP10 ── #}
+{% set concepts = data.concepts|default([]) %}
+{% if concepts %}
 <div class="section">
-  <div class="collapsible">
-    <div class="collapsible-toggle">
-      <span class="toggle-label">🌍 宏观快照</span>
-      <span class="toggle-arrow">▼</span>
-    </div>
-    <div class="collapsible-content">
-      <div class="metric-grid cols-4" style="margin-top:8px;">
-        {% set us10y = macro.get('us_10y_yield', {}) %}
-        {% if us10y.get('value') is not none %}
-        <div class="metric-item">
-          <div class="label">美债10Y</div>
-          <div class="value">{{ '%.2f'|format(us10y.value) }}%</div>
-        </div>
-        {% endif %}
-        {% for c in macro.get('commodities', []) %}
-        <div class="metric-item">
-          <div class="label">{{ c.name }}</div>
-          <div class="value {{ pct_color(c.change_pct) }}">{{ '%.1f'|format(c.price) if c.price else '--' }}</div>
-          <div class="item-meta {{ pct_color(c.change_pct) }}">{{ fmt_pct(c.change_pct) }}</div>
-        </div>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
+<div class="section-title">💰 概念板块资金流入 TOP10</div>
+<div class="flow-list">
+{% for item in data.concepts %}
+{% set cp = item.change_pct|default(0) %}
+{% set inflow = item.net_inflow|default(0) / 1e8 %}
+<div class="flow-row">
+<div class="name">{{ item.name }}</div>
+<div class="change {{ 'up' if cp > 0 else 'down' if cp < 0 else '' }}">{{ "{:+.2f}%".format(cp) }}</div>
+<div class="amount">{{ "{:+.2f}".format(inflow) }}亿</div>
+</div>
+{% endfor %}
+</div>
 </div>
 {% endif %}
 
-{# ===== FOOTER ===== #}
-<div class="footer">
-  Stock Analysis Pro · 每日复盘 · {{ data.get('date', '') }}<br>
-  数据仅供参考，不构成投资建议
+<div style="text-align:center; padding: 20px 16px; color: #999; font-size: 11px;">
+数据更新: {{ data.fetch_time }}<br>数据来源: 新浪财经 / 腾讯财经 / 东方财富
 </div>
-{% endblock %}
+
+<script>
+function toggleDetail(el) {
+  var detail = el.nextElementSibling;
+  var icon = el.querySelector(".expand-icon");
+  detail.classList.toggle("show");
+  icon.classList.toggle("open");
+}
+</script>
+
+</body>
+</html>
