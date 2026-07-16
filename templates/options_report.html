@@ -116,25 +116,19 @@ h3 { font-size: 14px; color: #ffd93d; margin: 12px 0 6px; }
 <body>
 
 <h1>📊 ETF期权全合约扫描</h1>
-<div class="subtitle">{{ fetch_time }} · 共扫描 {{ total_contracts }} 个合约 · {{ underlyings|length }} 个品种</div>
+<div class="subtitle">{{ data.fetch_time }} · 共扫描 {{ data.total_contracts }} 个合约 · {{ data.underlyings|length }} 个品种</div>
 
 <!-- ==================== 市场全景 ==================== -->
 <h2>🌐 市场全景</h2>
 <div class="overview-grid">
-{% for code, info in underlyings.items() %}
-{% set hv = hv_map.get(code, {}) %}
+{% for code, info in data.underlyings.items() %}
+{% set hv = data.hv_map.get(code, {}) %}
 {% set hv60 = hv.get('hv60') %}
-{% set atm_iv = atm_ivs.get(code, 0) %}
-{% set spread = (atm_iv - hv60) if (atm_iv and hv60) else none %}
 <div class="overview-item">
   <div class="name">{{ info.name }}</div>
   <div class="price">{{ "%.4f"|format(info.price) }}</div>
   <div class="meta">
     HV60: {{ "%.1f%%"|format(hv60*100) if hv60 else "N/A" }}<br>
-    平值IV: {{ "%.1f%%"|format(atm_iv*100) if atm_iv else "N/A" }}<br>
-    {% if spread is not none %}
-    IV-HV: <span class="{{ 'spread-pos' if spread > 0 else 'spread-neg' }}">{{ "%+.1f%%"|format(spread*100) }}</span><br>
-    {% endif %}
     {% set pos = hv.get('position_60d') %}
     位置: {{ "%.0f%%"|format(pos*100) if pos is not none else "N/A" }} (60日)
   </div>
@@ -166,7 +160,7 @@ h3 { font-size: 14px; color: #ffd93d; margin: 12px 0 6px; }
 </tr>
 </thead>
 <tbody>
-{% for s in seller_top %}
+{% for s in data.seller_top %}
 <tr>
   <td><span class="rank-num {{ 'rank-1' if loop.index==1 else ('rank-2' if loop.index==2 else ('rank-3' if loop.index==3 else 'rank-n')) }}">{{ loop.index }}</span></td>
   <td class="name-col" title="{{ s.name }}">{{ s.name }}</td>
@@ -209,7 +203,7 @@ h3 { font-size: 14px; color: #ffd93d; margin: 12px 0 6px; }
 </tr>
 </thead>
 <tbody>
-{% for b in buyer_top %}
+{% for b in data.buyer_top %}
 <tr>
   <td><span class="rank-num {{ 'rank-1' if loop.index==1 else ('rank-2' if loop.index==2 else ('rank-3' if loop.index==3 else 'rank-n')) }}">{{ loop.index }}</span></td>
   <td class="name-col" title="{{ b.name }}">{{ b.name }}</td>
@@ -232,9 +226,9 @@ h3 { font-size: 14px; color: #ffd93d; margin: 12px 0 6px; }
 <!-- ==================== 操作建议 ==================== -->
 <h2>💡 操作建议</h2>
 
-{% if seller_top %}
+{% if data.seller_top %}
 <h3>卖方推荐</h3>
-{% for s in seller_top[:3] %}
+{% for s in data.seller_top[:3] %}
 <div class="advice-card">
   <div class="title">{{ s.verdict }} {{ s.name }}</div>
   <div class="detail">
@@ -253,9 +247,9 @@ h3 { font-size: 14px; color: #ffd93d; margin: 12px 0 6px; }
 {% endfor %}
 {% endif %}
 
-{% if buyer_top %}
+{% if data.buyer_top %}
 <h3>买方推荐</h3>
-{% for b in buyer_top[:3] %}
+{% for b in data.buyer_top[:3] %}
 <div class="advice-card" style="border-color:#4facfe;">
   <div class="title" style="color:#4facfe;">{{ b.verdict }} {{ b.name }}</div>
   <div class="detail">

@@ -106,33 +106,34 @@ def run(target_count=10, verbose=True, use_cache=True):
     # 清空K线缓存
     clear_kline_cache()
 
-    # === Step 1+1.5: 用Playwright获取概念列表 + 过滤 + 对top N拉成分股 ===
+    # === Step 1: 用HTTP API获取概念列表 (轻量, 避免Playwright滑块验证) ===
     if verbose:
-        print("  Step 1: 获取概念列表 + 成分股 (Playwright, 两次浏览器会话)...")
-    from collectors.em_concept import fetch_concepts_batch
+        print("  Step 1: 获取概念列表 (HTTP API)...")
+    from collectors.em_concept import fetch_concept_list, fetch_concept_stocks
 
-    def _filter_and_pick(concepts):
-        filtered = filter_concepts(concepts)
-        return filtered[:target_count]
-
-    batch = fetch_concepts_batch(
-        top_n=60,
-        stocks_limit=100,
-        verbose=verbose,
-        filter_fn=_filter_and_pick,
-    )
-    top = batch.get('filtered', [])
-    stocks_map = batch.get('stocks_map', {})
-
-    if not top:
+    concepts_raw = fetch_concept_list(top_n=60, verbose=verbose)
+    if not concepts_raw:
         print("\n  ⚠️ 无法获取概念排行！可能原因：")
-        print("  1. Playwright未安装或浏览器启动失败")
-        print("  2. 网络问题 → 检查是否能访问 data.eastmoney.com")
+        print("  1. Cookie未配置或已过期")
+        print("  2. 网络问题 → 检查是否能访问 push2.eastmoney.com")
         print("  💡 如有离线缓存将自动降级使用\n")
         return {"error": "无法获取概念排行", "date": date_str}
 
+    # 过滤 + 取top N
+    filtered = filter_concepts(concepts_raw)[:target_count]
+    top = filtered
+    stocks_map = {}
+
     if verbose:
-        print(f"  → 过滤后{len(top)}个概念")
+        print(f"  → 过滤后{len(top)}个概念, 开始拉成分股...")
+
+    # 对每个概念拉成分股 (HTTP)
+    for c in top:
+        bk_code = c['bk_code']
+        if verbose:
+            print(f"    拉取 {c['name']} 成分股...")
+        stocks = fetch_concept_stocks(bk_code, c['name'], limit=10, verbose=False)
+        stocks_map[bk_code] = stocks
 
     for c in top:
         bk_code = c['bk_code']
