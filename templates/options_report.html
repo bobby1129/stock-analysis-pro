@@ -3,160 +3,199 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ETF期权扫描报告</title>
+<title>ETF期权风险收益报告</title>
 <style>
-
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
   font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-  background: #1a1a2e;
-  color: #e0e0e0;
-  max-width: 520px;
+  background: #f5f6f8;
+  color: #333;
+  max-width: 640px;
   margin: 0 auto;
   padding: 12px;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
 }
-h1 { font-size: 18px; color: #4facfe; margin-bottom: 4px; }
-h2 { font-size: 16px; color: #00d4aa; margin: 20px 0 10px; border-bottom: 1px solid #0f3460; padding-bottom: 6px; }
-h3 { font-size: 14px; color: #ffd93d; margin: 12px 0 6px; }
-.subtitle { color: #a0a0a0; font-size: 12px; margin-bottom: 16px; }
-.card {
-  background: #16213e;
-  border: 1px solid #0f3460;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 12px;
-}
-.overview-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-}
-.overview-item {
-  background: #16213e;
-  border: 1px solid #0f3460;
-  border-radius: 6px;
-  padding: 10px;
-}
-.overview-item .name { font-size: 13px; color: #a0a0a0; }
-.overview-item .price { font-size: 16px; font-weight: bold; margin: 2px 0; }
-.overview-item .meta { font-size: 11px; color: #a0a0a0; }
-.spread-pos { color: #00d4aa; }
-.spread-neg { color: #ff4757; }
+h1 { font-size: 17px; color: #1a73e8; margin-bottom: 4px; }
+h2 { font-size: 15px; color: #333; margin: 20px 0 8px; padding-bottom: 6px; border-bottom: 2px solid #1a73e8; }
+h3 { font-size: 14px; color: #555; margin: 12px 0 6px; }
+.subtitle { color: #888; font-size: 11px; margin-bottom: 14px; }
 
-/* 排名表格 */
+/* 波动率全景表格 */
+.vol-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  background: #fff;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.vol-table th {
+  background: #1a73e8;
+  color: #fff;
+  padding: 6px 4px;
+  text-align: center;
+  font-weight: 500;
+  white-space: nowrap;
+  font-size: 11px;
+}
+.vol-table td {
+  padding: 5px 4px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap;
+}
+.vol-table tr:nth-child(even) { background: #fafbfc; }
+.signal-high { color: #d32f2f; font-weight: bold; }
+.signal-low { color: #388e3c; font-weight: bold; }
+.signal-normal { color: #f57c00; }
+
+/* 排序表格 */
 .rank-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
+  background: #fff;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
 .rank-table th {
-  background: #0f3460;
-  padding: 6px 4px;
+  background: #34495e;
+  color: #fff;
+  padding: 6px 3px;
   text-align: center;
-  font-weight: 600;
-  color: #a0a0a0;
+  font-weight: 500;
   white-space: nowrap;
-  position: sticky;
-  top: 0;
+  font-size: 11px;
 }
 .rank-table td {
-  padding: 6px 4px;
+  padding: 5px 3px;
   text-align: center;
-  border-bottom: 1px solid rgba(15,52,96,0.5);
+  border-bottom: 1px solid #eee;
   white-space: nowrap;
 }
-.rank-table tr:hover { background: rgba(79,172,254,0.08); }
-.rank-table .name-col { text-align: left; font-size: 11px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
-.rank-num { display: inline-block; width: 18px; height: 18px; line-height: 18px; text-align: center; border-radius: 50%; font-size: 11px; font-weight: bold; }
-.rank-1 { background: #00d4aa; color: #000; }
-.rank-2 { background: #ffd93d; color: #000; }
-.rank-3 { background: #ff8c42; color: #000; }
-.rank-n { background: #0f3460; color: #e0e0e0; }
+.rank-table tr:nth-child(even) { background: #fafbfc; }
+.rank-table tr:hover { background: #e8f4fd; }
+.name-col { text-align: left !important; font-size: 11px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; }
+.rank-num {
+  display: inline-block; width: 20px; height: 20px; line-height: 20px;
+  text-align: center; border-radius: 50%; font-size: 11px; font-weight: bold;
+}
+.rank-1 { background: #ffd700; color: #333; }
+.rank-2 { background: #c0c0c0; color: #333; }
+.rank-3 { background: #cd7f32; color: #fff; }
+.rank-n { background: #e0e0e0; color: #666; }
 
-.verdict-green { color: #00d4aa; }
-.verdict-yellow { color: #ffd93d; }
-.verdict-orange { color: #ff8c42; }
-.verdict-red { color: #ff4757; }
+.yield-high { color: #2e7d32; font-weight: bold; }
+.yield-mid { color: #ef6c00; }
+.s-high { color: #1565c0; font-weight: bold; }
 
-/* T型报价表 */
-.t-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 16px; }
-.t-table th { background: #0f3460; padding: 4px 3px; text-align: center; font-size: 10px; color: #a0a0a0; }
-.t-table td { padding: 4px 3px; text-align: center; border-bottom: 1px solid rgba(15,52,96,0.3); }
-.t-table .strike-col { background: rgba(79,172,254,0.1); font-weight: bold; }
-.t-table .atm-row { background: rgba(0,212,170,0.1); }
+/* 滚动容器 */
+.scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 12px; }
 
-/* 建议卡片 */
-.advice-card {
-  background: linear-gradient(135deg, rgba(0,212,170,0.1), rgba(79,172,254,0.1));
-  border: 1px solid #00d4aa;
-  border-radius: 8px;
+/* 定义 & 规则区域 */
+.def-section {
+  background: #fff;
+  border-radius: 6px;
   padding: 12px;
-  margin-bottom: 10px;
+  margin-top: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
-.advice-card .title { font-size: 14px; font-weight: bold; color: #00d4aa; margin-bottom: 6px; }
-.advice-card .detail { font-size: 12px; line-height: 1.8; }
-.advice-card .highlight { color: #ffd93d; font-weight: bold; }
+.def-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.def-table th {
+  background: #f0f0f0;
+  padding: 4px 6px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 1px solid #ddd;
+}
+.def-table td {
+  padding: 4px 6px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.def-table td:first-child { font-weight: bold; color: #1a73e8; white-space: nowrap; }
 
-.section-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.tab-btns { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
-.tab-btn {
-  padding: 4px 10px;
-  border-radius: 4px;
+.rules-list {
   font-size: 12px;
-  background: #0f3460;
-  color: #e0e0e0;
-  border: none;
-  cursor: pointer;
+  color: #555;
+  padding-left: 16px;
+  margin-top: 8px;
 }
-.tab-btn.active { background: #4facfe; color: #fff; }
+.rules-list li { margin-bottom: 3px; }
+
+.footer {
+  text-align: center;
+  color: #aaa;
+  font-size: 10px;
+  margin-top: 24px;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+}
 </style>
 </head>
 <body>
 
-<h1>📊 ETF期权全合约扫描</h1>
-<div class="subtitle">{{ data.fetch_time }} · 共扫描 {{ data.total_contracts }} 个合约 · {{ data.underlyings|length }} 个品种</div>
+<h1>📊 ETF期权风险收益报告</h1>
+<div class="subtitle">{{ data.fetch_time }} · 共 {{ data.total_contracts }} 个合约 · 过滤后 {{ data.filtered_count }} 个</div>
 
-<!-- ==================== 市场全景 ==================== -->
-<h2>🌐 市场全景</h2>
-<div class="overview-grid">
-{% for code, info in data.underlyings.items() %}
-{% set hv = data.hv_map.get(code, {}) %}
-{% set hv60 = hv.get('hv60') %}
-<div class="overview-item">
-  <div class="name">{{ info.name }}</div>
-  <div class="price">{{ "%.4f"|format(info.price) }}</div>
-  <div class="meta">
-    HV60: {{ "%.1f%%"|format(hv60*100) if hv60 else "N/A" }}<br>
-    {% set pos = hv.get('position_60d') %}
-    位置: {{ "%.0f%%"|format(pos*100) if pos is not none else "N/A" }} (60日)
-  </div>
-</div>
+<!-- ==================== 第一部分：波动率全景 ==================== -->
+<h2>一、标的波动率全景</h2>
+<div class="scroll-x">
+<table class="vol-table">
+<thead>
+<tr>
+  <th>标的</th>
+  <th>现价</th>
+  <th>V</th>
+  <th>百分位</th>
+  <th>信号</th>
+  <th>20日振幅</th>
+  <th>60日振幅</th>
+  <th>20日年化</th>
+  <th>60日年化</th>
+</tr>
+</thead>
+<tbody>
+{% for v in data.volatility_panorama %}
+<tr>
+  <td style="font-weight:500">{{ v.name }}</td>
+  <td>{{ "%.4f"|format(v.price) }}</td>
+  <td style="font-weight:bold">{{ "%.2f"|format(v.v_ratio) }}</td>
+  <td>P{{ v.percentile }}</td>
+  <td class="{% if '高波' in v.signal %}signal-high{% elif '低波' in v.signal %}signal-low{% else %}signal-normal{% endif %}">{{ v.signal }}</td>
+  <td>{{ "%.4f"|format(v.amp_20) }}</td>
+  <td>{{ "%.4f"|format(v.amp_60) }}</td>
+  <td>{{ "%.4f"|format(v.amp_20_ann) }}</td>
+  <td>{{ "%.4f"|format(v.amp_60_ann) }}</td>
+</tr>
 {% endfor %}
+</tbody>
+</table>
 </div>
 
-<!-- ==================== 卖方机会榜 ==================== -->
-<h2>🔻 卖方机会 Top{{ data.seller_top|length }}</h2>
-<p style="font-size:12px;color:#a0a0a0;margin-bottom:8px;">
-  按单位风险收益排序 · 过滤: 7-90天, 成交额>10万, |Δ|<0.4, 年化>50%, 单张>100元, σ≥1.0
-</p>
-<div class="section-scroll">
+<!-- ==================== 第二部分：卖方排序 ==================== -->
+<h2>二、卖方机会排序（S值最高 → 优先卖出）</h2>
+<div class="scroll-x">
 <table class="rank-table">
 <thead>
 <tr>
   <th>#</th>
   <th>合约</th>
-  <th>行权价</th>
-  <th>天</th>
-  <th>年化</th>
-  <th>每张</th>
-  <th>安全边际</th>
-  <th>σ倍数</th>
-  <th>IV-HV</th>
-  <th>位置</th>
-  <th>单位收益</th>
-  <th>判定</th>
+  <th>方向</th>
+  <th>天数</th>
+  <th>权利金</th>
+  <th>保证金</th>
+  <th>直接收益</th>
+  <th>年化收益</th>
+  <th>D</th>
+  <th>R</th>
+  <th>S</th>
 </tr>
 </thead>
 <tbody>
@@ -164,112 +203,112 @@ h3 { font-size: 14px; color: #ffd93d; margin: 12px 0 6px; }
 <tr>
   <td><span class="rank-num {{ 'rank-1' if loop.index==1 else ('rank-2' if loop.index==2 else ('rank-3' if loop.index==3 else 'rank-n')) }}">{{ loop.index }}</span></td>
   <td class="name-col" title="{{ s.name }}">{{ s.name }}</td>
-  <td>{{ "%.2f"|format(s.strike) }}</td>
+  <td>{{ s.option_type }}</td>
   <td>{{ s.days }}</td>
-  <td style="color:{{ '#00d4aa' if s.annualized_yield>0.25 else ('#ffd93d' if s.annualized_yield>0.15 else '#e0e0e0') }}">{{ "%.1f%%"|format(s.annualized_yield*100) }}</td>
-  <td>{{ "%.0f"|format(s.premium_per_contract) }}</td>
-  <td>{{ "%.1f%%"|format(s.safety_margin*100) }}</td>
-  <td style="color:{{ '#00d4aa' if s.safety_margin_sigma and s.safety_margin_sigma>=2.0 else ('#ffd93d' if s.safety_margin_sigma and s.safety_margin_sigma>=1.0 else '#ff4757') }};font-weight:bold">{% if s.safety_margin_sigma is not none %}{{ "%.2f"|format(s.safety_margin_sigma) }}σ{% else %}N/A{% endif %}</td>
-  <td>{% if s.iv_hv_spread is not none %}<span class="{{ 'spread-pos' if s.iv_hv_spread>0 else 'spread-neg' }}">{{ "%+.1f%%"|format(s.iv_hv_spread*100) }}</span>{% else %}N/A{% endif %}</td>
-  <td>{% if s.position_60d is not none %}{{ "%.0f%%"|format(s.position_60d*100) }}{% else %}N/A{% endif %}</td>
-  <td style="font-weight:bold">{% if s.return_per_risk is not none %}{{ "%.2f"|format(s.return_per_risk) }}{% else %}N/A{% endif %}</td>
-  <td class="{{ 'verdict-green' if s.verdict=='🟢' else ('verdict-yellow' if s.verdict=='🟡' else ('verdict-orange' if s.verdict=='🟠' else 'verdict-red')) }}">{{ s.verdict }}</td>
+  <td>{{ "%.4f"|format(s.premium) }}</td>
+  <td>{{ "%.0f"|format(s.margin) }}</td>
+  <td>{{ "%.2f%%"|format(s.direct_yield * 100) }}</td>
+  <td class="{{ 'yield-high' if s.annualized_yield > 0.5 else ('yield-mid' if s.annualized_yield > 0.2 else '') }}">{{ "%.1f%%"|format(s.annualized_yield * 100) }}</td>
+  <td>{{ "%.3f"|format(s.D) }}</td>
+  <td>{{ "%.3f"|format(s.R) }}</td>
+  <td class="s-high">{{ "%.2f"|format(s.S) }}</td>
 </tr>
 {% endfor %}
+{% if not data.seller_top %}
+<tr><td colspan="11" style="color:#aaa;padding:20px;">当前无符合条件的合约</td></tr>
+{% endif %}
 </tbody>
 </table>
 </div>
 
-<!-- ==================== 买方机会榜 ==================== -->
-<h2>🔺 买方机会 Top{{ data.buyer_top|length }}</h2>
-<p style="font-size:12px;color:#a0a0a0;margin-bottom:8px;">
-  按性价比排序 · 过滤: 14-90天, 成交额>10万, Δ∈[0.15,0.70], IV/HV<1.0, 买方σ<1.5
-</p>
-<div class="section-scroll">
+<!-- ==================== 第三部分：买方排序 ==================== -->
+<h2>三、买方机会排序（卖方不合适 → 优先买入）</h2>
+<div class="scroll-x">
 <table class="rank-table">
 <thead>
 <tr>
   <th>#</th>
   <th>合约</th>
-  <th>行权价</th>
-  <th>天</th>
-  <th>成本率</th>
-  <th>杠杆</th>
-  <th>买方σ</th>
-  <th>IV折扣</th>
-  <th>位置</th>
-  <th>性价比</th>
-  <th>判定</th>
+  <th>方向</th>
+  <th>天数</th>
+  <th>虚值幅度</th>
+  <th>权利金</th>
+  <th>直接收益</th>
+  <th>年化收益</th>
+  <th>D</th>
+  <th>R</th>
+  <th>S</th>
 </tr>
 </thead>
 <tbody>
-{% for b in data.buyer_top %}
+{% for s in data.buyer_top %}
 <tr>
   <td><span class="rank-num {{ 'rank-1' if loop.index==1 else ('rank-2' if loop.index==2 else ('rank-3' if loop.index==3 else 'rank-n')) }}">{{ loop.index }}</span></td>
-  <td class="name-col" title="{{ b.name }}">{{ b.name }}</td>
-  <td>{{ "%.2f"|format(b.strike) }}</td>
-  <td>{{ b.days }}</td>
-  <td>{{ "%.2f%%"|format(b.cost_rate*100) }}</td>
-  <td>{{ "%.1f"|format(b.leverage) }}x</td>
-  <td style="color:{{ '#00d4aa' if b.buyer_sigma and b.buyer_sigma<0.5 else ('#ffd93d' if b.buyer_sigma and b.buyer_sigma<1.0 else '#ff4757') }}">{% if b.buyer_sigma is not none %}{{ "%.2f"|format(b.buyer_sigma) }}{% else %}N/A{% endif %}</td>
-  <td>{% if b.iv_discount is not none %}{{ "%+.1f%%"|format(b.iv_discount*100) }}{% else %}N/A{% endif %}</td>
-  <td>{% if b.position_60d is not none %}{{ "%.0f%%"|format(b.position_60d*100) }}{% if b.position_bonus > 1 %}★{% endif %}{% else %}N/A{% endif %}</td>
-  <td style="font-weight:bold;color:#00d4aa">{% if b.value_score is not none %}{{ "%.2f"|format(b.value_score) }}{% else %}N/A{% endif %}</td>
-  <td class="{{ 'verdict-green' if b.verdict=='🟢' else ('verdict-yellow' if b.verdict=='🟡' else ('verdict-orange' if b.verdict=='🟠' else 'verdict-red')) }}">{{ b.verdict }}</td>
+  <td class="name-col" title="{{ s.name }}">{{ s.name }}</td>
+  <td>{{ s.option_type }}</td>
+  <td>{{ s.days }}</td>
+  <td>{{ "%.1f%%"|format(s.otm_ratio * 100) }}</td>
+  <td>{{ "%.4f"|format(s.premium) }}</td>
+  <td>{{ "%.2f%%"|format(s.direct_yield * 100) }}</td>
+  <td class="{{ 'yield-high' if s.annualized_yield > 0.5 else ('yield-mid' if s.annualized_yield > 0.2 else '') }}">{{ "%.1f%%"|format(s.annualized_yield * 100) }}</td>
+  <td>{{ "%.3f"|format(s.D) }}</td>
+  <td>{{ "%.3f"|format(s.R) }}</td>
+  <td>{{ "%.2f"|format(s.S) }}</td>
 </tr>
 {% endfor %}
+{% if not data.buyer_top %}
+<tr><td colspan="11" style="color:#aaa;padding:20px;">当前无符合条件的合约</td></tr>
+{% endif %}
 </tbody>
 </table>
 </div>
 
-
-<!-- ==================== 操作建议 ==================== -->
-<h2>💡 操作建议</h2>
-
-{% if data.seller_top %}
-<h3>卖方推荐</h3>
-{% for s in data.seller_top[:3] %}
-<div class="advice-card">
-  <div class="title">{{ s.verdict }} {{ s.name }}</div>
-  <div class="detail">
-    操作: 卖出 {{ s.name }}<br>
-    行权价: <span class="highlight">{{ "%.2f"|format(s.strike) }}</span>
-    · 权利金: <span class="highlight">{{ "%.4f"|format(s.premium) }}</span> (每张{{ "%.0f"|format(s.premium_per_contract) }}元)<br>
-    剩余 {{ s.days }}天 · 年化收益 <span class="highlight">{{ "%.1f%%"|format(s.annualized_yield*100) }}</span><br>
-    安全边际 {{ "%.1f%%"|format(s.safety_margin*100) }} (ETF距行权价)
-    · IV {{ "%.1f%%"|format(s.iv*100) }}{% if s.iv_hv_spread is not none %} (vs HV {{ "%+.1f%%"|format(s.iv_hv_spread*100) }}){% endif %}<br>
-    {% if s.delta %}Delta: {{ "%.2f"|format(s.delta) }}{% endif %}
-    {% if s.safety_margin_sigma %} · σ倍数: {{ "%.2f"|format(s.safety_margin_sigma) }}{% endif %}
-    {% if s.return_per_risk %} · 单位风险收益: <span class="highlight">{{ "%.2f"|format(s.return_per_risk) }}</span>{% endif %}<br>
-    <span style="color:#a0a0a0">止损参考: 权利金翻倍(即{{ "%.4f"|format(s.premium*2) }})时平仓</span>
-  </div>
+<!-- ==================== 字段说明 ==================== -->
+<div class="def-section">
+<h3>字段说明</h3>
+<table class="def-table">
+<thead>
+<tr><th>缩写</th><th>全称</th><th>计算方式</th></tr>
+</thead>
+<tbody>
+<tr><td>D</td><td>距离风险</td><td>|现价 - 行权价| / 60日振幅</td></tr>
+<tr><td>R</td><td>年化时间风险</td><td>(剩余天数 / 365) / D</td></tr>
+<tr><td>S</td><td>风险收益比</td><td>年化收益率 / R</td></tr>
+<tr><td>直接收益</td><td>—</td><td>权利金 / 保证金</td></tr>
+<tr><td>年化收益</td><td>—</td><td>直接收益 × 365 / 天数</td></tr>
+<tr><td>60日振幅</td><td>—</td><td>60日最高价 - 60日最低价</td></tr>
+<tr><td>20日振幅</td><td>—</td><td>20日最高价 - 20日最低价</td></tr>
+<tr><td>V</td><td>波动率比</td><td>20日年化振幅 / 60日年化振幅</td></tr>
+<tr><td>百分位</td><td>—</td><td>V在252日滚动窗口中的百分位</td></tr>
+</tbody>
+</table>
 </div>
-{% endfor %}
-{% endif %}
 
-{% if data.buyer_top %}
-<h3>买方推荐</h3>
-{% for b in data.buyer_top[:3] %}
-<div class="advice-card" style="border-color:#4facfe;">
-  <div class="title" style="color:#4facfe;">{{ b.verdict }} {{ b.name }}</div>
-  <div class="detail">
-    操作: 买入 {{ b.name }}<br>
-    行权价: <span class="highlight">{{ "%.2f"|format(b.strike) }}</span>
-    · 权利金: <span class="highlight">{{ "%.4f"|format(b.premium) }}</span><br>
-    剩余 {{ b.days }}天 · 杠杆 <span class="highlight">{{ "%.1f"|format(b.leverage) }}x</span>
-    · 成本率 {{ "%.2f%%"|format(b.cost_rate*100) }}<br>
-    盈亏平衡: {{ "%.3f"|format(b.breakeven) }} (需{{ "涨" if b.option_type=='C' else "跌" }}{{ "%.1f%%"|format(b.breakeven_pct*100) }})<br>
-    买方σ: {% if b.buyer_sigma is not none %}{{ "%.2f"|format(b.buyer_sigma) }}{% else %}N/A{% endif %}
-    · IV折扣: {% if b.iv_discount is not none %}{{ "%+.1f%%"|format(b.iv_discount*100) }}{% else %}N/A{% endif %}
-    {% if b.position_60d is not none %}· 60日位置: {{ "%.0f%%"|format(b.position_60d*100) }}{% if b.position_bonus > 1 %} ★加成{% endif %}{% endif %}<br>
-    性价比: <span class="highlight">{{ "%.2f"|format(b.value_score) }}</span>
-  </div>
+<!-- ==================== 过滤规则 ==================== -->
+<div class="def-section">
+<h3>过滤规则</h3>
+<ul class="rules-list">
+  <li>仅虚值（认购: 行权价 &gt; 现价，认沽: 行权价 &lt; 现价）</li>
+  <li>卖方: 距到期 ≥ {{ data.filter_rules.min_days }}天</li>
+  <li>买方: 距到期 ≥ {{ data.filter_rules.min_days_buyer }}天</li>
+  <li>权利金 ≥ {{ data.filter_rules.min_premium }}（每张 ≥ {{ (data.filter_rules.min_premium * data.filter_rules.contract_multiplier)|int }}元）</li>
+  <li>认购/认沽分开排序</li>
+  <li>保证金比例: {{ (data.filter_rules.margin_rate * 100)|int }}%（行权价 × {{ data.filter_rules.contract_multiplier }} × {{ (data.filter_rules.margin_rate * 100)|int }}%）</li>
+</ul>
 </div>
-{% endfor %}
-{% endif %}
 
-<div style="text-align:center;color:#a0a0a0;font-size:11px;margin-top:20px;padding:10px;border-top:1px solid #0f3460;">
-  ETF期权全合约扫描器 · 数据来源: 新浪财经 + 上交所<br>
+<!-- ==================== 信号说明 ==================== -->
+<div class="def-section">
+<h3>波动率信号说明</h3>
+<ul class="rules-list">
+  <li><span class="signal-high">🔴高波</span>: V &gt; 1.2 — 近期波动加速，卖方时机</li>
+  <li><span class="signal-low">🟢低波</span>: V &lt; 0.8 — 近期波动趋缓，买方便宜</li>
+  <li><span class="signal-normal">🟡正常</span>: 0.8 ≤ V ≤ 1.2</li>
+</ul>
+</div>
+
+<div class="footer">
+  ETF期权风险收益扫描器 v2 · 数据来源: 新浪财经 + 腾讯行情<br>
   本报告仅供研究参考，不构成投资建议
 </div>
 
