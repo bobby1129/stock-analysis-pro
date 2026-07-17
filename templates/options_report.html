@@ -232,6 +232,7 @@ h3 { font-size: 14px; color: #555; margin: 12px 0 6px; }
   <th>方向</th>
   <th>天数</th>
   <th>虚值幅度</th>
+  <th>胜率</th>
   <th>权利金</th>
   <th>直接收益</th>
   <th>年化收益</th>
@@ -248,6 +249,7 @@ h3 { font-size: 14px; color: #555; margin: 12px 0 6px; }
   <td>{{ s.option_type }}</td>
   <td>{{ s.days }}</td>
   <td>{{ "%.1f%%"|format(s.otm_ratio * 100) }}</td>
+  <td class="{{ 'signal-low' if s.win_prob > 0.2 else ('signal-normal' if s.win_prob > 0.12 else '') }}">{{ "%.1f%%"|format(s.win_prob * 100) }}</td>
   <td>{{ "%.4f"|format(s.premium) }}</td>
   <td>{{ "%.2f%%"|format(s.direct_yield * 100) }}</td>
   <td class="{{ 'yield-high' if s.annualized_yield > 0.5 else ('yield-mid' if s.annualized_yield > 0.2 else '') }}">{{ "%.1f%%"|format(s.annualized_yield * 100) }}</td>
@@ -257,7 +259,7 @@ h3 { font-size: 14px; color: #555; margin: 12px 0 6px; }
 </tr>
 {% endfor %}
 {% if not data.buyer_top %}
-<tr><td colspan="11" style="color:#aaa;padding:20px;">当前无符合条件的合约</td></tr>
+<tr><td colspan="12" style="color:#aaa;padding:20px;">当前无符合条件的合约</td></tr>
 {% endif %}
 </tbody>
 </table>
@@ -274,6 +276,7 @@ h3 { font-size: 14px; color: #555; margin: 12px 0 6px; }
 <tr><td>D</td><td>距离风险</td><td>|现价 - 行权价| / 60日振幅</td></tr>
 <tr><td>R</td><td>年化时间风险</td><td>(剩余天数 / 365) / D</td></tr>
 <tr><td>S</td><td>风险收益比</td><td>年化收益率 / R</td></tr>
+<tr><td>胜率</td><td>到达行权价概率</td><td>BS d2: Φ(d2)认购 / Φ(-d2)认沽，d2=(ln(S/K)+(r-σ²/2)T)/(σ√T)</td></tr>
 <tr><td>直接收益</td><td>—</td><td>权利金 / 保证金</td></tr>
 <tr><td>年化收益</td><td>—</td><td>直接收益 × 365 / 天数</td></tr>
 <tr><td>60日振幅</td><td>—</td><td>60日最高价 - 60日最低价</td></tr>
@@ -290,7 +293,7 @@ h3 { font-size: 14px; color: #555; margin: 12px 0 6px; }
 <ul class="rules-list">
   <li>仅虚值（认购: 行权价 &gt; 现价，认沽: 行权价 &lt; 现价）</li>
   <li>卖方: 距到期 ≥ {{ data.filter_rules.min_days }}天</li>
-  <li>买方: 距到期 ≥ {{ data.filter_rules.min_days_buyer }}天</li>
+  <li>买方: 距到期 {{ data.filter_rules.min_days_buyer }}~{{ data.filter_rules.max_days_buyer }}天，虚值幅度 &gt; {{ (data.filter_rules.buyer_otm_min * 100)|int }}%，直接收益 &lt; {{ (data.filter_rules.buyer_max_yield * 100)|int }}%，胜率 ≥ {{ (data.filter_rules.buyer_win_prob_min * 100)|int }}%</li>
   <li>权利金 ≥ {{ data.filter_rules.min_premium }}（每张 ≥ {{ (data.filter_rules.min_premium * data.filter_rules.contract_multiplier)|int }}元）</li>
   <li>认购/认沽分开排序</li>
   <li>保证金比例: {{ (data.filter_rules.margin_rate * 100)|int }}%（行权价 × {{ data.filter_rules.contract_multiplier }} × {{ (data.filter_rules.margin_rate * 100)|int }}%）</li>

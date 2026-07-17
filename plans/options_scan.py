@@ -4,10 +4,54 @@ ETF期权风险收益扫描引擎 v3
 调度: 数据采集 → 波动率计算 → 过滤虚值 → 风险收益指标计算 → 卖方/买方排序输出
 """
 
+import math
 from collectors.options import (
     fetch_all_options, calculate_volatility_ratio, calculate_risk_metrics,
     UNDERLYINGS
 )
+
+
+# 正态分布CDF (不依赖scipy)
+def norm_cdf(x):
+    """标准正态分布累积分布函数"""
+    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
+
+
+def calc_win_probability(spot, strike, hv_std_ann, days, option_type):
+    """
+    完整Black-Scholes d2公式估算到达行权价的概率
+    
+    Args:
+        spot: 标的现价
+        strike: 行权价
+        hv_std_ann: 年化历史波动率标准差 (HV60)
+        days: 距到期天数
+        option_type: 'C' 或 'P'
+    
+    Returns:
+        概率 (0~1)
+    
+    公式：
+        d2 = (ln(S/K) + (r - σ²/2)*T) / (σ√T)
+        认购 P = Φ(d2)
+        认沽 P = 1 - Φ(d2)
+    """
+    if spot <= 0 or strike <= 0 or hv_std_ann <= 0 or days <= 0:
+        return 0
+    
+    T = days / 365.0
+    r = 0.02  # 无风险利率 2%
+    sigma = hv_std_ann
+    
+    # d2 公式
+    d2 = (math.log(spot / strike) + (r - 0.5 * sigma * sigma) * T) / (sigma * math.sqrt(T))
+    
+    if option_type == 'C':
+        # 认购：P(S_T > K) = Φ(d2)
+        return norm_cdf(d2)
+    else:
+        # 认沽：P(S_T < K) = 1 - Φ(d2) = Φ(-d2)
+        return 1.0 - norm_cdf(d2)
 
 
 # 过滤参数
@@ -125,6 +169,7 @@ def run_scan(underlying: str = None, month: str = None, top_n: int = 10) -> dict
             "underlying_name": c.get("underlying_name", ""),
             "underlying_code": code,
             "spot": spot,
+            "win_prob": calc_win_probability(spot, strike, vol["hv60_std"], days, option_type),
         })
 
     print(f"  过滤后: {len(scored_contracts)} 个合约")
@@ -145,6 +190,7 @@ def run_scan(underlying: str = None, month: str = None, top_n: int = 10) -> dict
     # - 天数 10~90天
     # - 虚值幅度 > 3%
     # - 直接收益率 < 20%
+    # - 胜率 >= 10%
     buyer_candidates = []
     for c in scored_contracts:
         # 天数限制
@@ -157,6 +203,9 @@ def run_scan(underlying: str = None, month: str = None, top_n: int = 10) -> dict
         # 直接收益率 < 20%
         dy = c["premium_per_contract"] / c["margin"]
         if dy >= 0.20:
+            continue
+        # 胜率 >= 10%
+        if c["win_prob"] < 0.10:
             continue
         c["otm_ratio"] = otm_ratio
         buyer_candidates.append(c)
@@ -180,6 +229,7 @@ def run_scan(underlying: str = None, month: str = None, top_n: int = 10) -> dict
             "contract_multiplier": CONTRACT_MULTIPLIER,
             "buyer_otm_min": 0.03,
             "buyer_max_yield": 0.20,
+            "buyer_win_prob_min": 0.10,
         },
     }
 
@@ -208,7 +258,8 @@ def print_summary(result: dict):
               f"{s['annualized_yield']*100:7.1f}% "
               f"{s['D']:6.3f} {s['R']:6.3f} {s['S']:8.2f}")
 
-    print(f"\n买方Top{len(result['buyer_top'])} (S值最低 + 天数≥10 → 优先买入):")
+    print(f"\n买方Top{len(result['buyer_top'])} (S值最低 + 胜率≥10% → 优先买入):")
+    hdr = f"{'#':>2s} {'合约':18s} {'方向':4s} {'天':>3s} {'权利金':>7s} {'直接收益':>8s} {'年化收益':>8s} {'胜率':>6s} {'D':>6s} {'R':>6s} {'S':>8s}"
     print(hdr)
     print("-" * len(hdr))
     for i, s in enumerate(result["buyer_top"], 1):
@@ -216,4 +267,5 @@ def print_summary(result: dict):
               f"{s['premium']:7.4f} "
               f"{s['direct_yield']*100:7.2f}% "
               f"{s['annualized_yield']*100:7.1f}% "
+              f"{s['win_prob']*100:5.1f}% "
               f"{s['D']:6.3f} {s['R']:6.3f} {s['S']:8.2f}")

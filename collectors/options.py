@@ -242,6 +242,7 @@ def calculate_volatility_ratio(underlying_code: str) -> dict:
         "amp_60": float,
         "amp_20_ann": float,
         "amp_60_ann": float,
+        "hv60_std": float,  # 真正的HV60标准差年化
         "signal": "🔴高波"|"🟡正常"|"🟢低波"
     }
     """
@@ -311,6 +312,9 @@ def calculate_volatility_ratio(underlying_code: str) -> dict:
     else:
         signal = "🟡正常"
     
+    # 计算真正的HV60标准差年化（用于胜率计算）
+    hv60_std = _calc_hv_std(klines, window=60)
+    
     return {
         "v_ratio": round(v_ratio, 3),
         "percentile": percentile,
@@ -318,8 +322,48 @@ def calculate_volatility_ratio(underlying_code: str) -> dict:
         "amp_60": round(amp_60, 4),
         "amp_20_ann": round(amp_20_ann, 4),
         "amp_60_ann": round(amp_60_ann, 4),
-        "signal": signal
+        "hv60_std": round(hv60_std, 4),
+        "signal": signal,
     }
+
+
+def _calc_hv_std(klines: list, window: int = 60) -> float:
+    """
+    计算真正的历史波动率标准差年化
+    
+    公式：
+        r_i = ln(close_i / close_{i-1})  # 日对数收益率
+        HV = std(r_i) × √252  # 年化
+    
+    Args:
+        klines: K线数据列表，每个元素包含 'close' 字段
+        window: 计算窗口（默认60天）
+    
+    Returns:
+        年化波动率标准差
+    """
+    if not klines or len(klines) < window + 1:
+        return 0.0
+    
+    # 取最近 window+1 天的收盘价（需要 window 个收益率）
+    recent = klines[-(window + 1):]
+    closes = [k["close"] for k in recent]
+    
+    # 计算日对数收益率
+    returns = []
+    for i in range(1, len(closes)):
+        r = math.log(closes[i] / closes[i - 1])
+        returns.append(r)
+    
+    # 计算标准差
+    n = len(returns)
+    mean_r = sum(returns) / n
+    variance = sum((r - mean_r) ** 2 for r in returns) / (n - 1)
+    std_daily = math.sqrt(variance)
+    
+    # 年化
+    hv_ann = std_daily * math.sqrt(252)
+    return hv_ann
 
 
 def calculate_risk_metrics(contract: dict, spot_price: float, amp_60: float) -> dict:
