@@ -142,6 +142,10 @@ def run(target_count=10, verbose=True, use_cache=True):
         stocks = stocks_map.get(bk_code, [])
         stock_details = []
         for s in stocks:
+            # 剔除北交所 (代码以4/8/9开头: 43xxxx, 83xxxx, 87xxxx, 920xxx)
+            code = s.get('code', '') or s.get('symbol', '')
+            if code and code[0] in ('4', '8', '9'):
+                continue
             try:
                 pct_val = float(s.get('change_pct', 0) or 0)
             except (ValueError, TypeError):
