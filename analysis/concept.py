@@ -322,10 +322,12 @@ def _calc_concept_score(dist: dict, momentum: dict, vol_sig: dict, limit_up: int
     if total == 0:
         return {"total": 0, "details": {}, "label": "--"}
 
-    # 1. 赚钱效应: >7%占比 + 上涨比例
+    # 1. 赚钱效应: >7%占比 + 3~7%占比
     above_7_ratio = dist['above_7'] / total
+    between_3_7_ratio = dist['between_3_7'] / total
+    profit_score = min(above_7_ratio * 100 + between_3_7_ratio * 50, 30)
+    
     up_ratio = (dist['above_7'] + dist['between_3_7'] + dist['between_0_3']) / total
-    profit_score = min(above_7_ratio * 100 + up_ratio * 30, 30)
 
     # 2. 介入时机: 刚启动占比高 → 有空间 (加分), 全是连涨3天+ → 可能追高 (减分)
     just_started_ratio = momentum['just_started'] / total

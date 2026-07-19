@@ -141,7 +141,7 @@ def batch_klines(symbols: list, datalen=30, delay=0.15, verbose=False, max_worke
             for fut in as_completed(futures):
                 sym, klines = fut.result()
                 if klines:
-                    _kline_cache[sym] = [{'day': k['day'], 'close': float(k['close']), 'volume': float(k['volume']), 'low': float(k['low'])} for k in klines]
+                    _kline_cache[sym] = [{'day': k['day'], 'open': float(k['open']), 'high': float(k['high']), 'low': float(k['low']), 'close': float(k['close']), 'volume': float(k['volume'])} for k in klines]
                 else:
                     _kline_cache[sym] = []
                 done_count += 1

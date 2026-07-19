@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from collectors.concept import concept_news, clear_kline_cache
 from analysis.concept import analyze_board_trend, analyze_concept_deep
 from analysis.concept_rank import rank_concepts
+from analysis.stock_picker import score_board_strength, score_pick_quality, pick_stocks, find_resonance
 
 # ── 缓存 ──
 CACHE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "cache")
@@ -106,12 +107,27 @@ def run(target_count=10, verbose=True, use_cache=True):
     # 清空K线缓存
     clear_kline_cache()
 
-    # === Step 1: 用HTTP API获取概念列表 (轻量, 避免Playwright滑块验证) ===
+    # === Step 1: 用Playwright一次获取概念列表+成分股 (通过浏览器, 避免滑块验证) ===
     if verbose:
-        print("  Step 1: 获取概念列表 (HTTP API)...")
-    from collectors.em_concept import fetch_concept_list, fetch_concept_stocks
+        print("  Step 1: 获取概念列表+成分股 (Playwright浏览器, 一次完成)...")
+    from collectors.em_concept import fetch_concepts_batch
+    from collectors.quote import batch_quotes_tencent
 
-    concepts_raw = fetch_concept_list(top_n=60, verbose=verbose)
+    # 一次Playwright调用: 拉列表 → filter_fn过滤 → 拉top N成分股
+    def _filter_for_batch(concepts):
+        return filter_concepts(concepts)[:target_count]
+
+    result = fetch_concepts_batch(
+        top_n=60,
+        fetch_stocks_for=None,
+        stocks_limit=100,
+        verbose=verbose,
+        filter_fn=_filter_for_batch,
+    )
+    concepts_raw = result.get('concepts', [])
+    filtered = result.get('filtered', [])
+    stocks_map = result.get('stocks_map', {})
+
     if not concepts_raw:
         print("\n  ⚠️ 无法获取概念排行！可能原因：")
         print("  1. Cookie未配置或已过期")
@@ -119,23 +135,19 @@ def run(target_count=10, verbose=True, use_cache=True):
         print("  💡 如有离线缓存将自动降级使用\n")
         return {"error": "无法获取概念排行", "date": date_str}
 
-    # 过滤 + 取top N
-    filtered = filter_concepts(concepts_raw)[:target_count]
     top = filtered
-    stocks_map = {}
 
     if verbose:
-        print(f"  → 过滤后{len(top)}个概念, 开始拉成分股...")
+        print(f"  → 过滤后{len(top)}个概念, 成分股已获取")
 
-    # 对每个概念拉成分股 (HTTP)
-    for i, c in enumerate(top):
-        bk_code = c['bk_code']
-        if verbose:
-            print(f"    拉取 {c['name']} 成分股...")
-        stocks = fetch_concept_stocks(bk_code, c['name'], limit=100, verbose=False)
-        stocks_map[bk_code] = stocks
-        if i < len(top) - 1:
-            time.sleep(1.0)  # 避免东财限流
+    # 用腾讯批量行情补充成交额 (东财Playwright拿到的amount可能为0)
+    all_symbols = []
+    for bk_code in stocks_map:
+        for s in stocks_map[bk_code]:
+            sym = s.get('symbol', '')
+            if sym:
+                all_symbols.append(sym)
+    tencent_quotes = batch_quotes_tencent(all_symbols) if all_symbols else {}
 
     for c in top:
         bk_code = c['bk_code']
@@ -150,10 +162,14 @@ def run(target_count=10, verbose=True, use_cache=True):
                 pct_val = float(s.get('change_pct', 0) or 0)
             except (ValueError, TypeError):
                 pct_val = 0
+            # 成交额优先用东财的，为0则用腾讯行情补充
             try:
                 amount_val = float(s.get('amount', 0) or 0)
             except (ValueError, TypeError):
                 amount_val = 0
+            sym = s.get('symbol', '')
+            if amount_val == 0 and sym in tencent_quotes:
+                amount_val = tencent_quotes[sym].get('amount', 0)
             try:
                 turnover_val = float(s.get('turnover', 0) or 0)
             except (ValueError, TypeError):
@@ -228,16 +244,35 @@ def run(target_count=10, verbose=True, use_cache=True):
             # === Step 4: 板块级趋势定性 ===
             trend = analyze_board_trend(deep)
             entry['trend'] = trend
+            
+            # === Step 5: 双轨评分 (增量添加，不改原有逻辑) ===
+            # 轨道A: 板块强度评分
+            board_score = score_board_strength(entry, deep, trend, c['stocks'])
+            entry['board_score'] = board_score
+            
+            # 轨道B: 选股决策评分 + 精选标的
+            picked = pick_stocks(c['stocks'], deep, limit=5)
+            entry['picked_stocks'] = picked
+            pick_score = score_pick_quality(entry, deep, picked)
+            entry['pick_score'] = pick_score
+            
         else:
             entry['deep'] = {"error": "无法获取成分股"}
             entry['trend'] = {"status": "unknown", "reason": "无法获取成分股"}
+            entry['board_score'] = {'total': 0, 'phase': '未知'}
+            entry['pick_score'] = {'total': 0, 'phase': '未知'}
+            entry['picked_stocks'] = []
 
         results.append(entry)
 
-    # === Step 5: 按资金流入排序（保持东财排序） ===
-    results.sort(key=lambda x: x.get('net_inflow', 0) or 0, reverse=True)
+    # === Step 6: 跨概念共振 ===
+    concepts_with_picks = [{'name': r['name'], 'picked_stocks': r.get('picked_stocks', [])} for r in results]
+    resonance = find_resonance(concepts_with_picks)
 
-    output = {"date": date_str, "concepts": results, "count": len(results)}
+    # === Step 7: 按资金流入倒序排序 ===
+    results.sort(key=lambda x: x.get('net_inflow', 0), reverse=True)
+
+    output = {"date": date_str, "concepts": results, "count": len(results), "resonance": resonance}
 
     if use_cache:
         _cache_set(cache_key, output)
@@ -282,7 +317,13 @@ def format_report(data: dict) -> str:
         rep = deep.get('representativeness', {})
 
         if rep:
-            lines.append(f"    代表性: 采样{rep['top100_amount_yi']}亿 / 总计{rep['total_amount_yi']}亿 ({rep['ratio']}%)")
+            top100 = rep.get('top100_amount_yi', 0)
+            total = rep.get('total_amount_yi', 0)
+            ratio = rep.get('ratio', 0)
+            if total > 0:
+                lines.append(f"    代表性: 采样{top100}亿 / 总计{total}亿 ({ratio}%)")
+            else:
+                lines.append(f"    代表性: 采样{top100}亿 ({rep.get('sample_count', 0)}只)")
 
         if dist:
             lines.append(f"    涨幅分布: >7%={dist['above_7']}只 3-7%={dist['between_3_7']}只 0-3%={dist['between_0_3']}只 <0%={dist['below_0']}只")
@@ -319,6 +360,36 @@ def format_report(data: dict) -> str:
                 date = n.get('date', '')[:10]
                 title = n.get('title', '')[:50]
                 lines.append(f"      [{date}] {title}")
+
+        # 双轨评分
+        board_score = c.get('board_score', {})
+        pick_score = c.get('pick_score', {})
+        board_val = board_score.get('total', 0)
+        pick_val = pick_score.get('total', 0)
+        board_phase = board_score.get('phase', '--')
+        pick_phase = pick_score.get('phase', '--')
+        
+        lines.append(f"    📊 板块强度: {board_val}分 ({board_phase})")
+        lines.append(f"    🎯 选股决策: {pick_val}分 ({pick_phase})")
+        
+        # 精选标的
+        picked = c.get('picked_stocks', [])
+        if picked:
+            lines.append(f"    🎯 精选标的 (Top {len(picked)}):")
+            for s in picked[:5]:
+                entry_type = s.get('entry_type', '追高')
+                entry_score = s.get('entry_score', 0)
+                reason = s.get('reason', '')
+                lines.append(f"      {s['name']}({s['symbol']}) {s['pct']:+.2f}% — {entry_type} {entry_score}分 {reason}")
+        
+        # 共振
+        resonance_list = data.get('resonance', [])
+        concept_resonance = [r for r in resonance_list if r['name'] in [s['name'] for s in picked]]
+        if concept_resonance:
+            lines.append(f"    🔗 跨概念共振:")
+            for r in concept_resonance[:3]:
+                concepts_str = '、'.join(r['concepts'])
+                lines.append(f"      {r['name']} — 出现在 {r['resonance_count']} 个概念 ({concepts_str})")
 
     lines.append(f"\n{'='*50}")
     lines.append("报告生成完毕")

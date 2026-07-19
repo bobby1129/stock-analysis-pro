@@ -12,7 +12,7 @@
 {# ===== HEADER ===== #}
 <div class="header">
   <h1>🎯 概念深度选股</h1>
-  <div class="subtitle">{{ now.strftime('%Y-%m-%d %H:%M') if now else '' }} · 按投资价值评分排序</div>
+  <div class="subtitle">{{ now.strftime('%Y-%m-%d %H:%M') if now else '' }} · 按资金流入排序</div>
 </div>
 
 {# ===== SCORE RANKING ===== #}
@@ -20,14 +20,28 @@
 <div class="section">
   <div class="section-title"><span class="icon">🏆</span> 评分排行</div>
   <div style="padding:0 4px 8px;">
+    <div style="display:flex;align-items:center;padding:4px 12px;font-size:11px;color:var(--text-muted);border-bottom:1px solid var(--card-border);">
+      <span style="width:20px;"></span>
+      <span style="flex:1;">板块</span>
+      <span style="min-width:55px;text-align:right;margin-right:8px;">资金流入</span>
+      <span style="min-width:50px;text-align:right;margin-right:8px;">涨幅</span>
+      <span style="min-width:35px;text-align:right;margin-right:8px;">强度</span>
+      <span style="min-width:35px;text-align:right;">选股</span>
+    </div>
     {% for c in concepts %}
-    {% set score = c.deep.score|default({}) %}
-    {% set score_val = score.total|default(0) %}
+    {% set board_score = c.board_score|default({}) %}
+    {% set pick_score = c.pick_score|default({}) %}
+    {% set board_val = board_score.total|default(0) %}
+    {% set pick_val = pick_score.total|default(0) %}
+    {% set net_inflow = c.net_inflow|default(0) %}
+    {% set inflow_yi = (net_inflow / 100000000)|round(2) %}
     <div style="display:flex;align-items:center;padding:8px 12px;border-bottom:1px solid var(--card-border);">
       <span style="width:20px;font-size:12px;font-weight:700;color:var(--text-muted);">{{ loop.index }}</span>
       <span style="flex:1;font-size:14px;font-weight:600;">{{ c.name }}</span>
-      <span class="{{ pct_color(c.change_pct) }}" style="font-size:13px;margin-right:10px;">{{ fmt_pct1(c.change_pct) }}</span>
-      <span style="font-size:15px;font-weight:700;color:{% if score_val >= 70 %}var(--green){% elif score_val >= 50 %}var(--accent){% elif score_val >= 30 %}var(--yellow){% else %}var(--red){% endif %};min-width:45px;text-align:right;">{{ score_val }}分</span>
+      <span class="{% if inflow_yi > 0 %}up{% elif inflow_yi < 0 %}down{% else %}flat{% endif %}" style="font-size:13px;margin-right:8px;">{{ '%+.2f'|format(inflow_yi) }}亿</span>
+      <span class="{% if c.change_pct is not none and c.change_pct > 0 %}up{% elif c.change_pct is not none and c.change_pct < 0 %}down{% else %}flat{% endif %}" style="font-size:12px;margin-right:8px;min-width:50px;text-align:right;">{{ '%+.1f'|format(c.change_pct) if c.change_pct is not none else '--' }}%</span>
+      <span style="font-size:12px;color:{% if board_val >= 70 %}var(--green){% elif board_val >= 50 %}var(--accent){% elif board_val >= 30 %}var(--yellow){% else %}var(--red){% endif %};margin-right:8px;min-width:35px;text-align:right;">{{ board_val }}</span>
+      <span style="font-size:12px;color:{% if pick_val >= 70 %}var(--green){% elif pick_val >= 50 %}var(--accent){% elif pick_val >= 30 %}var(--yellow){% else %}var(--red){% endif %};min-width:35px;text-align:right;">{{ pick_val }}</span>
     </div>
     {% endfor %}
   </div>
@@ -39,6 +53,9 @@
 {% set trend = concept.trend|default({}) %}
 {% set deep = concept.deep|default({}) %}
 {% set score = deep.score|default({}) %}
+{% set board_score = concept.board_score|default({}) %}
+{% set pick_score = concept.pick_score|default({}) %}
+{% set picked_stocks = concept.picked_stocks|default([]) %}
 {% set dist = deep.distribution|default({}) %}
 {% set mom = deep.momentum|default({}) %}
 {% set rep = deep.representativeness|default({}) %}
@@ -46,41 +63,116 @@
 {% set vol = deep.volume_signal|default({}) %}
 {% set status = trend.status|default('unknown') %}
 {% set score_val = score.total|default(0) %}
+{% set board_val = board_score.total|default(0) %}
+{% set pick_val = pick_score.total|default(0) %}
 
 <div class="section">
-  {# --- Title + Score --- #}
+  {# --- Title + Dual Track Scores --- #}
   <div style="padding:14px 16px 10px;display:flex;align-items:center;">
-    <span style="background:{% if score_val >= 70 %}var(--green){% elif score_val >= 50 %}var(--accent){% elif score_val >= 30 %}var(--yellow){% else %}var(--red){% endif %};color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;">{{ loop.index }}</span>
+    <span style="background:{% if pick_val >= 70 %}var(--green){% elif pick_val >= 50 %}var(--accent){% elif pick_val >= 30 %}var(--yellow){% else %}var(--red){% endif %};color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;">{{ loop.index }}</span>
     <div style="flex:1;margin-left:10px;">
       <div style="font-size:16px;font-weight:700;">{{ concept.name }}</div>
-      <div style="font-size:11px;color:var(--text-secondary);">{{ score.label|default('--') }} · 龙头: {{ concept.leader }}</div>
+      <div style="font-size:11px;color:var(--text-secondary);">
+        📊 板块强度: <span style="color:{% if board_val >= 70 %}var(--green){% elif board_val >= 50 %}var(--accent){% elif board_val >= 30 %}var(--yellow){% else %}var(--red){% endif %};font-weight:700;">{{ board_val }}分</span> {{ board_score.phase|default('--') }}
+        · 🎯 选股: <span style="color:{% if pick_val >= 70 %}var(--green){% elif pick_val >= 50 %}var(--accent){% elif pick_val >= 30 %}var(--yellow){% else %}var(--red){% endif %};font-weight:700;">{{ pick_val }}分</span> {{ pick_score.phase|default('--') }}
+      </div>
     </div>
     <div style="text-align:right;">
-      <div style="font-size:22px;font-weight:700;color:{% if score_val >= 70 %}var(--green){% elif score_val >= 50 %}var(--accent){% elif score_val >= 30 %}var(--yellow){% else %}var(--red){% endif %};">{{ score_val }}</div>
-      <div class="{{ pct_color(concept.change_pct) }}" style="font-size:13px;font-weight:600;">{{ fmt_pct(concept.change_pct) }}</div>
+      <div class="{{ pct_color(concept.change_pct) }}" style="font-size:22px;font-weight:700;">{{ fmt_pct(concept.change_pct) }}</div>
+      <div style="font-size:11px;color:var(--text-secondary);">龙头: {{ concept.leader }}</div>
     </div>
   </div>
 
-  {# --- Score Breakdown --- #}
-  {% set details = score.details|default({}) %}
-  {% if details %}
-  <div class="metric-grid cols-4">
-    <div class="metric-item">
-      <div class="label">赚钱效应</div>
-      <div class="value" style="font-size:13px;">{{ details.profit|default(0) }}/30</div>
+
+  {# --- 轨道A: 板块强度评分详情 --- #}
+  {% set board_details = board_score.details|default({}) %}
+  {% if board_details %}
+  <div style="padding:10px 16px;border-top:1px solid var(--card-border);">
+    <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">📊 轨道A: 板块强度 {{ board_val }}分 ({{ board_score.phase|default('--') }})</div>
+    <div class="metric-grid cols-4">
+      <div class="metric-item">
+        <div class="label">赚钱效应</div>
+        <div class="value" style="font-size:13px;">{{ board_details.profit|default(0) }}/30</div>
+      </div>
+      <div class="metric-item">
+        <div class="label">资金强度</div>
+        <div class="value" style="font-size:13px;">{{ board_details.strength|default(0) }}/25</div>
+      </div>
+      <div class="metric-item">
+        <div class="label">板块宽度</div>
+        <div class="value" style="font-size:13px;">{{ board_details.breadth|default(0) }}/25</div>
+      </div>
+      <div class="metric-item">
+        <div class="label">持续性</div>
+        <div class="value" style="font-size:13px;">{{ board_details.sustain|default(0) }}/20</div>
+      </div>
     </div>
-    <div class="metric-item">
-      <div class="label">介入时机</div>
-      <div class="value" style="font-size:13px;">{{ details.timing|default(0) }}/25</div>
+  </div>
+  {% endif %}
+
+  {# --- 轨道B: 选股决策评分详情 --- #}
+  {% set pick_details = pick_score.details|default({}) %}
+  {% if pick_details %}
+  <div style="padding:10px 16px;border-top:1px solid var(--card-border);">
+    <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">🎯 轨道B: 选股决策 {{ pick_val }}分 ({{ pick_score.phase|default('--') }})</div>
+    <div class="metric-grid cols-4">
+      <div class="metric-item">
+        <div class="label">可买标的</div>
+        <div class="value" style="font-size:13px;">{{ pick_details.buyable_count|default(0) }}/30</div>
+      </div>
+      <div class="metric-item">
+        <div class="label">标的质量</div>
+        <div class="value" style="font-size:13px;">{{ pick_details.quality|default(0) }}/25</div>
+      </div>
+      <div class="metric-item">
+        <div class="label">追高风险</div>
+        <div class="value" style="font-size:13px;">{{ pick_details.risk|default(0) }}/25</div>
+      </div>
+      <div class="metric-item">
+        <div class="label">新鲜度</div>
+        <div class="value" style="font-size:13px;">{{ pick_details.freshness|default(0) }}/20</div>
+      </div>
     </div>
-    <div class="metric-item">
-      <div class="label">资金强度</div>
-      <div class="value" style="font-size:13px;">{{ details.strength|default(0) }}/25</div>
-    </div>
-    <div class="metric-item">
-      <div class="label">板块宽度</div>
-      <div class="value" style="font-size:13px;">{{ details.breadth|default(0) }}/20</div>
-    </div>
+  </div>
+  {% endif %}
+
+  {# --- 精选标的 (Top 5) --- #}
+  {% if picked_stocks %}
+  <div style="padding:10px 16px;border-top:1px solid var(--card-border);">
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px;">🎯 精选标的 (Top {{ picked_stocks|length }})</div>
+    <table class="data-table" style="font-size:12px;">
+      <tr style="color:var(--text-muted);font-size:11px;">
+        <td>股票</td>
+        <td style="text-align:right;">涨幅</td>
+        <td>入场信号</td>
+        <td style="text-align:right;">评分</td>
+        <td>理由</td>
+      </tr>
+      {% for s in picked_stocks %}
+      <tr>
+        <td>
+          <div style="font-weight:500;">{{ s.name }}</div>
+          <div style="font-size:10px;color:var(--text-muted);">{{ s.symbol }}</div>
+        </td>
+        <td style="text-align:right;" class="{{ pct_color(s.pct) }}">{{ fmt_pct1(s.pct) }}</td>
+        <td>
+          {% if s.entry_type == '突破启动' %}
+          <span class="signal-badge positive" style="margin:0;">🚀 突破</span>
+          {% elif s.entry_type == '回踩确认' %}
+          <span class="signal-badge info" style="margin:0;">📉 回踩</span>
+          {% elif s.entry_type == '趋势加仓' %}
+          <span class="signal-badge positive" style="margin:0;">💪 趋势</span>
+          {% elif s.entry_type == '底部异动' %}
+          <span class="signal-badge info" style="margin:0;">⚡ 底部</span>
+          {% else %}
+          <span class="signal-badge warning" style="margin:0;">⚠️ 追高</span>
+          {% endif %}
+        </td>
+        <td style="text-align:right;font-weight:600;color:{% if s.entry_score >= 70 %}var(--green){% elif s.entry_score >= 50 %}var(--accent){% else %}var(--yellow){% endif %};">{{ s.entry_score }}</td>
+        <td style="font-size:11px;color:var(--text-secondary);">{{ s.reason|default('') }}</td>
+      </tr>
+      {% endfor %}
+    </table>
   </div>
   {% endif %}
 
@@ -239,7 +331,22 @@
 {# ===== FOOTER ===== #}
 <div class="footer">
   Stock Analysis Pro · 概念深度选股<br>
-  评分维度: 赚钱效应(30) + 介入时机(25) + 资金强度(25) + 板块宽度(20)<br>
+  <details style="margin:8px 0;text-align:left;">
+    <summary style="cursor:pointer;font-size:12px;">📐 评分维度说明</summary>
+    <div style="margin-top:8px;font-size:11px;line-height:1.8;">
+      <b>轨道A 板块强度(100分):</b><br>
+      A1 赚钱效应(30): min(30, >7%占比×100 + 3~7%占比×50)<br>
+      A2 资金强度(25): 净流入×系数(3/2/1, 按流通市值≥500亿成分股数分档)上限15 + 放量股占比×15上限10<br>
+      A3 板块宽度(25): 上涨比例×25上限20 + 涨停数×1上限5<br>
+      A4 持续性(20): 连涨3天+×3 + 连涨2天×2 + 刚启动×1, 上限20<br>
+      <br>
+      <b>轨道B 选股决策(100分):</b><br>
+      B1 可买标的数(30): 精选标的中非"追高"的数量×6, 上限30<br>
+      B2 标的质量(25): 精选标的entry_score平均分, 按比例折算<br>
+      B3 追高风险(25): 连涨3天+占比×50, 越高扣分越多<br>
+      B4 新鲜度(20): 刚启动占比×30, 越高越好<br>
+    </div>
+  </details>
   数据仅供参考，不构成投资建议
 </div>
 {% endblock %}
