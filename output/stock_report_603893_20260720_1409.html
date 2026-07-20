@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>瑞芯微 (603893) — 分析报告</title>
+<style>
+/* === CSS Variables (dark theme) === */
+:root {
+  --bg: #0d1117;
+  --card: #161b22;
+  --card-border: #21262d;
+  --text: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #6e7681;
+  --accent: #58a6ff;
+  --green: #3fb950;
+  --red: #f85149;
+  --yellow: #d29922;
+  --orange: #db6d28;
+  --purple: #bc8cff;
+  --radius: 12px;
+  --gap: 1px;
+}
+
+/* === Reset & Base === */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 480px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* === Header === */
+.header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 20px 16px 16px;
+  text-align: center;
+  border-bottom: 1px solid var(--card-border);
+}
+.header h1 { font-size: 20px; font-weight: 700; }
+.header .subtitle { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+.header .price-row {
+  display: flex; align-items: baseline; justify-content: center; gap: 12px;
+  margin-top: 10px;
+}
+.header .price { font-size: 32px; font-weight: 700; }
+.header .change { font-size: 16px; font-weight: 600; }
+.header .score-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+.score-badge.bullish { background: rgba(63,185,80,0.15); color: var(--green); }
+.score-badge.neutral { background: rgba(210,153,34,0.15); color: var(--yellow); }
+.score-badge.bearish { background: rgba(248,81,73,0.15); color: var(--red); }
+
+/* === Section Card === */
+.section {
+  margin: 10px 12px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 14px 16px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title .icon { font-size: 16px; }
+
+/* === Metric Grid (PE/PB/market cap etc) === */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: var(--gap);
+  background: var(--card-border);
+}
+.metric-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.metric-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+.metric-grid.cols-5 { grid-template-columns: repeat(5, 1fr); }
+.metric-item {
+  background: var(--card);
+  padding: 10px 8px;
+  text-align: center;
+}
+.metric-item .label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.metric-item .value {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* === Signal Badges === */
+.signal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  margin: 3px 4px 3px 0;
+}
+.signal-badge.positive { background: rgba(63,185,80,0.12); color: var(--green); }
+.signal-badge.negative { background: rgba(248,81,73,0.12); color: var(--red); }
+.signal-badge.warning { background: rgba(210,153,34,0.12); color: var(--yellow); }
+.signal-badge.info { background: rgba(88,166,255,0.12); color: var(--accent); }
+.signals-wrap { padding: 8px 16px 12px; display: flex; flex-wrap: wrap; }
+
+/* === Data Table === */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table tr { border-bottom: 1px solid var(--card-border); }
+.data-table tr:last-child { border-bottom: none; }
+.data-table td { padding: 10px 16px; font-size: 13px; }
+.data-table td:first-child { color: var(--text-secondary); white-space: nowrap; }
+.data-table td:last-child { text-align: right; font-weight: 500; }
+
+/* === Progress Bar === */
+.progress-row { padding: 8px 16px; display: flex; align-items: center; gap: 10px; }
+.progress-row .prog-label { width: 60px; font-size: 12px; color: var(--text-secondary); flex-shrink: 0; }
+.progress-row .prog-bar { flex: 1; height: 6px; background: var(--card-border); border-radius: 3px; overflow: hidden; }
+.progress-row .prog-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+.progress-row .prog-value { width: 55px; font-size: 12px; text-align: right; font-weight: 600; flex-shrink: 0; }
+
+/* === Collapsible === */
+.collapsible { border-top: 1px solid var(--card-border); }
+.collapsible-toggle {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; cursor: pointer; user-select: none;
+}
+.collapsible-toggle .toggle-label { font-size: 13px; color: var(--text-secondary); }
+.collapsible-toggle .toggle-arrow { color: var(--text-muted); transition: transform 0.2s; font-size: 12px; }
+.collapsible-content { display: none; padding: 0 16px 12px; }
+.collapsible.open .collapsible-content { display: block; }
+.collapsible.open .toggle-arrow { transform: rotate(180deg); }
+
+/* === List Items === */
+.list-item {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 13px;
+}
+.list-item:last-child { border-bottom: none; }
+.list-item .item-title { color: var(--text); }
+.list-item .item-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* === Score Gauge (SVG) === */
+.gauge-wrap { text-align: center; padding: 16px; }
+.gauge-score { font-size: 36px; font-weight: 700; margin-top: -8px; }
+.gauge-label { font-size: 13px; color: var(--text-secondary); }
+
+/* === Color helpers === */
+.up { color: var(--green); }
+.down { color: var(--red); }
+.flat { color: var(--text-muted); }
+.warn { color: var(--yellow); }
+.accent { color: var(--accent); }
+
+/* === Footer === */
+.footer {
+  text-align: center;
+  padding: 20px 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+</style>
+</head>
+<body>
+
+
+<div class="header">
+  <h1>瑞芯微 <span style="font-size:13px;font-weight:400;color:var(--text-secondary)">603893</span></h1>
+  <div class="subtitle">电子设备-半导体-集成电路 · 2020年上市</div>
+  <div class="price-row">
+    <span class="price up">¥207.78</span>
+    <span class="change up">+2.86%</span>
+  </div>
+  <span class="score-badge bullish">
+    ⭐ 68分 · 强看多
+  </span>
+</div>
+
+<div class="section">
+  <div class="section-title"><span class="icon">📊</span> 大盘环境</div>
+  <div class="metric-grid cols-3">
+    <div class="metric-item">
+      <div class="label">上证</div>
+      <div class="value">3774</div>
+      <div style="font-size:11px;margin-top:2px;" class="up">+0.27%</div>
+    </div>
+    <div class="metric-item">
+      <div class="label">深证</div>
+      <div class="value">13560</div>
+      <div style="font-size:11px;margin-top:2px;" class="down">-1.07%</div>
+    </div>
+    <div class="metric-item">
+      <div class="label">创业</div>
+      <div class="value">3427</div>
+      <div style="font-size:11px;margin-top:2px;" class="down">-0.03%</div>
+    </div>
+  </div>
+  <div style="padding:8px 16px;font-size:12px;color:var(--text-secondary);">
+    相对强度: <span class="up">+2.59%</span>
+(强于大盘)  </div>
+</div>
+
+<div class="section">
+  <div class="section-title"><span class="icon">📈</span> 关键指标</div>
+  <div class="metric-grid cols-5">
+    <div class="metric-item">
+      <div class="label">PE(动)</div>
+      <div class="value">75.8</div>
+    </div>
+    <div class="metric-item">
+      <div class="label">PB</div>
+      <div class="value">18.2</div>
+    </div>
+    <div class="metric-item">
+      <div class="label">总市值</div>
+      <div class="value" style="font-size:13px;">878.8亿</div>
+    </div>
+    <div class="metric-item">
+      <div class="label">换手率</div>
+      <div class="value">6.5%</div>
+    </div>
+    <div class="metric-item">
+      <div class="label">振幅</div>
+      <div class="value">11.2%</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title"><span class="icon">🏢</span> 公司概况</div>
+  <table class="data-table">
+    <tr><td>全称</td><td style="font-size:12px;">瑞芯微电子股份有限公司</td></tr>
+    <tr><td>行业</td><td>电子设备-半导体-集成电路</td></tr>
+    <tr><td>主营</td><td style="font-size:12px;text-align:right;max-width:60%;word-break:break-all;">智能应用处理器SoC及周边配套芯片的设计、研发与销售。</td></tr>
+    <tr><td>产品</td><td style="font-size:12px;text-align:right;max-width:60%;word-break:break-all;">通用处理器、视觉处理器、电源管理芯片、接口转换芯片、无线连接芯片</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <div class="section-title"><span class="icon">🏭</span> 行业分析</div>
+  <div style="padding:12px 16px;font-size:13px;line-height:1.7;color:var(--text-primary);">
+    当前全球半导体行业正处于库存去化尾声与需求温和复苏的上行周期初期，AIoT及智能终端驱动SoC市场规模持续扩容。瑞芯微营收与净利实现36.2%和57.1%的高增，充分印证了行业景气度的强劲回升。<br><br>技术端，端侧AI与边缘计算成为核心演进方向，视觉与通用处理器需求爆发，供应链安全诉求亦加速了国产替代进程。政策端，国家产业基金等持续赋能，而SoC设计极高的资金、人才及软件生态壁垒使得头部集中效应加剧。瑞芯微凭借43.04%的高毛利率，已构筑起深厚的技术与生态护城河。<br><br>未来3-5年，随着AI大模型向端侧设备落地、智能座舱及机器视觉等场景加速渗透，瑞芯微的智能SoC及配套芯片将迎来量价齐升。当前7.23%的ROE有望在规模效应与高附加值产品放量下进一步修复，公司将在国产高端芯片突围中享受长期成长红利。
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title"><span class="icon">🔗</span> 产业链分析</div>
+  <div style="padding:12px 16px;font-size:13px;line-height:1.7;color:var(--text-primary);">
+    瑞芯微作为Fabless设计企业，位居产业链中游。上游依赖台积电、中芯国际等代工，长电科技等封测，及ARM的IP与海外EDA；下游深度赋能AIoT、消费电子、汽车智能座舱及工业控制。<br><br>公司是国内AIoT SoC龙头，在商显、机器视觉等细分市场具备强产品定义权与客户黏性，但先进制程产能话语权偏弱。<br><br>供应链风险主要源于先进制程受限及ARM架构的地缘政治隐患。对此，公司正加速布局RISC-V架构，并导入本土代工与国产EDA，稳步推进供应链自主可控与国产替代。
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title"><span class="icon">⚔️</span> 竞争格局</div>
+  <div style="padding:12px 16px;font-size:13px;line-height:1.7;color:var(--text-primary);">
+    瑞芯微在国内AIoT SoC领域居领先地位，主要竞争对手为全志科技、晶晨股份及联发科。公司核心竞争力在于“主SoC+周边芯片”的协同矩阵与强大的AI算力赋能，43%的高毛利率彰显其高附加值产品的差异化优势。市场份额方面，公司在机器视觉、智能座舱及边缘计算等细分赛道稳居国内第一梯队，超36%的营收增速印证了其强劲的市场扩张力。其技术护城河源于自研NPU架构、先进制程设计能力，以及多年深耕构建的完善开发者生态与底层SDK，形成了极高的客户转换成本与生态粘性。
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title"><span class="icon">📦</span> 业务构成</div>
+  <div style="padding:12px 16px;font-size:13px;line-height:1.7;color:var(--text-primary);">
+    瑞芯微以智能应用处理器SoC为核心，深耕AIoT及智能硬件市场。产品结构上，通用与视觉处理器等SoC芯片为绝对营收支柱，贡献核心利润；电源管理、接口及无线连接等周边芯片作为重要补充，完善产品矩阵。<br><br>结合36.2%的高营收增速与43%的高毛利率，视觉处理器及AI边缘计算芯片等高附加值产品潜力巨大，是驱动业绩高增的核心引擎。<br><br>“主芯片+周边配套”的产品组合形成强协同效应，通过提供一站式系统级解决方案，有效降低客户开发门槛，显著增强客户粘性与综合市场竞争力。
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title"><span class="icon">📉</span> 技术面分析</div>
+
+  <table class="data-table">
+    <tr>
+      <td>MA5</td>
+      <td>
+        214.13
+<span style="color:var(--red);font-size:11px;margin-left:4px;">▼跌破</span>
+      </td>
+    </tr>
+    <tr>
+      <td>MA10</td>
+      <td>
+        205.56
+<span style="color:var(--green);font-size:11px;margin-left:4px;">▲站上</span>
+      </td>
+    </tr>
+    <tr>
+      <td>MA20</td>
+      <td>
+        194.07
+<span style="color:var(--green);font-size:11px;margin-left:4px;">▲站上</span>
+      </td>
+    </tr>
+    <tr>
+      <td>MA60</td>
+      <td>
+        184.35
+<span style="color:var(--green);font-size:11px;margin-left:4px;">▲站上</span>
+      </td>
+    </tr>
+    <tr>
+      <td>MA120</td>
+      <td>
+        178.59
+<span style="color:var(--green);font-size:11px;margin-left:4px;">▲站上</span>
+      </td>
+    </tr>
+    <tr>
+      <td>MA250</td>
+      <td>
+        181.52
+<span style="color:var(--green);font-size:11px;margin-left:4px;">▲站上</span>
+      </td>
+    </tr>
+  </table>
+
+  <div class="metric-grid cols-4" style="margin-top:var(--gap);">
+    <div class="metric-item">
+      <div class="label">MACD</div>
+      <div class="value up" style="font-size:12px;">
+多头      </div>
+    </div>
+    <div class="metric-item">
+      <div class="label">KDJ</div>
+      <div class="value" style="font-size:12px;">67/72</div>
+    </div>
+    <div class="metric-item">
+      <div class="label">RSI6</div>
+      <div class="value" style="font-size:12px;">45</div>
+    </div>
+    <div class="metric-item">
+      <div class="label">量比</div>
+      <div class="value" style="font-size:12px;">1.3</div>
+    </div>
+  </div>
+
+  <table class="data-table">
+    <tr><td>布林上轨</td><td>224.10</td></tr>
+    <tr><td>布林中轨</td><td>194.07</td></tr>
+    <tr><td>布林下轨</td><td>164.05</td></tr>
+<tr><td>支撑位</td><td class="up">171.30</td></tr><tr><td>压力位</td><td class="down">231.55</td></tr><tr><td>60日分位</td><td>76.7%</td></tr><tr><td>250日分位</td><td>61.6%</td></tr>  </table>
+
+  <div class="signals-wrap" style="border-top:1px solid var(--card-border);padding-top:12px;">
+    <span class="signal-badge positive">✅ 站上MA10</span>
+    <span class="signal-badge positive">✅ 站上MA20</span>
+    <span class="signal-badge positive">✅ 站上MA60</span>
+    <span class="signal-badge positive">✅ 站上MA120</span>
+    <span class="signal-badge positive">✅ 站上MA250</span>
+    <span class="signal-badge positive">✅ MACD多头</span>
+    <span class="signal-badge warning">⚠️ 跌破MA5</span>
+    <span class="signal-badge warning">⚠️ KDJ死叉</span>
+  </div>
+
+  <div style="padding:12px 16px;font-size:13px;line-height:1.7;color:var(--text-primary);border-top:1px solid var(--card-border);margin-top:12px;">
+    <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px;">📖 技术面解读</div>
+    当前整体处于**上升趋势中的短期震荡**。价格稳在20日和60日均线上方，但短期回落至5日均线下方，说明大方向向上，正回调蓄势。<br><br>**短期信号**：当前上涨动能偏弱，不建议盲目追高，适合持股观望或等回调后逢低吸纳。<br><br>**关键价位**：上方压力看214和231.5；下方支撑看194和171.3。<br><br>**风险提示**：若放量跌破194元，短期上升趋势将遭破坏，请注意减仓控制风险。
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title"><span class="icon">💰</span> 基本面分析</div>
+
+
+  <div style="padding: 4px 0;">
+    <div class="progress-row">
+      <span class="prog-label">ROE</span>
+      <div class="prog-bar">
+        <div class="prog-fill" style="width:24.1%;background:var(--green);"></div>
+      </div>
+      <span class="prog-value down">7.2%</span>
+    </div>
+    <div class="progress-row">
+      <span class="prog-label">毛利率</span>
+      <div class="prog-bar">
+        <div class="prog-fill" style="width:43.042%;background:var(--accent);"></div>
+      </div>
+      <span class="prog-value">43.0%</span>
+    </div>
+    <div class="progress-row">
+      <span class="prog-label">负债率</span>
+      <div class="prog-bar">
+        <div class="prog-fill" style="width:17.8549%;background:var(--green);"></div>
+      </div>
+      <span class="prog-value up">17.9%</span>
+    </div>
+  </div>
+
+  <table class="data-table">
+<tr><td>净利率</td><td>27.3%</td></tr><tr><td>营收增速</td><td class="up">+36.22%</td></tr><tr><td>净利增速</td><td class="up">+57.15%</td></tr><tr><td>EPS</td><td>¥0.78</td></tr><tr><td>每股净资产</td><td>¥11.21</td></tr><tr><td>每股现金流</td><td>¥0.91</td></tr>  </table>
+
+<div class="collapsible">
+  <div class="collapsible-toggle">
+    <span class="toggle-label">机构一致预期 (3家)</span>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="collapsible-content">
+        <table class="data-table">
+      <tr>
+        <td>2026年</td>
+        <td>EPS ¥3.39 (15家)</td>
+      </tr>
+      <tr>
+        <td>2027年</td>
+        <td>EPS ¥4.40 (15家)</td>
+      </tr>
+      <tr>
+        <td>2028年</td>
+        <td>EPS ¥5.60 (13家)</td>
+      </tr>
+    </table>
+
+  </div>
+</div>
+
+<div class="collapsible">
+  <div class="collapsible-toggle">
+    <span class="toggle-label">分红历史 (3条)</span>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="collapsible-content">
+        <div class="list-item">
+      <div class="item-title">{&#39;date&#39;: &#39;2026-04-15&#39;, &#39;dividend&#39;: 12.0, &#39;ex_date&#39;: &#39;NaT&#39;, &#39;status&#39;: &#39;预案&#39;}</div>
+    </div>
+    <div class="list-item">
+      <div class="item-title">{&#39;date&#39;: &#39;2026-02-04&#39;, &#39;dividend&#39;: 3.0, &#39;ex_date&#39;: &#39;2026-02-10&#39;, &#39;status&#39;: &#39;实施&#39;}</div>
+    </div>
+    <div class="list-item">
+      <div class="item-title">{&#39;date&#39;: &#39;2025-07-28&#39;, &#39;dividend&#39;: 6.5, &#39;ex_date&#39;: &#39;2025-08-01&#39;, &#39;status&#39;: &#39;实施&#39;}</div>
+    </div>
+
+  </div>
+</div>
+
+  <div class="signals-wrap" style="border-top:1px solid var(--card-border);padding-top:12px;">
+    <span class="signal-badge positive">✅ 低负债(17.9%)</span>
+    <span class="signal-badge positive">✅ 营收高增(36.2%)</span>
+    <span class="signal-badge positive">✅ 净利高增(57.1%)</span>
+    <span class="signal-badge positive">✅ 近3年有分红(最近每10股派12.0元)</span>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title"><span class="icon">🎯</span> 资金面</div>
+
+  <table class="data-table">
+    <tr><td>近20日成交中位</td><td>29.3亿</td></tr>
+<tr><td>期间最高</td><td>87.9亿</td></tr><tr><td>期间最低</td><td>21.0亿</td></tr>  </table>
+
+  <div style="padding:10px 16px;font-size:12px;color:var(--text-secondary);border-top:1px solid var(--card-border);">
+⚠️ 北向数据过时 (港交所 2024-08 起停止披露个股北向持股，数据仅供参考)
+  </div>
+
+  <table class="data-table">
+    <tr><td>大股东变动</td><td>近5条: 增持1 / 减持4</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <div class="section-title"><span class="icon">💬</span> 舆情面</div>
+  <table class="data-table">
+    <tr><td>情绪信号</td><td>偏多</td></tr>
+<tr><td>机构一致预期</td><td class="accent">强烈看多</td></tr>  </table>
+
+<div class="collapsible">
+  <div class="collapsible-toggle">
+    <span class="toggle-label">机构研报 (10份)</span>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="collapsible-content">
+        <div class="list-item">
+      <div class="item-title">
+        <span class="signal-badge positive" style="margin:0 6px 0 0;font-size:11px;">
+          买入
+        </span>
+        AIoT SoC算力平台+协处理器双轮驱动
+      </div>
+      <div class="item-meta">中邮证券 · 2026-05-28</div>
+    </div>
+    <div class="list-item">
+      <div class="item-title">
+        <span class="signal-badge info" style="margin:0 6px 0 0;font-size:11px;">
+          增持
+        </span>
+        深化AIoT 2.0战略，端侧大模型与协处理器创新驱动业绩高增长
+      </div>
+      <div class="item-meta">中银证券 · 2026-04-28</div>
+    </div>
+    <div class="list-item">
+      <div class="item-title">
+        <span class="signal-badge positive" style="margin:0 6px 0 0;font-size:11px;">
+          买入
+        </span>
+        2026年一季报点评：业绩超市场预期，AIoT生态驱动高质量增长
+      </div>
+      <div class="item-meta">东吴证券 · 2026-04-23</div>
+    </div>
+    <div class="list-item">
+      <div class="item-title">
+        <span class="signal-badge positive" style="margin:0 6px 0 0;font-size:11px;">
+          买入
+        </span>
+        公司简评报告：旗舰芯片增强纵向发展力，产品矩阵丰富扩宽横向应用市场
+      </div>
+      <div class="item-meta">东海证券 · 2026-04-20</div>
+    </div>
+    <div class="list-item">
+      <div class="item-title">
+        <span class="signal-badge positive" style="margin:0 6px 0 0;font-size:11px;">
+          买入
+        </span>
+        生态共赢，务实前行
+      </div>
+      <div class="item-meta">中邮证券 · 2026-03-04</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="collapsible">
+  <div class="collapsible-toggle">
+    <span class="toggle-label">股吧热帖 (5条)</span>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="collapsible-content">
+        <div class="list-item">
+      <div class="item-title">都散了吧，已经连续放量滞涨，拉不动了，见顶该撤了，芯片行情的尾巴了，瑞芯微不是行</div>
+    </div>
+    <div class="list-item">
+      <div class="item-title">唉，还是补跌了</div>
+    </div>
+    <div class="list-item">
+      <div class="item-title">短时间内估计没有行情了</div>
+    </div>
+    <div class="list-item">
+      <div class="item-title">这应该算是全A筹码还算合理的个股了</div>
+    </div>
+    <div class="list-item">
+      <div class="item-title">从来没有连续巨跌过，加大仓位</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="collapsible">
+  <div class="collapsible-toggle">
+    <span class="toggle-label">相关新闻 (5条)</span>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="collapsible-content">
+        <div class="list-item">
+      <div class="item-title">半导体板块走高 瑞芯微涨停</div>
+      <div class="item-meta">东方财富Choice数据 · 2026-07-16</div>
+    </div>
+    <div class="list-item">
+      <div class="item-title">半导体板块走高，瑞芯微涨停</div>
+      <div class="item-meta">每日经济新闻 · 2026-07-16</div>
+    </div>
+    <div class="list-item">
+      <div class="item-title">半导体板块震荡拉升，瑞芯微涨停</div>
+      <div class="item-meta">界面新闻 · 2026-07-16</div>
+    </div>
+    <div class="list-item">
+      <div class="item-title">长鑫科技今日申购催化板块情绪，芯片ETF华夏（159995）探底回升，瑞芯微逆势涨停</div>
+      <div class="item-meta">每日经济新闻 · 2026-07-16</div>
+    </div>
+    <div class="list-item">
+      <div class="item-title">瑞芯微：2026年半年度业绩预告</div>
+      <div class="item-meta">证券日报 · 2026-07-07</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="collapsible">
+  <div class="collapsible-toggle">
+    <span class="toggle-label">互动易问答 (5条)</span>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="collapsible-content">
+        <div class="list-item">
+      <div class="item-title" style="color:var(--accent);">
+        💬 董秘您好！市场高度关注公司在汽车电子领域的第二增长曲线。请问目前公司车规级智能座舱及周边芯片的定点客户导入进度是否顺利？预计今年是否会有更多头部或造车新势...
+      </div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;padding-left:16px;border-left:2px solid var(--card-border);">
+        瑞芯微：尊敬的投资者，您好！公司全面布局汽车智能化赛道，已经形成汽车AIBox、车载音频、智能座舱、车载视觉、液晶仪表、视觉传输及车载AIoT等多产品线布局。其中在车载AIBox领域，公司基于主控芯片+协处理器的产品组合方案可以实现端侧离线部署“龙虾智能体座舱助手”，通过智能体自主完成从感知到理解、决策的闭环，目前在业内头部主机厂及Tier1顺利推进；在车载音频领域，公司车规级AI音频芯片R...
+      </div>
+      <div class="item-meta">瑞芯微股友 · 2026-03-18</div>
+    </div>
+    <div class="list-item">
+      <div class="item-title" style="color:var(--accent);">
+        💬 您好。请问当前ddr和flash等存储涨价，造成整机成本大幅上升。是否造成下游的需求大幅下降呢？对贵司的芯片销售是否会带来巨大的影响？另外晶圆和封装产能持...
+      </div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;padding-left:16px;border-left:2px solid var(--card-border);">
+        瑞芯微：尊敬的投资者，您好！从一季度业绩就能看出来虽然存储涨价造成消费电子承压，但AIoT和新质生产力生命力顽强，端侧AI技术正在重塑各行各业电子产品，需求仍在持续增长。目前半导体上游行业确实面临供应紧缺、涨价的影响，公司与众多供应商均保持长期稳定合作，持续密切关注供应链变化，灵活调整库存策略和采购策略以保障客户供应。感谢您的关注！
+      </div>
+      <div class="item-meta">瑞芯微股友 · 2026-06-03</div>
+    </div>
+    <div class="list-item">
+      <div class="item-title" style="color:var(--accent);">
+        💬 有什么具体的稳定股价的措施吗？其他半导体都在涨，瑞芯微一直跌，加上又要减持，不担心股价奔溃吗
+      </div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;padding-left:16px;border-left:2px solid var(--card-border);">
+        瑞芯微：尊敬的投资者，您好！短期股价在二级市场表现受到多重复杂因素影响而存在波动。外部股东减持是自身阶段性资金需求的个人行为。公司管理层将继续努力做好公司各项经营管理工作，因应端侧AI快速发展机遇，推动公司长期的高质量可持续健康发展。感谢您的关注！
+      </div>
+      <div class="item-meta">瑞芯微股友 · 2026-05-13</div>
+    </div>
+    <div class="list-item">
+      <div class="item-title" style="color:var(--accent);">
+        💬 尊敬的董秘您好，请问公司到五月十日的股东人数，谢谢
+      </div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;padding-left:16px;border-left:2px solid var(--card-border);">
+        瑞芯微：尊敬的投资者，您好！公司在定期报告中披露对应时点股东人数以保证所有投资者平等获悉公司信息。如果您需要了解其他时间节点的股东人数，请将该时点的持股证明及有效身份证件资料发送至公司邮箱（ir@rock-chips.com）进行预约，公司确认股东身份后将与您联系，届时携带申请资料原件至公司办公地点，经核实股东身份后现场查阅股东名册，并配合公司做好内幕信息知情人登记、签署承诺书等工作。感谢您的关注！
+      </div>
+      <div class="item-meta">瑞芯微股友 · 2026-05-12</div>
+    </div>
+    <div class="list-item">
+      <div class="item-title" style="color:var(--accent);">
+        💬 公司年报数据显示存货余额大幅增加，请问产品滞销还是迭代淘汰？未来如何防范积压风险？谢谢
+      </div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;padding-left:16px;border-left:2px solid var(--card-border);">
+        瑞芯微：尊敬的投资者，您好！公司根据业务体量快速扩张相应增加备货规模，同时结合当前供应链复杂形势，从保障客户产品供应安全角度适当增加战略性备货。截至2026年第一季度末，公司存货账面价值13.04亿元，其中以中高端产品和新品、次新品为主，整体处在正常水平。感谢您的关注！
+      </div>
+      <div class="item-meta">瑞芯微股友 · 2026-04-28</div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<div class="section">
+  <div class="section-title"><span class="icon">✅</span> 综合研判</div>
+
+  <div class="gauge-wrap">
+    <svg width="140" height="85" viewBox="0 0 140 85">
+      <path d="M 15 75 A 55 55 0 0 1 125 75" fill="none" stroke="#21262d" stroke-width="10" stroke-linecap="round"/>
+      <path d="M 15 75 A 55 55 0 0 1 125 75" fill="none"
+        stroke="#3fb950"
+        stroke-width="10" stroke-linecap="round"
+        stroke-dasharray="117.64 173" />
+    </svg>
+    <div class="gauge-score" style="color:var(--green)">
+      68
+    </div>
+    <div class="gauge-label">强看多</div>
+  </div>
+
+  <div class="metric-grid cols-4">
+    <div class="metric-item">
+      <div class="label">技术</div>
+      <div class="value up">+14</div>
+    </div>
+    <div class="metric-item">
+      <div class="label">基本面</div>
+      <div class="value up">+16</div>
+    </div>
+    <div class="metric-item">
+      <div class="label">资金</div>
+      <div class="value up">+7</div>
+    </div>
+    <div class="metric-item">
+      <div class="label">舆情</div>
+      <div class="value up">+25</div>
+    </div>
+  </div>
+
+  <div class="signals-wrap" style="border-top:1px solid var(--card-border);padding-top:12px;">
+    <span class="signal-badge positive">✅ 站上MA10</span>
+    <span class="signal-badge positive">✅ 站上MA20</span>
+    <span class="signal-badge positive">✅ 站上MA60</span>
+    <span class="signal-badge positive">✅ MACD多头</span>
+    <span class="signal-badge positive">✅ 多头排列(MA5&gt;10&gt;20&gt;60)</span>
+    <span class="signal-badge positive">✅ 营收高增(36.2%)</span>
+    <span class="signal-badge positive">✅ 净利高增(57.1%)</span>
+    <span class="signal-badge positive">✅ 低负债(17.9%)</span>
+    <span class="signal-badge positive">✅ 放量交易(量比1.92)</span>
+    <span class="signal-badge positive">✅ 股吧偏多(1.00)</span>
+    <span class="signal-badge warning">⚠️ 跌破MA5</span>
+    <span class="signal-badge warning">⚠️ 高估值(PE=75.78)</span>
+    <span class="signal-badge warning">⚠️ PB过高(18.18)</span>
+  </div>
+
+  <div style="padding:10px 16px;font-size:12px;color:var(--text-secondary);border-top:1px solid var(--card-border);">
+    📅 对比 2026-07-20:
+    价格 +2.26% ·
+    评分 +4 ·
+    评级 强看多 → 强看多
+  </div>
+</div>
+
+<div class="footer">
+  Stock Analysis Pro · 生成时间: 2026-07-20 14:09<br>
+  数据仅供参考，不构成投资建议
+</div>
+
+<script>
+// Collapsible toggle
+document.querySelectorAll('.collapsible-toggle').forEach(function(el) {
+  el.addEventListener('click', function() {
+    this.parentElement.classList.toggle('open');
+  });
+});
+</script>
+</body>
+</html>

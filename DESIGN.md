@@ -1,6 +1,6 @@
 # Stock Analysis Pro — 设计文档
 
-> v3.6 | 2026-07-20
+> v3.7 | 2026-07-20
 > Repo: https://github.com/bobby1129/stock-analysis-pro
 
 ---
@@ -103,6 +103,7 @@ CLI command
 | `capital.py` | 17 | flow.py | 成交额统计 + 北向持股 (thin wrapper) | ✅ |
 | `sentiment.py` | 80 | 股吧+互动易+新闻+评级 | 关键词情绪评分 → bullish/bearish/neutral + 帖子计数 + 互动易Q&A + 评级统计 | ✅ |
 | `company.py` | 82 | info.py | 公司概况(行业/主营/产品/简介/实控人/法人/注册资本/员工数) | ✅ |
+| `business.py` | ~140 | company+fundamentals+technicals + LLM | 行业分析/产业链/竞争格局/业务构成/技术面解读(LLM生成) | ✅ |
 | `scorer.py` | 404 | 技术/基本面/资金/舆情/行情/估值 | 四维评分(各±25), 总分±100, 7级评级(强看多→强看空), 综合信号/警告 | ✅ |
 | `concept.py` | 418 | 概念排行 + 成分股(100只) + 新闻 | 趋势定性(breakout/strong/rising/falling/neutral), 涨跌分布, 领涨股, 新闻归因, 综合评分(100分制) | ✅ |
 | `stock_picker.py` | ~400 | 成分股+K线+deep_analysis | 双轨评分: 轨道A板块强度(100分) + 轨道B选股决策(100分) + 精选标的(入场信号分类+entry_score) + 跨概念共振 | ✅ |
@@ -113,7 +114,7 @@ CLI command
 
 | 模块 | 行数 | 编排流程 | 状态 |
 |------|------|----------|------|
-| `stock_analysis.py` | 152 | 行情→公司概况→技术面→基本面→资金面→舆情面→估值→综合评分 | ✅ |
+| `stock_analysis.py` | 175 | 行情→公司概况→技术面→基本面→资金面→舆情面→估值→综合评分→业务深度分析(LLM) | ✅ |
 | `concept_analysis.py` | 340 | 概念排行→趋势定性(100只成分股,剔除北交所)→新闻归因→机会筛选(涨跌分布+综合评分), 含地域过滤+龙头去重 | ✅ |
 | `daily_report.py` | 619 | 每日复盘: 指数行情→涨跌家数→概念资金流→宏观数据→持仓分析→自选股→格式化输出 | ✅ |
 | `options_scan.py` | ~270 | ETF期权全市场扫描: 合约数据→HV计算→D/R/S风险收益排序→卖方Top10→买方Top10(BS胜率) | ✅ |
@@ -149,7 +150,7 @@ CLI command
 ```
 templates/
 ├── base.html              # 197行 基础模板 (暗色主题 + CSS变量 + 移动端适配)
-├── stock_report.html      # 440行 个股分析报告 (8模块)
+├── stock_report.html      # 500行 个股分析报告 (8模块+5个LLM深度分析板块)
 ├── concept_report.html    # 245行 概念分析报告
 ├── market_report.html     # 244行 市场概览报告
 └── components/            # 6个可复用组件

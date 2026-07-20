@@ -153,7 +153,18 @@ def run(symbol: str) -> dict:
     # 11. 保存快照 (覆盖旧的)
     _save_snapshot(symbol, result)
     
-    # 12. 关闭浏览器
+    # 12. 业务深度分析（LLM 生成：行业/产业链/竞争/业务/技术解读）
+    try:
+        from analysis.business import analyze as analyze_business
+        print("  [业务分析] LLM 生成行业/产业链/竞争/技术解读...")
+        result["business"] = analyze_business(
+            symbol, result["company"], result["fundamentals"], result["technicals"]
+        )
+    except Exception as e:
+        print(f"  [业务分析] 跳过: {e}")
+        result["business"] = {}
+    
+    # 13. 关闭浏览器
     try:
         from collectors.em_browser import close_browser
         close_browser()

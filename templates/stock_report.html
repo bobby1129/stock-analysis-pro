@@ -112,6 +112,44 @@
 </div>
 {% endif %}
 
+{# ===== 4b. BUSINESS DEEP DIVE ===== #}
+{% set biz = data.business|default({}) %}
+{% if biz.industry_analysis %}
+<div class="section">
+  <div class="section-title"><span class="icon">🏭</span> 行业分析</div>
+  <div style="padding:12px 16px;font-size:13px;line-height:1.7;color:var(--text-primary);">
+    {{ biz.industry_analysis|replace('\n', '<br>')|safe }}
+  </div>
+</div>
+{% endif %}
+
+{% if biz.supply_chain %}
+<div class="section">
+  <div class="section-title"><span class="icon">🔗</span> 产业链分析</div>
+  <div style="padding:12px 16px;font-size:13px;line-height:1.7;color:var(--text-primary);">
+    {{ biz.supply_chain|replace('\n', '<br>')|safe }}
+  </div>
+</div>
+{% endif %}
+
+{% if biz.competition %}
+<div class="section">
+  <div class="section-title"><span class="icon">⚔️</span> 竞争格局</div>
+  <div style="padding:12px 16px;font-size:13px;line-height:1.7;color:var(--text-primary);">
+    {{ biz.competition|replace('\n', '<br>')|safe }}
+  </div>
+</div>
+{% endif %}
+
+{% if biz.business_structure %}
+<div class="section">
+  <div class="section-title"><span class="icon">📦</span> 业务构成</div>
+  <div style="padding:12px 16px;font-size:13px;line-height:1.7;color:var(--text-primary);">
+    {{ biz.business_structure|replace('\n', '<br>')|safe }}
+  </div>
+</div>
+{% endif %}
+
 {# ===== 5. TECHNICALS ===== #}
 <div class="section">
   <div class="section-title"><span class="icon">📉</span> 技术面分析</div>
@@ -184,6 +222,14 @@
     {% for w in tech.warnings|default([]) %}
     <span class="signal-badge warning">⚠️ {{ w }}</span>
     {% endfor %}
+  </div>
+  {% endif %}
+
+  {# Technical interpretation (LLM) #}
+  {% if biz.tech_interpretation %}
+  <div style="padding:12px 16px;font-size:13px;line-height:1.7;color:var(--text-primary);border-top:1px solid var(--card-border);margin-top:12px;">
+    <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px;">📖 技术面解读</div>
+    {{ biz.tech_interpretation|replace('\n', '<br>')|safe }}
   </div>
   {% endif %}
 </div>
