@@ -145,10 +145,13 @@ def _score_tech(tech: Dict) -> Tuple[int, List[str], List[str]]:
     warnings = []
     
     price = tech.get("price", 0)
+    ma5 = tech.get("ma5")
+    ma10 = tech.get("ma10")
+    ma20 = tech.get("ma20")
+    ma60 = tech.get("ma60")
     
     # MA 位置 (±8)
-    for ma_key, weight in [("ma5", 2), ("ma10", 2), ("ma20", 2), ("ma60", 2)]:
-        ma_val = tech.get(ma_key)
+    for ma_key, ma_val, weight in [("ma5", ma5, 2), ("ma10", ma10, 2), ("ma20", ma20, 2), ("ma60", ma60, 2)]:
         if ma_val and price:
             if price > ma_val:
                 score += weight
@@ -188,7 +191,6 @@ def _score_tech(tech: Dict) -> Tuple[int, List[str], List[str]]:
     
     # ── 量价关系 (±5) ──
     p60 = tech.get("percentile_60d", {}).get("value", 50)
-    ma20 = tech.get("ma20")
     if vol_ratio and price and ma20:
         above_ma20 = price > ma20
         if vol_ratio > 1.5 and above_ma20:
@@ -202,9 +204,6 @@ def _score_tech(tech: Dict) -> Tuple[int, List[str], List[str]]:
             warnings.append(f"天量天价(量比{vol_ratio:.1f},60日高位{p60:.0f}%)")
     
     # ── 均线排列 (±5) ──
-    ma5 = tech.get("ma5")
-    ma10 = tech.get("ma10")
-    ma60 = tech.get("ma60")
     if ma5 is not None and ma10 is not None and ma20 is not None and ma60 is not None:
         if ma5 > ma10 > ma20 > ma60:
             score += 5

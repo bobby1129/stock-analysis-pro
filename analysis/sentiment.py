@@ -27,7 +27,7 @@ def analyze(symbol: str, stock_name: str = "", em_data: dict = None) -> dict:
     # 互动易问答 (仍走直连，风险较低)
     qa = interactive_qa(symbol, limit=10)
 
-    # 关键词情绪评分 (股吧 + 新闻合并)
+    # 关键词情绪评分 (股吧 + 新闻合并，新闻有时间衰减)
     positive_keywords = ["利好", "买入", "加仓", "看好", "突破", "上涨", "主力",
                          "增长", "新高", "分红", "回购", "增持", "超预期"]
     negative_keywords = ["利空", "卖出", "减持", "看空", "跌破", "下跌", "套牢",
@@ -36,19 +36,34 @@ def analyze(symbol: str, stock_name: str = "", em_data: dict = None) -> dict:
     pos_count = 0
     neg_count = 0
 
-    # 股吧帖子
-    all_titles = [p.get("title", "") for p in posts]
-    # 新闻标题+摘要
-    for n in news:
-        all_titles.append(n.get("title", "") + n.get("content", ""))
+    # 股吧帖子 (无时间信息，权重=1)
+    for p in posts:
+        text = p.get("title", "")
+        pos_count += sum(1 for kw in positive_keywords if kw in text)
+        neg_count += sum(1 for kw in negative_keywords if kw in text)
 
-    for text in all_titles:
-        for kw in positive_keywords:
-            if kw in text:
-                pos_count += 1
-        for kw in negative_keywords:
-            if kw in text:
-                neg_count += 1
+    # 新闻 (有时间衰减：7天内权重1.0，7-14天0.7，14天+0.4)
+    from datetime import datetime, timedelta
+    now = datetime.now()
+    for n in news:
+        text = n.get("title", "") + n.get("content", "")
+        date_str = n.get("date", "")
+        weight = 1.0
+        if date_str:
+            try:
+                d = datetime.strptime(date_str[:10], "%Y-%m-%d")
+                age_days = (now - d).days
+                if age_days <= 7:
+                    weight = 1.0
+                elif age_days <= 14:
+                    weight = 0.7
+                else:
+                    weight = 0.4
+            except (ValueError, TypeError):
+                weight = 1.0
+        
+        pos_count += sum(1 for kw in positive_keywords if kw in text) * weight
+        neg_count += sum(1 for kw in negative_keywords if kw in text) * weight
 
     total = pos_count + neg_count
     if total == 0:

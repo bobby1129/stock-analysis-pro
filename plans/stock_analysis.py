@@ -30,6 +30,17 @@ def _save_snapshot(symbol: str, data: dict):
         "pb": data.get("basic", {}).get("pb"),
         "total_score": data.get("score", {}).get("total_score"),
         "rating": data.get("score", {}).get("rating"),
+        # 新增：技术面信号
+        "tech_signals": data.get("technicals", {}).get("signals", [])[:5],
+        "tech_warnings": data.get("technicals", {}).get("warnings", [])[:5],
+        # 新增：资金面状态
+        "capital_signals": data.get("capital", {}).get("signals", [])[:3],
+        "capital_warnings": data.get("capital", {}).get("warnings", [])[:3],
+        # 新增：估值 PEG
+        "peg": data.get("valuation", {}).get("peg"),
+        # 新增：风险指标
+        "volatility_20d": data.get("technicals", {}).get("volatility_20d"),
+        "max_drawdown_60d": data.get("technicals", {}).get("max_drawdown_60d"),
     }
     try:
         with open(path, "w") as f:
@@ -83,7 +94,7 @@ def run(symbol: str) -> dict:
     result["company"] = analyze_company(symbol, em_data=f10_data)
     
     # 4. 技术面
-    result["technicals"] = analyze_technical(symbol)
+    result["technicals"] = analyze_technical(symbol, basic=basic)
     
     # 5. 基本面
     result["fundamentals"] = analyze_fundamental(symbol)
@@ -103,7 +114,7 @@ def run(symbol: str) -> dict:
     result["sentiment"] = analyze_sentiment(symbol, stock_name=stock_name, em_data=sent_data)
     
     # 8. 估值面
-    result["valuation"] = analyze_valuation(symbol)
+    result["valuation"] = analyze_valuation(symbol, basic=basic)
     
     # 9. 综合评分
     result["score"] = compute_score(

@@ -8,9 +8,14 @@
 from collectors.quote import kline, realtime
 
 
-def analyze(symbol: str) -> dict:
-    """技术面分析"""
-    rt = realtime(symbol)
+def analyze(symbol: str, basic: dict = None) -> dict:
+    """技术面分析
+    
+    Args:
+        symbol: 股票代码
+        basic: 预获取的实时行情数据 (可选, 避免重复请求)
+    """
+    rt = basic if basic else realtime(symbol)
     price = rt["price"]
     kl = kline(symbol, days=250)
     
@@ -80,7 +85,7 @@ def analyze(symbol: str) -> dict:
     
     # ── 3. KDJ (9, 3, 3) ──
     if len(closes) >= 9:
-        k, d, j = _kdj(highs, lows, closes, 9, 3, 3)
+        k, d, j, prev_k, prev_d, prev_j = _kdj(highs, lows, closes, 9, 3, 3)
         result["kdj"] = {
             "k": round(k, 2),
             "d": round(d, 2),
@@ -92,13 +97,11 @@ def analyze(symbol: str) -> dict:
         elif k < 20 or d < 20:
             result["signals"].append(f"KDJ超卖(K={k:.0f},D={d:.0f})")
         
-        # 金叉死叉
-        if len(closes) >= 12:
-            prev_k, prev_d, _ = _kdj(highs[:-1], lows[:-1], closes[:-1], 9, 3, 3)
-            if k > d and prev_k <= prev_d:
-                result["signals"].append("KDJ金叉")
-            elif k < d and prev_k >= prev_d:
-                result["warnings"].append("KDJ死叉")
+        # 金叉死叉（使用 prev_k/prev_d，避免重复计算）
+        if k > d and prev_k <= prev_d:
+            result["signals"].append("KDJ金叉")
+        elif k < d and prev_k >= prev_d:
+            result["warnings"].append("KDJ死叉")
     
     # ── 4. RSI (6/12/24) ──
     for period in [6, 12, 24]:
@@ -188,6 +191,55 @@ def analyze(symbol: str) -> dict:
         elif price <= recent_low * 1.02:
             result["signals"].append(f"接近支撑位({recent_low:.2f})")
     
+    # ── 10. 风险指标 ──
+    # 波动率 (20日年化)
+    if len(closes) >= 20:
+        returns = [(closes[i] - closes[i-1]) / closes[i-1] for i in range(1, len(closes))]
+        vol_20d = (sum((r - sum(returns[-20:])/20)**2 for r in returns[-20:]) / 19) ** 0.5 * (252**0.5)
+        result["volatility_20d"] = round(vol_20d * 100, 2)
+    
+    # 最大回撤 (60日/250日)
+    for window in [60, 250]:
+        if len(closes) >= window:
+            window_closes = closes[-window:]
+            peak = window_closes[0]
+            max_dd = 0
+            for c in window_closes:
+                if c > peak:
+                    peak = c
+                dd = (peak - c) / peak
+                if dd > max_dd:
+                    max_dd = dd
+            label = "60d" if window == 60 else "250d"
+            result[f"max_drawdown_{label}"] = round(max_dd * 100, 2)
+    
+    # Beta (vs 上证指数，需要获取上证K线)
+    if len(closes) >= 60:
+        try:
+            sh_kl = kline("000001", days=60)  # 上证指数
+            if len(sh_kl) >= 60:
+                sh_closes = [b["close"] for b in sh_kl]
+                stock_returns = [(closes[i] - closes[i-1]) / closes[i-1] for i in range(len(closes)-60, len(closes))]
+                sh_returns = [(sh_closes[i] - sh_closes[i-1]) / sh_closes[i-1] for i in range(1, len(sh_closes))]
+                
+                # 对齐长度
+                min_len = min(len(stock_returns), len(sh_returns))
+                stock_returns = stock_returns[-min_len:]
+                sh_returns = sh_returns[-min_len:]
+                
+                if min_len > 10:
+                    # 协方差 / 方差
+                    mean_s = sum(stock_returns) / len(stock_returns)
+                    mean_m = sum(sh_returns) / len(sh_returns)
+                    cov = sum((stock_returns[i] - mean_s) * (sh_returns[i] - mean_m) for i in range(len(stock_returns))) / (len(stock_returns) - 1)
+                    var_m = sum((sh_returns[i] - mean_m) ** 2 for i in range(len(sh_returns))) / (len(sh_returns) - 1)
+                    
+                    if var_m > 0:
+                        beta = cov / var_m
+                        result["beta"] = round(beta, 2)
+        except Exception:
+            pass  # Beta 计算失败不影响其他指标
+    
     return result
 
 
@@ -203,9 +255,9 @@ def _ema(data, period):
 
 
 def _kdj(highs, lows, closes, n=9, m1=3, m2=3):
-    """KDJ 指标计算"""
+    """KDJ 指标计算，返回当日和昨日的 K/D/J"""
     if len(closes) < n:
-        return 50, 50, 50
+        return 50, 50, 50, 50, 50, 50
     
     rsv_list = []
     for i in range(n - 1, len(closes)):
@@ -220,12 +272,18 @@ def _kdj(highs, lows, closes, n=9, m1=3, m2=3):
     # 初始 K/D = 50
     k = 50
     d = 50
-    for rsv in rsv_list:
+    prev_k = 50
+    prev_d = 50
+    for i, rsv in enumerate(rsv_list):
+        if i == len(rsv_list) - 1:
+            prev_k = k
+            prev_d = d
         k = (m1 - 1) / m1 * k + 1 / m1 * rsv
         d = (m2 - 1) / m2 * d + 1 / m2 * k
     
     j = 3 * k - 2 * d
-    return k, d, j
+    prev_j = 3 * prev_k - 2 * prev_d
+    return k, d, j, prev_k, prev_d, prev_j
 
 
 def _rsi(closes, period=14):
