@@ -290,13 +290,8 @@ def format_report(data: dict) -> str:
 
     for i, c in enumerate(data['concepts'], 1):
         lines.append(f"\n{'─'*50}")
-        deep = c.get('deep', {})
-        score = deep.get('score', {})
-        score_label = score.get('label', '--')
-        score_val = score.get('total', 0)
 
         lines.append(f"【{i}】{c['name']}  {c['change_pct']:+.2f}%  成交{c['amount_yi']}亿")
-        lines.append(f"    评分: {score_val}分 {score_label}")
         lines.append(f"    龙头: {c['leader']}({c['leader_code']}) {c['leader_pct']:+.2f}%")
 
         # 趋势

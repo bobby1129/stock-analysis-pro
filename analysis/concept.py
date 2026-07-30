@@ -287,9 +287,6 @@ def analyze_concept_deep(stocks: list, total_amount: float, verbose=False) -> di
         "ratio": round(len(above_avg_stocks) / len(stock_momentum) * 100, 1) if stock_momentum else 0,
     }
 
-    # ── 8. 概念综合评分 ──
-    score = _calc_concept_score(distribution, momentum, volume_signal, limit_up_count)
-
     return {
         "representativeness": representativeness,
         "distribution": distribution,
@@ -302,74 +299,6 @@ def analyze_concept_deep(stocks: list, total_amount: float, verbose=False) -> di
             "consecutive_boards": consecutive_boards,
         },
         "volume_signal": volume_signal,
-        "score": score,
-    }
-
-
-def _calc_concept_score(dist: dict, momentum: dict, vol_sig: dict, limit_up: int) -> dict:
-    """
-    概念综合评分 — 多维度打分
-
-    维度:
-    1. 赚钱效应 (涨幅分布)
-    2. 介入时机 (持续性分布)
-    3. 资金强度 (放量 + 涨停)
-    4. 板块宽度 (上涨比例)
-
-    返回: {total, details: {profit, timing, strength, breadth}}
-    """
-    total = dist.get('total', 1)
-    if total == 0:
-        return {"total": 0, "details": {}, "label": "--"}
-
-    # 1. 赚钱效应: >7%占比 + 3~7%占比
-    above_7_ratio = dist['above_7'] / total
-    between_3_7_ratio = dist['between_3_7'] / total
-    profit_score = min(above_7_ratio * 100 + between_3_7_ratio * 50, 30)
-    
-    up_ratio = (dist['above_7'] + dist['between_3_7'] + dist['between_0_3']) / total
-
-    # 2. 介入时机: 刚启动占比高 → 有空间 (加分), 全是连涨3天+ → 可能追高 (减分)
-    just_started_ratio = momentum['just_started'] / total
-    consecutive_3plus_ratio = momentum['consecutive_3plus'] / total
-    # 理想: 刚启动多 + 连涨适中
-    if just_started_ratio > 0.3:
-        timing_score = 25  # 很多刚启动，好时机
-    elif just_started_ratio > 0.15:
-        timing_score = 20
-    elif consecutive_3plus_ratio > 0.4:
-        timing_score = 10  # 太多连涨，可能追高
-    else:
-        timing_score = 15
-
-    # 3. 资金强度: 放量股占比 + 涨停数
-    vol_ratio = vol_sig.get('ratio', 0) / 100
-    strength_score = min(vol_ratio * 40 + limit_up * 3, 25)
-
-    # 4. 板块宽度: 上涨家数占比
-    breadth_score = up_ratio * 20
-
-    total_score = round(profit_score + timing_score + strength_score + breadth_score, 1)
-
-    # 定性标签
-    if total_score >= 70:
-        label = "⭐ 重点关注"
-    elif total_score >= 50:
-        label = "👀 可以关注"
-    elif total_score >= 30:
-        label = "⚡ 一般"
-    else:
-        label = "⚠️ 谨慎"
-
-    return {
-        "total": total_score,
-        "label": label,
-        "details": {
-            "profit": round(profit_score, 1),
-            "timing": round(timing_score, 1),
-            "strength": round(strength_score, 1),
-            "breadth": round(breadth_score, 1),
-        }
     }
 
 

@@ -52,7 +52,6 @@
 {% for concept in concepts %}
 {% set trend = concept.trend|default({}) %}
 {% set deep = concept.deep|default({}) %}
-{% set score = deep.score|default({}) %}
 {% set board_score = concept.board_score|default({}) %}
 {% set pick_score = concept.pick_score|default({}) %}
 {% set picked_stocks = concept.picked_stocks|default([]) %}
@@ -62,7 +61,6 @@
 {% set lu = deep.limit_up|default({}) %}
 {% set vol = deep.volume_signal|default({}) %}
 {% set status = trend.status|default('unknown') %}
-{% set score_val = score.total|default(0) %}
 {% set board_val = board_score.total|default(0) %}
 {% set pick_val = pick_score.total|default(0) %}
 
