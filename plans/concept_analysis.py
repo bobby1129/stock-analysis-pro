@@ -10,7 +10,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from collectors.concept import concept_news, clear_kline_cache
 from analysis.concept import analyze_board_trend, analyze_concept_deep
-from analysis.concept_rank import rank_concepts
 from analysis.stock_picker import score_board_strength, score_pick_quality, pick_stocks, find_resonance
 
 # ── 缓存 ──

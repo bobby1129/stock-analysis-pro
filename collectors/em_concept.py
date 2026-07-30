@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
-"""东方财富 push2 概念板块采集器
+"""东方财富概念板块采集器
 
-数据源: push2.eastmoney.com (需Cookie, JSONP格式)
+主链路: Playwright浏览器 (fetch_concepts_batch) — 概念列表+成分股一次完成
+辅助: fetch_concept_list (HTTP) — 仅 daily_report 轻量调用
 Cookie: 从 config/config.yaml 读取, 过期时向用户索要
 
 用法:
-    from collectors.em_concept import fetch_concept_list, fetch_concept_stocks
+    from collectors.em_concept import fetch_concepts_batch
     
-    concepts = fetch_concept_list(top_n=30)  # 按资金流入排序
-    stocks = fetch_concept_stocks('BK1137')  # 存储芯片成分股(按涨幅)
+    result = fetch_concepts_batch(top_n=60, filter_fn=my_filter)
+    concepts = result['concepts']
+    stocks_map = result['stocks_map']
 """
 
 import re
@@ -679,104 +681,4 @@ def fetch_concept_list(top_n: int = 30, verbose: bool = False) -> list:
         
     except Exception as e:
         print(f"[em_concept] 获取概念列表失败: {e}")
-        return []
-
-
-def fetch_concept_stocks(bk_code: str, name: str = '', limit: int = 100, verbose: bool = False) -> list:
-    """
-    获取概念成分股 (按涨幅排序)
-    
-    成功后自动合并到离线缓存; 失败时从离线缓存兜底
-    
-    Returns:
-        [
-            {
-                'symbol': 'sh688766',
-                'code': '688766',
-                'market': 1,
-                'name': '普冉股份',
-                'price': 45.67,
-                'change_pct': 3.45,
-                'amount': 123456789,
-                'turnover': 2.5,
-            },
-            ...
-        ]
-    """
-    _throttle()
-    
-    cookie = get_cookie()
-    if not cookie:
-        # 兜底: 离线缓存
-        cached = get_cached_stocks(bk_code)
-        if cached:
-            if verbose:
-                print(f"  [离线] {bk_code} 使用缓存 {len(cached)} 只成分股")
-            return cached
-        return []
-    
-    headers = {**_HEADERS, 'Cookie': cookie}
-    params = _make_params(
-        fs=f'b:{bk_code}',
-        fields='f2,f3,f4,f5,f6,f7,f8,f12,f13,f14,f15,f16,f17',
-        pz=limit,
-        fid='f3',  # 按涨幅排序
-    )
-    
-    try:
-        resp = requests.get(_BASE_URL, params=params, headers=headers, timeout=15)
-        if not resp.text or 'jQuery' not in resp.text:
-            # 兜底: 离线缓存
-            cached = get_cached_stocks(bk_code)
-            if cached:
-                if verbose:
-                    print(f"  [离线兜底] {bk_code} 在线失败, 使用缓存 {len(cached)} 只")
-                return cached
-            return []
-            
-        data = _jsonp_parse(resp.text)
-        if not data or not data.get('data'):
-            cached = get_cached_stocks(bk_code)
-            if cached:
-                if verbose:
-                    print(f"  [离线兜底] {bk_code} 解析失败, 使用缓存 {len(cached)} 只")
-                return cached
-            return []
-        
-        items = data['data'].get('diff', [])
-        results = []
-        
-        for item in items:
-            code = item.get('f12', '')
-            market = item.get('f13', 0)
-            prefix = 'sh' if market == 1 else 'sz'
-            
-            results.append({
-                'symbol': f'{prefix}{code}',
-                'code': code,
-                'market': market,
-                'name': item.get('f14', ''),
-                'price': item.get('f2', 0),
-                'change_pct': item.get('f3', 0),
-                'amount': item.get('f6', 0),
-                'turnover': item.get('f8', 0),
-            })
-        
-        if verbose:
-            print(f"  [在线] {bk_code} 获取到 {len(results)} 只成分股")
-        
-        # 合并到离线缓存 (增量: 新增的股票追加)
-        if results and name:
-            _merge_stocks_to_cache(bk_code, name, results)
-        
-        return results
-        
-    except Exception as e:
-        print(f"[em_concept] 获取成分股失败({bk_code}): {e}")
-        # 兜底: 离线缓存
-        cached = get_cached_stocks(bk_code)
-        if cached:
-            if verbose:
-                print(f"  [离线兜底] {bk_code} 异常, 使用缓存 {len(cached)} 只")
-            return cached
         return []
