@@ -160,7 +160,7 @@ stock-analysis-pro/
 │   ├── flow.py             # 资金流 (成交额/北向)
 │   ├── info.py             # 公司F10 (东财)
 │   ├── sentiment.py        # 舆情 (股吧/新闻/互动易)
-│   ├── em_concept.py       # 概念板块 (HTTP API + Cookie + JSONP)
+│   ├── em_concept.py       # 概念板块 (Playwright主链路 + HTTP辅助)
 │   ├── em_browser.py       # 共享Playwright浏览器会话
 │   ├── macro.py            # 宏观数据 (akshare + 新浪)
 │   ├── options.py          # 期权数据 (新浪hq.sinajs.cn)
@@ -174,13 +174,14 @@ stock-analysis-pro/
 │   ├── sentiment.py        # 舆情分析
 │   ├── company.py          # 公司概况
 │   ├── concept.py          # 概念深度分析
-│   ├── concept_rank.py     # 概念排名引擎
+│   ├── stock_picker.py     # 双轨评分+选股
 │   ├── macro.py            # 宏观分析
 │   └── scorer.py           # 综合评分
 ├── plans/                  # 编排层
 │   ├── stock_analysis.py   # 个股分析流程
 │   ├── concept_analysis.py # 概念分析流程
 │   ├── daily_report.py     # 每日复盘流程
+│   ├── daily_review.py     # 宏观市场概览
 │   └── options_scan.py     # 期权扫描流程
 ├── templates/              # HTML报告模板
 ├── config/
@@ -203,12 +204,12 @@ stock-analysis-pro/
 | 新浪 (money.finance) | K线数据 | 直连 | ✅ |
 | 东财 (emweb/guba) | 公司F10/股吧 | Playwright拦截 | ✅ |
 | 东财 (search-api) | 概念新闻 | 直连 | ✅ |
-| 东财 (push2.eastmoney.com) | 概念板块 | HTTP API + Cookie + JSONP | ✅ |
+| 东财 (push2.eastmoney.com) | 概念板块 | Playwright拦截 (主链路) / HTTP API (daily_report辅助) | ✅ |
 | 东财 (互动易) | 投资者问答 | 直连 | ✅ |
 | akshare (THS) | 财务/分红/预测 | 需代理 | ✅ |
 | akshare (涨停池) | 涨跌停统计 | 需代理 | ✅ |
 
-> 概念板块数据通过 HTTP API 直接请求东财 push2 接口获取（JSONP格式，需Cookie），覆盖全市场概念。
+> 概念板块主链路通过 Playwright 浏览器访问东财行情页拦截 XHR 响应获取（需Cookie注入浏览器上下文）。daily_report 轻量调用仍走 HTTP API。
 
 ## 代理配置
 

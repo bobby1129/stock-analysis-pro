@@ -21,7 +21,7 @@ cd ~/.hermes/skills/stock-analysis-pro
 # 2. 安装依赖
 pip install -r requirements.txt
 
-# 3. 安装 Playwright 浏览器 (用于东财 F10/股吧/研报采集)
+# 3. 安装 Playwright 浏览器 (用于东财概念板块/F10/股吧/研报采集)
 playwright install chromium
 
 # 4. 配置
@@ -54,7 +54,7 @@ python core/cli.py concept
 
 # 3. 验证HTML报告
 python core/cli.py analyze 600519 --html
-# 预期输出：cache/stock_600519.html 生成
+# 预期输出：output/stock_600519.html 生成
 ```
 
 如果第1步就失败，检查：
@@ -127,11 +127,11 @@ collectors/          analysis/           plans/
 | 东财 emweb | 公司F10 (Playwright) | Playwright拦截 | ✅ |
 | 东财 guba | 股吧热帖 (Playwright) | Playwright拦截 | ✅ |
 | 东财 search-api | 概念新闻 | 直连 | ✅ |
-| 东财 push2 | 概念资金流 | Cookie+JSONP | ✅ |
-| 东财 行情页 | 涨跌家数+涨跌停 | Playwright | ✅ |
+| 东财 push2 | 概念资金流 | Playwright拦截 (主链路) / HTTP (daily_report) | ✅ |
+| 东财 行情页 | 涨跌家数 | HTTP API + Cookie | ✅ |
 | akshare THS | 财务/分红/预测 | 需代理 | ✅ |
 | akshare 涨停池 | 涨跌停统计 | 需代理 | ✅ |
-| akshare 期权 | IV/HV/Greeks | 需代理 | ✅ |
+| 新浪 期权 | IV/HV/Greeks/行情 | 直连 | ✅ |
 | 新浪 期权 | 全合约列表 | 直连 | ✅ |
 
 ---
@@ -155,9 +155,9 @@ collectors/          analysis/           plans/
 
 数据来源：
 - 指数行情：腾讯 qt.gtimg.cn
-- 涨跌家数：Playwright 访问东财行情页
-- 涨跌停数据：Playwright 拦截东财页面
-- 概念资金流：东财 push2 API (需 Cookie)
+- 涨跌家数：东财 push2 HTTP API (需 Cookie)
+- 涨跌停数据：akshare 涨停池 (需代理)
+- 概念资金流：Playwright 拦截东财行情页 (需 Cookie 注入浏览器)
 - 持仓数据：`data/portfolio.json`
 
 ### ETF 期权扫描 (options)
@@ -187,7 +187,7 @@ collectors/          analysis/           plans/
 
 数据来源：
 - 全合约列表：新浪期权频道
-- IV/HV/Greeks：akshare 期权数据
+- IV/HV/Greeks：新浪期权频道 (hq.sinajs.cn)
 - 标的行情：腾讯 qt.gtimg.cn
 
 ### 个股分析 (analyze)
@@ -207,10 +207,10 @@ collectors/          analysis/           plans/
 
 ### 概念板块扫描 (concept)
 
-1. 东财 push2 按资金流入排序概念
+1. Playwright 拦截东财行情页，按资金流入排序概念
 2. 过滤非行业概念(风格/市值/地域类)
 3. 成分股涨幅分布 → 趋势定性(启动/主升浪/走弱)
-4. 概念评分(赚钱效应/介入时机/资金强度/板块宽度)
+4. 双轨评分: 轨道A板块强度(赚钱效应/资金强度/板块宽度) + 轨道B选股决策(可买标的/标的质量/追高风险/新鲜度)
 5. 新闻归因 → 驱动逻辑
 
 ### 宏观市场概览 (market)
