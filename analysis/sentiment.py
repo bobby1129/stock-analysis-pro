@@ -43,7 +43,7 @@ def analyze(symbol: str, stock_name: str = "", em_data: dict = None) -> dict:
         neg_count += sum(1 for kw in negative_keywords if kw in text)
 
     # 新闻 (有时间衰减：7天内权重1.0，7-14天0.7，14天+0.4)
-    from datetime import datetime, timedelta
+    from datetime import datetime
     now = datetime.now()
     for n in news:
         text = n.get("title", "") + n.get("content", "")

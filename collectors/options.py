@@ -11,7 +11,6 @@ import re
 import time
 import math
 from datetime import datetime, date
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 HEADERS = {
     "Referer": "https://finance.sina.com.cn",

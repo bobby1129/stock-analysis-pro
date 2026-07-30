@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """分析维度层 — 概念板块趋势定性 + 深度分析 + 机会挖掘"""
 
-from collectors.concept import concept_leader_kline, concept_stocks, batch_klines
+from collectors.concept import concept_stocks, batch_klines
 
 
 def analyze_board_trend(deep_result: dict) -> dict:

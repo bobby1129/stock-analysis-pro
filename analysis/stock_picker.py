@@ -9,7 +9,7 @@
 注意: 本模块纯计算，无网络请求。K线数据从 collectors/concept.py 的缓存获取。
 """
 
-from typing import List, Dict, Optional
+from typing import List, Dict
 import sys
 import os
 

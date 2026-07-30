@@ -4,7 +4,7 @@
 三个独立分析函数 + 一个综合研判函数
 """
 
-from typing import Dict, List
+from typing import Dict
 
 
 def analyze_global(data: Dict) -> Dict:

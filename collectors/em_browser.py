@@ -8,7 +8,7 @@ import json
 import re
 import time
 import os
-from typing import Dict, Optional
+from typing import Dict
 
 _BROWSER = None
 _CONTEXT = None

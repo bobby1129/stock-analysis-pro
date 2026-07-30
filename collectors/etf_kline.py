@@ -7,7 +7,7 @@ ETF K线数据采集器 — 用于计算历史波动率(HV)
 import requests
 import re
 import json
-from collectors.options import UNDERLYINGS, HEADERS
+from collectors.options import UNDERLYINGS
 
 
 def fetch_kline(underlying: str, datalen: int = 120) -> list:

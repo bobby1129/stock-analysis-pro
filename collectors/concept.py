@@ -28,49 +28,6 @@ def _is_float(s):
         return False
 
 
-def concept_rank_sina(limit=20):
-    """获取新浪概念板块排行 (按成交额降序)"""
-    url = 'http://vip.stock.finance.sina.com.cn/q/view/newFLJK.php?param=class'
-    try:
-        resp = requests.get(url, headers=_HEADERS, timeout=10)
-        text = resp.text.split('=', 1)[1].strip().rstrip(';')
-        raw_data = json.loads(text)
-
-        concepts = []
-        for k, v in raw_data.items():
-            parts = v.split(',')
-            if len(parts) >= 12:
-                try:
-                    change_pct = float(parts[4])
-                    amount = float(parts[6])
-                    name = parts[1]
-
-                    if any(kw in name for kw in FILTER_KEYWORDS):
-                        continue
-
-                    concepts.append({
-                        'code': parts[0],
-                        'name': name,
-                        'stock_count': int(parts[2]),
-                        'price': float(parts[3]),
-                        'change_pct': change_pct,
-                        'amount': amount,
-                        'market_cap': float(parts[7]),
-                        'leader_code': parts[8],
-                        'leader_pct': float(parts[9]) if len(parts) > 9 and _is_float(parts[9]) else 0.0,
-                        'leader_name': parts[12] if len(parts) > 12 else '',
-                    })
-                except:
-                    continue
-
-        concepts.sort(key=lambda x: x['amount'], reverse=True)
-        return concepts[:limit]
-
-    except Exception as e:
-        print(f"新浪概念获取失败: {e}")
-        return []
-
-
 def concept_stocks(node_code, num=30, sort='changepercent', asc=False):
     """
     获取概念成分股 (按涨跌幅排序, 默认降序)
