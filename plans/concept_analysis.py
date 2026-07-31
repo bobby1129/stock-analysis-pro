@@ -53,6 +53,10 @@ FILTER_KEYWORDS = [
     # 新增: 风格/市值类概念
     '风格', '红利', '大盘', '小盘', '中盘', '权重', '破增发', '超跌',
     '新高', '趋势', '反转', '题材', '预减', '扭亏',
+    # 新增: 指数/基金/宽基类概念
+    '富时罗素', '标准普尔', 'HS300', '深证100', '上证180', '上证380',
+    '东方财富热股', '价值股', '成长股',
+    'MSCI', '道琼斯', '纳斯达克', '恒生', '日经',
 ]
 
 REGIONS = [
@@ -190,6 +194,13 @@ def run(target_count=10, verbose=True, use_cache=True):
             c['up_ratio'] = round(c['up_count'] / c['total'] * 100, 1)
             c['avg_pct'] = round(sum(s['pct'] for s in stock_details) / len(stock_details), 2)
             c['total_amount_yi'] = round(sum(s['amount_yi'] for s in stock_details), 1)
+        else:
+            c['total'] = 0
+            c['up_count'] = 0
+            c['down_count'] = 0
+            c['up_ratio'] = 0
+            c['avg_pct'] = 0
+            c['total_amount_yi'] = 0
     top.sort(key=lambda x: -x['avg_pct'])
 
     results = []

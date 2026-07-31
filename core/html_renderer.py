@@ -5,7 +5,7 @@
 import os
 import json
 from datetime import datetime
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from jinja2 import Environment, FileSystemLoader, select_autoescape, Undefined
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
@@ -37,7 +37,7 @@ def render(data: dict, template_name: str, output_dir: str = None, filename: str
     )
 
     # Register custom filters
-    env.filters["default"] = lambda v, d="": d if v is None else v
+    env.filters["default"] = lambda v, d="": d if v is None or isinstance(v, Undefined) else v
 
     template = env.get_template(f"{template_name}.html")
     now = datetime.now()

@@ -139,6 +139,10 @@ FILTER_KEYWORDS = [
     '动量因子', '价值因子',
     # 泛化标签
     '高商誉', '区域', '板块',
+    # 指数/基金/宽基类
+    '富时罗素', '标准普尔', 'HS300', '深证100',
+    '东方财富热股', '价值股', '成长股',
+    '道琼斯', '纳斯达克', '恒生', '日经',
 ]
 
 REGIONS = [
@@ -413,23 +417,10 @@ async def _fetch_concepts_playwright(
             # 手动指定模式
             stocks_to_fetch = fetch_stocks_for
 
-        # ── 3. 拉成分股 (导航到详情页，滚动触发懒加载，拦截自动发出的API) ──
+        # ── 3. 拉成分股 (导航详情页 + response拦截, 不用route) ──
         stocks_map = {}
         if stocks_to_fetch:
-            # 拦截并修改请求参数，将 pz=50 改为更大的值
-            async def modify_request(route):
-                request = route.request
-                url = request.url
-                if 'clist/get' in url and ('BK' in url or '%3ABK' in url):
-                    # 替换 pz 参数为 stocks_limit
-                    import re
-                    new_url = re.sub(r'pz=\d+', f'pz={stocks_limit}', url)
-                    await route.continue_(url=new_url)
-                else:
-                    await route.continue_()
-            
-            await page.route('**/*', modify_request)
-            
+            import asyncio as _aio
             for i, info in enumerate(stocks_to_fetch):
                 bk_code = info['bk_code']
                 name = info.get('name', bk_code)
@@ -437,23 +428,18 @@ async def _fetch_concepts_playwright(
                 if verbose:
                     print(f'  [Playwright] 成分股 ({i+1}/{len(stocks_to_fetch)}): {name}...')
 
-                import asyncio
-                # 非第一个概念时等待，避免请求过频
                 if i > 0:
-                    await asyncio.sleep(5)
+                    await _aio.sleep(3)
 
-                # 拦截详情页的成分股API
                 detail_data = {}
                 async def on_detail_response(response, code=bk_code):
                     url = response.url
                     if response.status != 200:
                         return
-                    # 匹配条件：clist API 且包含板块代码（考虑URL编码）
                     if 'clist/get' in url and (f'b:{code}' in url or f'b%3A{code}' in url):
                         try:
                             text = await response.text()
                             if text.startswith('jQuery'):
-                                # JSONP格式，提取JSON部分
                                 json_str = text[text.index('(') + 1:text.rindex(')')]
                                 data = json.loads(json_str)
                             else:
@@ -461,26 +447,55 @@ async def _fetch_concepts_playwright(
                             detail_data['stocks'] = data
                         except:
                             pass
-                
+
                 page.on('response', on_detail_response)
 
                 try:
-                    # 导航到详情页
                     await page.goto(
                         f'https://data.eastmoney.com/bkzj/{bk_code}.html',
                         wait_until='domcontentloaded',
                         timeout=15000,
                     )
-                    await page.wait_for_timeout(3000)  # 等待页面加载
-                    
-                    # 滚动到页面底部，触发懒加载
-                    await page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
-                    await page.wait_for_timeout(5000)  # 等待API响应
+                    await page.wait_for_timeout(3000)
 
-                    # 解析拦截到的数据
+                    # ── 滑块验证检测 ──
+                    slider_detected = False
+                    for frame in page.frames:
+                        if 'captcha' in frame.url or 'slidervalid' in frame.url:
+                            slider_detected = True
+                            break
+                    if slider_detected:
+                        screenshot_path = '/tmp/stock-analysis-pro/cache/slider_captcha.png'
+                        await page.screenshot(path=screenshot_path)
+                        print(f'\n⚠️ 东财滑块验证触发！截图: {screenshot_path}')
+                        print(f'请手动完成验证，等待中...')
+                        # 等待滑块消失 (最多120秒)
+                        for _wait in range(24):
+                            await page.wait_for_timeout(5000)
+                            still_blocked = False
+                            for frame in page.frames:
+                                if 'captcha' in frame.url or 'slidervalid' in frame.url:
+                                    still_blocked = True
+                                    break
+                            if not still_blocked:
+                                print(f'  ✅ 验证通过，继续...')
+                                # 验证通过后重新加载页面拿数据
+                                await page.goto(
+                                    f'https://data.eastmoney.com/bkzj/{bk_code}.html',
+                                    wait_until='domcontentloaded',
+                                    timeout=15000,
+                                )
+                                await page.wait_for_timeout(3000)
+                                break
+                        else:
+                            print(f'  ❌ 等待超时(120s)，跳过 {name}')
+
+                    await page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
+                    await page.wait_for_timeout(5000)
+
                     if 'stocks' in detail_data:
                         items = _extract_items_from_response(detail_data['stocks'])
-                        
+
                         stocks = []
                         for item in items:
                             code = item.get('f12', '')
@@ -503,13 +518,11 @@ async def _fetch_concepts_playwright(
                         if verbose:
                             print(f'  [Playwright] {name}: {len(stocks)} 只')
 
-                        # 增量合并到离线缓存
                         if stocks and name:
                             _merge_stocks_to_cache(bk_code, name, stocks)
                     else:
                         if verbose:
                             print(f'  [Playwright] {name}: 未拦截到API')
-                        # 离线缓存兜底
                         cached = get_cached_stocks(bk_code)
                         if cached:
                             stocks_map[bk_code] = cached
@@ -519,7 +532,6 @@ async def _fetch_concepts_playwright(
                 except Exception as e:
                     if verbose:
                         print(f'  [Playwright] {name} 成分股失败: {e}')
-                    # 离线缓存兜底
                     cached = get_cached_stocks(bk_code)
                     if cached:
                         stocks_map[bk_code] = cached
@@ -527,9 +539,6 @@ async def _fetch_concepts_playwright(
                             print(f'  [Playwright] {name}: 使用离线缓存 {len(cached)} 只')
                 finally:
                     page.remove_listener('response', on_detail_response)
-            
-            # 清理 route 拦截
-            await page.unroute('**/*', modify_request)
 
         await browser.close()
 
