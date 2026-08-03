@@ -41,22 +41,36 @@ def _cache_set(key: str, data):
         pass
 
 FILTER_KEYWORDS = [
-    '昨日', '两融', '融资融券', '证金', '社保', '预盈', '预增', '破净',
-    '股权激励', '新股', '次新', '含H', '含B', 'AB股', '基金重仓',
-    '社保重仓', 'QFII', '保险重仓', '券商重仓', '外资重仓', '信托重仓',
-    '央企50', '上证380', '深成500', '沪深300', '中证500', '中证1000',
-    'MSCI中国', '央视50', '上证50', '上证180', '业绩预升', '业绩预降', '高送转',
-    '整体上市', '重组', '超大盘', '中盘', '小盘', '创业', '科创', 'ST',
-    '摘帽', '高市净', '低价', '高价', '高市盈率', '低市盈率', '破发',
-    '高商誉', '减持', '增持', '员工持股', '高送转预期', '参股新三板',
-    '沪股通', '深股通', '区域', '板块',
-    # 新增: 风格/市值类概念
-    '风格', '红利', '大盘', '小盘', '中盘', '权重', '破增发', '超跌',
-    '新高', '趋势', '反转', '题材', '预减', '扭亏',
-    # 新增: 指数/基金/宽基类概念
-    '富时罗素', '标准普尔', 'HS300', '深证100', '上证180', '上证380',
+    # 持仓/机构类
+    '两融', '融资融券', '证金', '社保', '基金重仓', '社保重仓',
+    'QFII', '保险重仓', '券商重仓', '外资重仓', '信托重仓',
+    # 业绩预告类
+    '预盈', '预增', '业绩预升', '业绩预降', '预减', '扭亏',
+    # 估值/价格类
+    '破净', '高市净', '低价', '高价', '高市盈率', '低市盈率', '破发', '百元股',
+    # 市值/规模/指数类
+    '超大盘', '中盘', '小盘', '大盘', '央企50',
+    '上证380', '深成500', '沪深300', '中证500', '中证1000',
+    'MSCI中国', '央视50', '上证50', '上证180',
+    # 股票特征类
+    '新股', '次新', '含H', '含B', 'AB股', 'B股', 'ST', '摘帽', '创业', '科创',
+    # 资本运作/交易类
+    '股权激励', '整体上市', '重组', '高送转', '高送转预期',
+    '员工持股', '参股新三板', '配股股', '举牌',
+    '减持', '增持', '沪股通', '深股通',
+    # 风格/因子/题材标签类
+    '风格', '红利', '权重', '破增发', '超跌',
+    '新高', '趋势', '反转', '题材',
+    '昨日', '昨日连板', '昨日涨停',
+    '科技风格', '大盘成长', '大盘价值', '中盘成长', '中盘价值',
+    '小盘成长', '小盘价值', '质量成长', '低波动', '高股息',
+    '动量因子', '价值因子',
+    # 泛化标签
+    '高商誉', '区域', '板块',
+    # 指数/基金/宽基类
+    '富时罗素', '标准普尔', 'HS300', '深证100',
     '东方财富热股', '价值股', '成长股',
-    'MSCI', '道琼斯', '纳斯达克', '恒生', '日经',
+    '道琼斯', '纳斯达克', '恒生', '日经',
 ]
 
 REGIONS = [
@@ -110,27 +124,13 @@ def run(target_count=10, verbose=True, use_cache=True):
     # 清空K线缓存
     clear_kline_cache()
 
-    # === Step 1: 用Playwright一次获取概念列表+成分股 (通过浏览器, 避免滑块验证) ===
+    # === Step 1: HTTP API获取概念列表 + 逐个获取成分股 (稳定, 不触发滑块) ===
     if verbose:
-        print("  Step 1: 获取概念列表+成分股 (Playwright浏览器, 一次完成)...")
-    from collectors.em_concept import fetch_concepts_batch
+        print("  Step 1: 获取概念列表 (HTTP API + Cookie)...")
+    from collectors.em_concept import fetch_concept_list, fetch_concept_stocks
     from collectors.quote import batch_quotes_tencent
 
-    # 一次Playwright调用: 拉列表 → filter_fn过滤 → 拉top N成分股
-    def _filter_for_batch(concepts):
-        return filter_concepts(concepts)[:target_count]
-
-    result = fetch_concepts_batch(
-        top_n=60,
-        fetch_stocks_for=None,
-        stocks_limit=100,
-        verbose=verbose,
-        filter_fn=_filter_for_batch,
-    )
-    concepts_raw = result.get('concepts', [])
-    filtered = result.get('filtered', [])
-    stocks_map = result.get('stocks_map', {})
-
+    concepts_raw = fetch_concept_list(top_n=60, verbose=verbose)
     if not concepts_raw:
         print("\n  ⚠️ 无法获取概念排行！可能原因：")
         print("  1. Cookie未配置或已过期")
@@ -138,12 +138,23 @@ def run(target_count=10, verbose=True, use_cache=True):
         print("  💡 如有离线缓存将自动降级使用\n")
         return {"error": "无法获取概念排行", "date": date_str}
 
-    top = filtered
+    # 过滤非行业概念
+    top = filter_concepts(concepts_raw)[:target_count]
 
     if verbose:
-        print(f"  → 过滤后{len(top)}个概念, 成分股已获取")
+        print(f"  → 过滤后{len(top)}个概念, 逐个获取成分股 (HTTP API)...")
 
-    # 用腾讯批量行情补充成交额 (东财Playwright拿到的amount可能为0)
+    # 逐个概念获取成分股 (HTTP API, 1秒间隔避免限流)
+    stocks_map = {}
+    for i, c in enumerate(top):
+        bk_code = c['bk_code']
+        name = c['name']
+        stocks = fetch_concept_stocks(bk_code, name=name, limit=100, verbose=verbose)
+        stocks_map[bk_code] = stocks
+        if i < len(top) - 1:
+            time.sleep(1.0)
+
+    # 用腾讯批量行情补充成交额 (东财HTTP拿到的amount可能为0)
     all_symbols = []
     for bk_code in stocks_map:
         for s in stocks_map[bk_code]:
