@@ -35,7 +35,7 @@ Agent 会自动调用本工具并给你解读结果。
 - **💼 持仓跟踪** — 当日持仓盈亏、涨跌、风险提示（含K线/公告/研报/新闻）
 - **👁️ 自选股监控** — 自选股列表及表现
 
-数据来源：腾讯行情 + 东财push2 HTTP API(涨跌家数) + akshare(涨跌停) + Playwright(概念资金流)
+数据来源：腾讯行情 + 东财push2 HTTP API(涨跌家数+概念资金流) + akshare(涨跌停)
 
 ### 2. ETF 期权扫描（新增 v3.0）
 
@@ -182,7 +182,7 @@ python3 core/cli.py market --html           # → output/market.html
 ## 🔧 技术细节
 
 - **项目位置：** `/tmp/stock-analysis-pro/`
-- **数据源：** 腾讯行情 + 新浪 K 线/期权 + 东财 F10/新闻/研报/互动易(Playwright) + 东财push2概念(Playwright主链路/HTTP辅助) + akshare(财务/北向/涨停)
+- **数据源：** 腾讯行情 + 新浪 K 线/期权 + 东财 F10/新闻/研报/互动易(Playwright) + 东财push2概念(HTTP API+Cookie主链路) + akshare(财务/北向/涨停)
 - **缓存策略：** 行情缓存 1 小时，概念扫描缓存 10 分钟
 - **评分权重：** 技术/基本面/资金/舆情 各 25%（可在 `config/config.yaml` 调整）
 - **代理设置：** akshare 接口需走代理（已自动配置）

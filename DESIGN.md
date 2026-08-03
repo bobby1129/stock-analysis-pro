@@ -73,7 +73,7 @@ CLI command
 | `flow.py` | 156 | 腾讯行情(推算) + akshare(北向) | 成交额统计(当日/20日高低中位/量比) + 北向持股(持股比例/趋势) | ✅ |
 | `info.py` | 56 | 东财F10 + 同花顺(akshare) | 公司全称/行业/实控人/法人/主营业务/产品类型/公司简介 | ✅ |
 | `sentiment.py` | 280 | 东财股吧+互动易+新闻搜索+分析师评级 | 股吧热帖 + 互动易问答 + 东财新闻 + 分析师评级(reportapi) | ✅ |
-| `em_concept.py` | 684 | 东财push2 (Playwright主链路 + HTTP辅助) | 概念列表(按资金流入排序) + 成分股(按涨幅,前100只) + 离线增量缓存 | ✅ |
+| `em_concept.py` | 797 | 东财push2 (HTTP API主链路 + Playwright辅助F10) | 概念列表(按资金流入排序) + 成分股(按涨幅,前100只) + 离线增量缓存 | ✅ |
 | `em_browser.py` | 376 | Playwright Chromium | 共享浏览器会话(F10/股吧/搜索/研报)，避免重复启动浏览器 | ✅ |
 | `concept.py` | 215 | 东财push2 HTTP API | 概念排行 + 成分股(100只) + 新闻 | ✅ |
 | `macro.py` | 354 | akshare + 新浪 | global_macro(美债/利率) + 新浪(金银油) + domestic_macro(CPI/PMI/M2/LPR) + zt_pool(涨停复盘) | ✅ |
@@ -81,11 +81,12 @@ CLI command
 | `cache.py` | 40 | 本地JSON文件 | TTL缓存(默认1小时)，减少重复请求 | ✅ |
 
 **em_concept.py 核心逻辑 (v7)**:
-- **采集方式**: Playwright浏览器拦截 (主链路, fetch_concepts_batch) + HTTP API (辅助, fetch_concept_list, 仅daily_report用)
+- **采集方式**: HTTP API + Cookie (主链路, fetch_concept_list + fetch_concept_stocks) — 稳定, 不触发滑块
 - **概念排序**: 按资金流入(f62)排序，过滤非行业概念（风格/市值/地域类），保留top_n个
-- **成分股获取**: Playwright拦截XHR响应，按涨幅(f3)排序获取前100只
+- **成分股获取**: HTTP API请求push2，按涨幅(f3)排序获取前100只，概念间sleep(1)避免限流
 - **离线兜底**: 在线失败时从`data/concept_cache.json`读取，离线缓存随使用逐次积累
 - **性能优化**: 只对过滤后的top10概念拉成分股，K线通过线程池并发拉取(10线程)
+- **⚠️ Playwright已弃用**: `fetch_concepts_batch()`(Playwright)连续导航10详情页触发滑块+IP级风控，v3.7已切回HTTP API
 
 **sentiment.py 数据源**:
 - **股吧热帖**: `guba.eastmoney.com` HTML解析
@@ -107,7 +108,7 @@ CLI command
 | `scorer.py` | 404 | 技术/基本面/资金/舆情/行情/估值 | 四维评分(各±25), 总分±100, 7级评级(强看多→强看空), 综合信号/警告 | ✅ |
 | `concept.py` | 418 | 概念排行 + 成分股(100只) + 新闻 | 趋势定性(breakout/strong/rising/falling/neutral), 涨跌分布, 领涨股, 新闻归因, 综合评分(100分制) | ✅ |
 | `stock_picker.py` | ~400 | 成分股+K线+deep_analysis | 双轨评分: 轨道A板块强度(100分) + 轨道B选股决策(100分) + 精选标的(入场信号分类+entry_score) + 跨概念共振 | ✅ |
-| ~~`concept_rank.py`~~ | — | — | 已删除(v3.7清理死代码), 功能由concept_analysis.py直接调用fetch_concepts_batch替代 | 🗑️ |
+| ~~`concept_rank.py`~~ | — | — | 已删除(v3.7清理死代码), 功能由concept_analysis.py直接调用fetch_concept_list+fetch_concept_stocks替代 | 🗑️ |
 | `macro.py` | 351 | macro.py (collectors) | analyze_global(环境定性) + analyze_domestic(经济周期/流动性) + analyze_event(市场情绪) + synthesize(综合研判) | ✅ |
 
 ### 3.3 Plans (编排层)
@@ -234,14 +235,14 @@ vim config/config.yaml
 | 东财互动易 | `guba.eastmoney.com/qa/` | 投资者问答 | Direct请求 |
 | 东财搜索 | `search-api-web.eastmoney.com` | 概念新闻搜索 | JSONP格式, 需剥离 `jQuery()` 包装 |
 | 东财分析师评级 | `reportapi.eastmoney.com` | 机构评级数据 | JSON格式 |
-| 东财push2 | `push2.eastmoney.com` | 概念列表+成分股 | Playwright拦截 (主链路) / HTTP API (daily_report辅助) |
+| 东财push2 | `push2.eastmoney.com` | 概念列表+成分股 | HTTP API + Cookie (主链路, 1s间隔) / Playwright (F10等动态页面辅助) |
 
 ### 4.2 Playwright (浏览器自动化)
 
 | 模块 | 功能 | 备注 |
 |------|------|------|
 | `em_browser.py` | 共享浏览器会话 | 避免重复启动Chromium |
-| `em_concept.py` | 概念列表+成分股采集 | Playwright拦截 (主链路) / HTTP API (daily_report辅助) |
+| `em_concept.py` | 概念列表+成分股采集 | HTTP API主链路 (fetch_concept_list + fetch_concept_stocks) / Playwright辅助 (F10) |
 | `info.py` (F10) | 公司详细信息 | 页面导航拦截 |
 | `sentiment.py` (股吧) | 股吧热帖+互动易 | HTML解析 |
 
@@ -259,9 +260,9 @@ vim config/config.yaml
 
 | API | 域名 | 影响 | 替代方案 |
 |-----|------|------|----------|
-| 东财push2直连 | `push2.eastmoney.com` | 频繁限流ERR_EMPTY_RESPONSE | Playwright页面导航拦截 |
+| 东财push2直连 | `push2.eastmoney.com` | ~~频繁限流ERR_EMPTY_RESPONSE~~ | HTTP API + Cookie已稳定(1s间隔), Playwright仅F10用 |
 | 东财push2his | `push2his.eastmoney.com` | 个股主力资金流缺失 | 用成交额统计+北向替代 |
-| akshare概念 | `stock_board_concept_*` | 概念板块详细数据不可用 | Playwright拦截替代 |
+| akshare概念 | `stock_board_concept_*` | 概念板块详细数据不可用 | HTTP API + Cookie替代 |
 
 ---
 
@@ -372,31 +373,28 @@ A2 资金强度分档：流通市值≥500亿成分股 ≤5个→3分/亿，5~15
 
 **数据采集**: Playwright请求字段包含f21(流通市值)，用于A2资金强度的分档计算。
 
-### 6.4 数据源架构 — Playwright页面导航拦截 (v6)
+### 6.4 数据源架构 — HTTP API + Cookie (v7)
 
-**背景**: 东财push2直连在服务器IP上频繁限流(ERR_EMPTY_RESPONSE)，Cookie无法根治。
+**背景**: 东财push2直连在服务器IP上曾频繁限流(ERR_EMPTY_RESPONSE)，后验证HTTP API + Cookie + 1s间隔稳定(Jul 16-20连续4天验证)。Playwright连续导航10详情页触发滑块+IP级风控，已弃用。
 
-**方案**: Playwright真实浏览器访问东财行情页，拦截XHR响应获取数据。
+**方案**: HTTP API直接请求push2.eastmoney.com，带Cookie + JSONP回调。
 
 ```
-Playwright Chromium
-  → 访问 quote.eastmoney.com/bk/ (概念列表页)
-    → 拦截 push2.eastmoney.com/api/data/v1/get XHR响应
-      → 解析JSON获取概念列表(资金流入排序)
-  → 对每个top_n概念，访问详情页
-    → 滚动触发懒加载
-    → 拦截 dataapi.eastmoney.com XHR响应
-      → 解析JSON获取成分股(按涨幅排序,前100只)
+HTTP requests (push2.eastmoney.com/api/qt/clist/get)
+  → fetch_concept_list: 概念列表(按资金流入f62排序)
+    → 过滤非行业概念 (FILTER_KEYWORDS + REGIONS)
+  → fetch_concept_stocks: 逐个概念获取成分股(按涨幅f3排序, 前100只)
+    → 概念间 sleep(1.0) 避免限流
   → 增量合并到离线缓存 (data/concept_cache.json)
 ```
 
-**采集引擎** (`collectors/em_concept.py` → `fetch_concepts_batch()`):
-1. Playwright访问东财行情页，拦截push2 XHR响应获取概念列表
-2. 按资金流入(f62)排序，过滤非行业概念，保留top_n个
-3. 对每个概念，Playwright访问详情页拦截dataapi XHR响应获取成分股
+**采集引擎** (`collectors/em_concept.py`):
+1. `fetch_concept_list()` — HTTP API获取概念列表，按资金流入(f62)排序，过滤非行业概念
+2. `fetch_concept_stocks()` — HTTP API获取成分股，按涨幅(f3)排序获取前100只，含f21流通市值字段
+3. 概念间`sleep(1.0)`避免限流，11次请求不触发滑块
 4. 增量合并到离线缓存 (`data/concept_cache.json`)
 5. 在线失败时使用离线缓存兜底
-6. 辅助方法 `fetch_concept_list()` (HTTP API) 仅供 daily_report 轻量调用
+6. `fetch_concepts_batch()` (Playwright) 已弃用 — 连续导航详情页触发滑块+IP风控
 
 **Cookie管理**:
 - 存储在 `config/config.yaml` 的 `eastmoney.cookie` 字段
@@ -415,7 +413,7 @@ Playwright Chromium
 - **OS**: Linux (6.1.84)
 - **Python**: 3.11
 - **Proxy**: Xray @ 127.0.0.1:10809 (HTTP, 用户态 systemd, whitelist 路由)
-- **Playwright**: Chromium (概念板块采集主链路 + F10/股吧/搜索/研报；涨跌家数用HTTP API，期权用新浪)
+- **Playwright**: Chromium (F10/股吧/搜索/研报；概念板块用HTTP API + Cookie，涨跌家数用HTTP API，期权用新浪)
 - **Dependencies**: `akshare>=1.10.0`, `requests>=2.28.0`, `pyyaml>=6.0`, `jinja2>=3.1.0`, `playwright>=1.40.0`
 - **Working Dir**: `/tmp/stock-analysis-pro/`
 - **Config**: `config/config.yaml` (Cookie在此管理, 不提交git)
@@ -521,8 +519,8 @@ Playwright Chromium
 
 ## 9. 关键经验
 
-1. **东财push2方案** — 概念采集主链路已改为Playwright拦截(v6)，HTTP API仅供daily_report轻量调用；涨跌家数仍走HTTP API
-2. **Playwright用于概念+F10/股吧** — `em_concept.py`概念主链路 + `em_browser.py`共享会话(F10/股吧/搜索/研报)
+1. **东财push2方案** — 概念采集主链路为HTTP API + Cookie + 1s间隔(Jul 16-20验证稳定)；Playwright曾用于概念采集但触发滑块+IP风控已弃用，现仅用于F10/股吧/搜索/研报
+2. **Playwright仅限F10/股吧/研报** — `em_browser.py`共享会话(F10/股吧/搜索/研报)；概念采集走HTTP API(`fetch_concept_list`+`fetch_concept_stocks`)
 3. **K线用新浪** — `hq.sinajs.cn`无限流，可线程池并发拉取
 4. **akshare的stock_board_concept_*系列** — 在服务器上被封(RemoteDisconnected)
 5. **涨跌停数据用akshare** — `stock_zt_pool_em`，不依赖东财push2

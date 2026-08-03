@@ -21,7 +21,7 @@ cd ~/.hermes/skills/stock-analysis-pro
 # 2. 安装依赖
 pip install -r requirements.txt
 
-# 3. 安装 Playwright 浏览器 (用于东财概念板块/F10/股吧/研报采集)
+# 3. 安装 Playwright 浏览器 (用于东财F10/股吧/研报采集, 概念板块用HTTP API不需要)
 playwright install chromium
 
 # 4. 配置
@@ -127,7 +127,7 @@ collectors/          analysis/           plans/
 | 东财 emweb | 公司F10 (Playwright) | Playwright拦截 | ✅ |
 | 东财 guba | 股吧热帖 (Playwright) | Playwright拦截 | ✅ |
 | 东财 search-api | 概念新闻 | 直连 | ✅ |
-| 东财 push2 | 概念资金流 | Playwright拦截 (主链路) / HTTP (daily_report) | ✅ |
+| 东财 push2 | 概念资金流 | HTTP API + Cookie (主链路, 1s间隔) / Playwright (F10辅助) | ✅ |
 | 东财 行情页 | 涨跌家数 | HTTP API + Cookie | ✅ |
 | akshare THS | 财务/分红/预测 | 需代理 | ✅ |
 | akshare 涨停池 | 涨跌停统计 | 需代理 | ✅ |
@@ -157,7 +157,7 @@ collectors/          analysis/           plans/
 - 指数行情：腾讯 qt.gtimg.cn
 - 涨跌家数：东财 push2 HTTP API (需 Cookie)
 - 涨跌停数据：akshare 涨停池 (需代理)
-- 概念资金流：Playwright 拦截东财行情页 (需 Cookie 注入浏览器)
+- 概念资金流：东财 push2 HTTP API (需 Cookie, 概念间 sleep 1s)
 - 持仓数据：`data/portfolio.json`
 
 ### ETF 期权扫描 (options)
@@ -207,7 +207,7 @@ collectors/          analysis/           plans/
 
 ### 概念板块扫描 (concept)
 
-1. Playwright 拦截东财行情页，按资金流入排序概念
+1. HTTP API 请求东财 push2，按资金流入排序概念 (需 Cookie, 1s间隔)
 2. 过滤非行业概念(风格/市值/地域类)
 3. 成分股涨幅分布 → 趋势定性(启动/主升浪/走弱)
 4. 双轨评分: 轨道A板块强度(赚钱效应/资金强度/板块宽度) + 轨道B选股决策(可买标的/标的质量/追高风险/新鲜度)

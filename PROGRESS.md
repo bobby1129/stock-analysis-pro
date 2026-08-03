@@ -594,7 +594,7 @@ python3 plans/concept_analysis.py
 │   ├── flow.py             # 156行 资金流(腾讯+akshare)
 │   ├── info.py             # 56行  公司信息(东财F10+同花顺)
 │   ├── sentiment.py        # 280行 舆情(股吧+互动易+新闻+分析师评级)
-│   ├── em_concept.py       # 770行 概念采集v6(Playwright页面导航拦截)
+│   ├── em_concept.py       # 797行 概念采集v7(HTTP API+Cookie主链路, Playwright辅助F10)
 │   ├── em_browser.py       # 376行 共享Playwright会话(F10/股吧/搜索/研报)
 │   ├── concept.py          # 215行 旧版概念采集(新浪,已废弃)
 │   ├── macro.py            # 354行 宏观数据(全球+国内+涨停复盘)
@@ -653,5 +653,28 @@ python3 plans/concept_analysis.py
 ### 🔮 未来优化方向
 - 概念过滤优化（品牌/政策/指数/重叠概念分类）
 - 单元测试
+
+---
+
+## 📋 2026-08-03 概念选股修复: Playwright → HTTP API (v7)
+
+### 问题
+- `85293e6` 误删 `fetch_concept_stocks` HTTP方法，退路断了
+- `d510f00`(v3.6) 将概念选股从 HTTP API 改为 Playwright(`fetch_concepts_batch`)
+- Playwright 连续导航10个详情页触发滑块+IP级风控
+
+### 修复
+| # | 文件 | 改动 |
+|---|------|------|
+| 1 | `collectors/em_concept.py` | 恢复 `fetch_concept_stocks` HTTP方法(新增f21流通市值字段) |
+| 2 | `plans/concept_analysis.py` | 从 `fetch_concepts_batch`(Playwright) 切回 `fetch_concept_list`+`fetch_concept_stocks`+`sleep(1)` |
+| 3 | `plans/concept_analysis.py` | 同步 FILTER_KEYWORDS 与 `em_concept.py` 一致 |
+| 4 | `collectors/em_concept.py` | 修正模块文档头: 主链路改为 HTTP API |
+| 5 | `DESIGN.md` `README.md` `SKILL.md` `USAGE.md` | 文档同步: Playwright主链路 → HTTP API主链路 |
+
+### 验证
+- 3个概念端到端测试通过(核能核电/新能源/商业航天)
+- 板块评分91分(加速期), 选股决策92-94分(精选期), 共振股1只
+- HTTP API 11次请求, 不触发滑块
 - 报告模板个性化定制
 - 更多数据源接入（同花顺/雪球）
