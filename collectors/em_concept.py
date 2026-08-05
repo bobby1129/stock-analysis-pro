@@ -27,6 +27,14 @@ _CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config')
 _CONFIG_FILE = os.path.join(_CONFIG_DIR, 'config.yaml')
 _CACHE_FILE = os.path.join(_DATA_DIR, 'concept_cache.json')
 
+import socket
+import urllib3.util.connection as _urllib3_conn
+
+# 强制IPv4 — 东财push2的IPv6端点TLS握手成功但HTTP层返回Empty reply
+# IPv4 (43.144.251.121) 稳定可用
+_urllib3_conn.allowed_gai_family = lambda: socket.AF_INET
+
+
 # ── 东财通用参数 ──
 _UT = "8dec03ba335b81bf4ebdf7b29ec27d15"
 
@@ -82,6 +90,39 @@ def _throttle():
     if elapsed < _request_interval:
         time.sleep(_request_interval - elapsed)
     _last_request_time = time.time()
+
+
+# ── 滑块检测 (连续断连计数器) ──
+_captcha_disconnect_count = 0
+_captcha_alerted = False
+
+def _alert_captcha(context: str, verbose: bool = True):
+    """
+    HTTP API路径的滑块检测:
+    RemoteDisconnected连续出现 → 大概率触发滑块, 需手动验证
+    
+    东财对HTTP API的滑块拦截方式 = 直接TCP断开(Empty reply), 不返回验证页面
+    """
+    global _captcha_disconnect_count, _captcha_alerted
+    _captcha_disconnect_count += 1
+    if _captcha_disconnect_count >= 2 and not _captcha_alerted:
+        _captcha_alerted = True
+        print()
+        print("=" * 60)
+        print("⚠️  疑似触发东财滑块验证!")
+        print(f"   连续断连 {_captcha_disconnect_count} 次 ({context})")
+        print("   → 浏览器打开: https://data.eastmoney.com/bkzj/gn.html")
+        print("   → 手动完成滑块验证")
+        print("   → 验证后重试即可恢复")
+        print("=" * 60)
+        print()
+
+def _reset_captcha_state():
+    """请求成功后重置计数器"""
+    global _captcha_disconnect_count, _captcha_alerted
+    if _captcha_disconnect_count > 0:
+        _captcha_disconnect_count = 0
+        _captcha_alerted = False
 
 
 def _jsonp_parse(text: str) -> Optional[dict]:
@@ -628,12 +669,24 @@ def fetch_concept_stocks(bk_code: str, name: str = '', limit: int = 100, verbose
         fs=f'b:{bk_code}',
         fields='f2,f3,f4,f5,f6,f7,f8,f12,f13,f14,f15,f16,f17,f21',
         pz=limit,
-        fid='f3',  # 按涨幅排序
+        fid='f6',  # 按成交额排序 (非涨幅排序, 避免采样偏差导致分布失真)
     )
 
     try:
-        resp = requests.get(_BASE_URL, params=params, headers=headers, timeout=15)
-        if not resp.text or 'jQuery' not in resp.text:
+        resp = None
+        for _attempt in range(2):
+            try:
+                resp = requests.get(_BASE_URL, params=params, headers=headers, timeout=15)
+                break
+            except requests.exceptions.ConnectionError as e:
+                if _attempt == 0:
+                    if verbose:
+                        print(f"  [重试] {bk_code} 连接断开, 重试...")
+                    _throttle()
+                    continue
+                _alert_captcha(f"成分股({bk_code})", verbose)
+                raise
+        if not resp or not resp.text or 'jQuery' not in resp.text:
             cached = get_cached_stocks(bk_code)
             if cached:
                 if verbose:
@@ -650,6 +703,7 @@ def fetch_concept_stocks(bk_code: str, name: str = '', limit: int = 100, verbose
                 return cached
             return []
 
+        _reset_captcha_state()
         items = data['data'].get('diff', [])
         results = []
 
@@ -732,8 +786,20 @@ def fetch_concept_list(top_n: int = 30, verbose: bool = False) -> list:
     )
     
     try:
-        resp = requests.get(_BASE_URL, params=params, headers=headers, timeout=15)
-        if not resp.text or 'jQuery' not in resp.text:
+        resp = None
+        for _attempt in range(2):
+            try:
+                resp = requests.get(_BASE_URL, params=params, headers=headers, timeout=15)
+                break
+            except requests.exceptions.ConnectionError as e:
+                if _attempt == 0:
+                    if verbose:
+                        print(f"  [重试] 概念列表连接断开, 重试...")
+                    _throttle()
+                    continue
+                _alert_captcha("概念列表", verbose)
+                raise
+        if not resp or not resp.text or 'jQuery' not in resp.text:
             print("[em_concept] ⚠️ Cookie可能已过期或无效")
             print("  → 请重新获取: 浏览器打开 https://quote.eastmoney.com/bk/ → F12 → Network → 复制新Cookie")
             print("  → 更新配置: 编辑 config/config.yaml，替换 eastmoney.cookie 的值")
@@ -748,25 +814,25 @@ def fetch_concept_list(top_n: int = 30, verbose: bool = False) -> list:
         
         items = data['data'].get('diff', [])
         results = []
-        
+
         for item in items:
             name = item.get('f14', '')
             if _should_filter(name):
                 continue
-            
+
             bk_code = item.get('f12', '')
-            
+
             # 领涨股
             leader_name = item.get('f140', '')
             leader_code_raw = item.get('f141', '')
             leader_market = item.get('f136', 0)
-            
+
             if leader_code_raw:
                 prefix = 'sh' if leader_market == 1 else 'sz'
                 leader_sym = f'{prefix}{leader_code_raw}'
             else:
                 leader_sym = ''
-            
+
             results.append({
                 'bk_code': bk_code,
                 'name': name,
@@ -778,13 +844,14 @@ def fetch_concept_list(top_n: int = 30, verbose: bool = False) -> list:
                 'leader_code': leader_sym,
                 'leader_pct': item.get('f136', 0) if isinstance(item.get('f136', 0), (int, float)) else 0,
             })
-            
+
             if len(results) >= top_n:
                 break
-        
+
+        _reset_captcha_state()
         if verbose:
             print(f"[em_concept] 资金流入排序, 过滤后保留 {len(results)} 个概念 (拉取{fetch_count}个)")
-        
+
         return results
         
     except Exception as e:

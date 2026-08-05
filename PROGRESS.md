@@ -470,7 +470,7 @@ python3 core/cli.py concept --json
 
 **核心逻辑**:
 1. **排序**: 按资金流入(f62)排序概念, 过滤非行业概念, 保留top_n个
-2. **成分股**: 按涨幅(f3)获取前100只, 合并到离线缓存 (增量: 新增股票追加)
+2. **成分股**: 按成交额(f6)获取前100只, 合并到离线缓存 (增量: 新增股票追加)
 3. **兜底**: 在线失败时从离线缓存读取 (离线缓存会越来越完整)
 4. **Cookie**: 独立存储, 过期时向用户索要, 不与stock_review混用
 
@@ -678,3 +678,33 @@ python3 plans/concept_analysis.py
 - HTTP API 11次请求, 不触发滑块
 - 报告模板个性化定制
 - 更多数据源接入（同花顺/雪球）
+
+---
+
+## v7.2 — 采样偏差修复 + 滑块检测 (2026-08-06)
+
+### 问题
+1. **涨幅分布严重失真**: `fetch_concept_stocks` 按涨幅排序(f3)取前100只 → 拿到的全是涨幅最高的股票 → 分布统计 above_7=98, below_0=0 (实际板块516只里肯定有下跌股)
+2. **连涨数据"无下跌"**: 同样采样偏差导致, 非K线计算错误 (连涨天数逻辑本身正确, 已手动验证)
+3. **HTTP API路径滑块不可见**: 东财对HTTP API的滑块拦截 = 直接TCP断开(RemoteDisconnected/Empty reply), 不返回验证页面, 代码无法自动检测
+
+### 修复
+| # | 文件 | 改动 |
+|---|------|------|
+| 1 | `collectors/em_concept.py` | `fetch_concept_stocks` 排序字段 f3(涨幅)→f6(成交额), 避免采样偏差 |
+| 2 | `collectors/em_concept.py` | `fetch_concept_list`+`fetch_concept_stocks` 加 ConnectionError 自动重试1次 |
+| 3 | `collectors/em_concept.py` | 新增 `_alert_captcha()`+`_reset_captcha_state()` — 连续断连≥2次时打印滑块验证提示, 成功后重置 |
+| 4 | `collectors/em_concept.py` | 强制IPv4 (urllib3 allowed_gai_family) — push2的IPv6端点TLS握手成功但HTTP层返回Empty reply |
+| 5 | `.gitignore` | `data/concept_cache.json` 从git track移除, 加入.gitignore (运行时数据不应入库) |
+| 6 | `DESIGN.md` `PROGRESS.md` | 文档同步: f3→f6, 重试+滑块检测说明 |
+
+### 验证
+- 10概念×10次请求 = 100次HTTP API, 0失败
+- 修复前: 半导体 below_0=0, 修复后: below_0=6 (成交额前100只含下跌股)
+- 连涨天数计算正确 (莱伯泰科连涨4天, 新浪K线手动验证)
+- 滑块触发→验证→恢复 流程验证通过
+
+### 技术发现
+- 东财push2 IPv6端点 (240e:e1:9600:209:1000::174) TLS握手成功但HTTP层Empty reply, IPv4正常
+- 东财HTTP API滑块拦截 = RemoteDisconnected, 非验证页面 (Playwright路径才返回iframe)
+- `wsc_checkuser_ok=1` Cookie字段 + IP通过验证后恢复

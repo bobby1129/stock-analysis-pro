@@ -73,7 +73,7 @@ CLI command
 | `flow.py` | 156 | 腾讯行情(推算) + akshare(北向) | 成交额统计(当日/20日高低中位/量比) + 北向持股(持股比例/趋势) | ✅ |
 | `info.py` | 56 | 东财F10 + 同花顺(akshare) | 公司全称/行业/实控人/法人/主营业务/产品类型/公司简介 | ✅ |
 | `sentiment.py` | 280 | 东财股吧+互动易+新闻搜索+分析师评级 | 股吧热帖 + 互动易问答 + 东财新闻 + 分析师评级(reportapi) | ✅ |
-| `em_concept.py` | 797 | 东财push2 (HTTP API主链路 + Playwright辅助F10) | 概念列表(按资金流入排序) + 成分股(按涨幅,前100只) + 离线增量缓存 | ✅ |
+| `em_concept.py` | 797 | 东财push2 (HTTP API主链路 + Playwright辅助F10) | 概念列表(按资金流入排序) + 成分股(按成交额,前100只) + 离线增量缓存 | ✅ |
 | `em_browser.py` | 376 | Playwright Chromium | 共享浏览器会话(F10/股吧/搜索/研报)，避免重复启动浏览器 | ✅ |
 | `concept.py` | 215 | 东财push2 HTTP API | 概念排行 + 成分股(100只) + 新闻 | ✅ |
 | `macro.py` | 354 | akshare + 新浪 | global_macro(美债/利率) + 新浪(金银油) + domestic_macro(CPI/PMI/M2/LPR) + zt_pool(涨停复盘) | ✅ |
@@ -83,7 +83,7 @@ CLI command
 **em_concept.py 核心逻辑 (v7)**:
 - **采集方式**: HTTP API + Cookie (主链路, fetch_concept_list + fetch_concept_stocks) — 稳定, 不触发滑块
 - **概念排序**: 按资金流入(f62)排序，过滤非行业概念（风格/市值/地域类），保留top_n个
-- **成分股获取**: HTTP API请求push2，按涨幅(f3)排序获取前100只，概念间sleep(1)避免限流
+- **成分股获取**: HTTP API请求push2，按成交额(f6)排序获取前100只，概念间sleep(1)避免限流
 - **离线兜底**: 在线失败时从`data/concept_cache.json`读取，离线缓存随使用逐次积累
 - **性能优化**: 只对过滤后的top10概念拉成分股，K线通过线程池并发拉取(10线程)
 - **⚠️ Playwright已弃用**: `fetch_concepts_batch()`(Playwright)连续导航10详情页触发滑块+IP级风控，v3.7已切回HTTP API
@@ -383,14 +383,14 @@ A2 资金强度分档：流通市值≥500亿成分股 ≤5个→3分/亿，5~15
 HTTP requests (push2.eastmoney.com/api/qt/clist/get)
   → fetch_concept_list: 概念列表(按资金流入f62排序)
     → 过滤非行业概念 (FILTER_KEYWORDS + REGIONS)
-  → fetch_concept_stocks: 逐个概念获取成分股(按涨幅f3排序, 前100只)
+  → fetch_concept_stocks: 逐个概念获取成分股(按成交额f6排序, 前100只)
     → 概念间 sleep(1.0) 避免限流
   → 增量合并到离线缓存 (data/concept_cache.json)
 ```
 
 **采集引擎** (`collectors/em_concept.py`):
 1. `fetch_concept_list()` — HTTP API获取概念列表，按资金流入(f62)排序，过滤非行业概念
-2. `fetch_concept_stocks()` — HTTP API获取成分股，按涨幅(f3)排序获取前100只，含f21流通市值字段
+2. `fetch_concept_stocks()` — HTTP API获取成分股，按成交额(f6)排序获取前100只，含f21流通市值字段。ConnectionError自动重试1次，连续断连触发滑块提示
 3. 概念间`sleep(1.0)`避免限流，11次请求不触发滑块
 4. 增量合并到离线缓存 (`data/concept_cache.json`)
 5. 在线失败时使用离线缓存兜底
