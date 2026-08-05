@@ -204,10 +204,9 @@ stock-analysis-pro/
 | 新浪 (money.finance) | K线数据 | 直连 | ✅ |
 | 东财 (emweb/guba) | 公司F10/股吧 | Playwright拦截 | ✅ |
 | 东财 (search-api) | 概念新闻 | 直连 | ✅ |
-| 东财 (push2.eastmoney.com) | 概念板块 | Playwright拦截 (主链路) / HTTP API (daily_report辅助) | ✅ |
+| 东财 (push2.eastmoney.com) | 概念板块 | HTTP API + Cookie (主链路, 1s间隔) / Playwright (F10辅助) | ✅ |
 | 东财 (互动易) | 投资者问答 | 直连 | ✅ |
 | akshare (THS) | 财务/分红/预测 | 需代理 | ✅ |
-| 东财 (push2.eastmoney.com) | 概念板块 | HTTP API + Cookie (主链路, 1s间隔) / Playwright (F10辅助) | ✅ |
 
 > 概念板块主链路通过 HTTP API 直接请求 push2.eastmoney.com，带 Cookie + JSONP 回调，概念间 sleep(1s) 避免限流。Playwright 仅用于 F10/股吧/搜索/研报等动态页面。
 
@@ -251,6 +250,7 @@ export HTTPS_PROXY=http://your-proxy:port
 |------|------|------|
 | `playwright: command not found` | 未安装Playwright | `pip install playwright && playwright install chromium` |
 | 概念板块返回空/离线缓存 | Cookie过期 | 重新获取Cookie，更新`config/config.yaml` |
+| `⚠️ 疑似触发东财滑块验证` | HTTP API连续断连(RemoteDisconnected) | 浏览器打开 https://data.eastmoney.com/bkzj/gn.html 手动完成滑块验证后重试 |
 | akshare报 `RemoteDisconnected` | 未配置代理 | `export HTTPS_PROXY=http://127.0.0.1:10809` 或在`config.yaml`配置`proxy.https` |
 | F10/股吧采集超时 | Playwright Chromium未安装 | `playwright install chromium` |
 | 概念板块数据为空且无离线缓存 | 首次运行+Cookie无效 | 先配置有效Cookie再运行 |

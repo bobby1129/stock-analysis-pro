@@ -633,7 +633,7 @@ def fetch_concepts_batch(
 
 def fetch_concept_stocks(bk_code: str, name: str = '', limit: int = 100, verbose: bool = False) -> list:
     """
-    获取概念成分股 (按涨幅排序, HTTP API + Cookie)
+    获取概念成分股 (按成交额排序, HTTP API + Cookie)
 
     成功后自动合并到离线缓存; 失败时从离线缓存兜底
 

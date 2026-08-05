@@ -241,6 +241,7 @@ HTML 报告输出到 `cache/` 目录，可直接发送给用户查看。
 
 1. **Playwright 必须安装 Chromium**: `playwright install chromium`，否则 F10/股吧/研报采集失败
 2. **东财 Cookie 会过期**: 概念板块返回空或使用离线缓存时，重新获取 Cookie 并更新 `config.yaml`
-3. **东财搜索 API 返回 JSONP**: 需要剥离 jQuery 回调包装再解析
-4. **腾讯行情 PB 在 d[46]**: 不是 d[52] (52是涨停价)
-5. **push2his 个股主力资金流不可用**: 服务器 IP 被封，用成交额+北向替代
+3. **滑块验证触发**: 连续断连(RemoteDisconnected)≥2次时打印`⚠️ 疑似触发东财滑块验证`，浏览器打开 https://data.eastmoney.com/bkzj/gn.html 手动验证后重试
+4. **东财搜索 API 返回 JSONP**: 需要剥离 jQuery 回调包装再解析
+5. **腾讯行情 PB 在 d[46]**: 不是 d[52] (52是涨停价)
+6. **push2his 个股主力资金流不可用**: 服务器 IP 被封，用成交额+北向替代
