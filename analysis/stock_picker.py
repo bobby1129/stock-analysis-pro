@@ -12,6 +12,7 @@
 from typing import List, Dict
 import sys
 import os
+import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -240,13 +241,24 @@ def _classify_entry(stock: Dict, klines: List[Dict]) -> Dict:
     # 从K线计算技术指标
     recent = klines[-5:] if len(klines) >= 5 else klines
     
-    # 连涨天数
+    # 连涨天数 (动态检测K线是否包含今天)
     consecutive_up = 0
-    for k in reversed(recent):
-        if k.get('close', 0) > k.get('open', 0):
+    for i in range(len(recent) - 1, 0, -1):
+        if recent[i].get('close', 0) > recent[i - 1].get('close', 0):
             consecutive_up += 1
         else:
             break
+    
+    # 动态检测：如果K线最后一根不是今天，用实时pct修正
+    if recent:
+        last_day = recent[-1].get('day', '')
+        today_str = datetime.date.today().isoformat()
+        if last_day != today_str:
+            # K线只到昨天，需要修正今天
+            if pct > 0:
+                consecutive_up += 1
+            elif pct < 0:
+                consecutive_up = 0
     
     # 月低点、月高点
     lows = [k.get('low', 0) for k in klines]
@@ -265,6 +277,16 @@ def _classify_entry(stock: Dict, klines: List[Dict]) -> Dict:
     avg_vol = sum(volumes[:-1]) / len(volumes[:-1]) if len(volumes) > 1 else 1
     vol_ratio = volumes[-1] / avg_vol if avg_vol > 0 else 1
     
+    # 近10日是否出现过单日涨幅>=5% (排除非首次突破)
+    lookback_10 = klines[-10:] if len(klines) >= 10 else klines
+    had_5pct_recently = False
+    for i in range(1, len(lookback_10)):
+        prev_close = lookback_10[i - 1].get('close', 0)
+        cur_close = lookback_10[i].get('close', 0)
+        if prev_close > 0 and (cur_close - prev_close) / prev_close * 100 >= 5:
+            had_5pct_recently = True
+            break
+    
     # 入场分类
     entry = {
         'symbol': symbol,
@@ -280,8 +302,8 @@ def _classify_entry(stock: Dict, klines: List[Dict]) -> Dict:
         'kline_summary': f'连涨{consecutive_up}天，距月低{rise_from_low:.1f}%',
     }
     
-    # 1. 突破启动
-    if pct > 5 and rise_from_low < 10 and consecutive_up <= 1:
+    # 1. 突破启动 (近10日无5%+单日涨幅，确认是首次突破)
+    if pct > 5 and rise_from_low < 10 and consecutive_up <= 1 and not had_5pct_recently:
         entry['entry_type'] = '突破启动'
         entry['entry_score'] = round(80 + min(20, pct * 2), 1)
         entry['reason'] = '放量突破平台' if vol_ratio > 1.5 else '突破启动'

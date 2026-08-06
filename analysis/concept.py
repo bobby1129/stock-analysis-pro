@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """分析维度层 — 概念板块趋势定性 + 深度分析 + 机会挖掘"""
 
+import datetime
 from collectors.concept import concept_stocks, batch_klines
 
 
@@ -227,6 +228,17 @@ def analyze_concept_deep(stocks: list, total_amount: float, verbose=False) -> di
         days = _count_consecutive_up(klines)
         vr = _volume_ratio(klines)
 
+        # 动态检测K线是否已包含今天
+        if klines:
+            last_day = klines[-1].get('day', '')
+            today_str = datetime.date.today().isoformat()
+            if last_day != today_str:
+                # K线只到昨天，用实时pct修正今天
+                if pct > 0:
+                    days += 1
+                elif pct < 0:
+                    days = 0
+
         is_js, rise_low = _is_just_started(klines, sym)
 
         stock_momentum.append({
@@ -244,7 +256,8 @@ def analyze_concept_deep(stocks: list, total_amount: float, verbose=False) -> di
             consecutive_3plus += 1
         elif days == 2:
             consecutive_2 += 1
-        elif is_js:
+        elif days == 1 and pct > 0:
+            # 今天刚开始涨(K线昨天没涨或连涨断了)
             just_started += 1
         elif pct < 0:
             falling += 1
@@ -260,8 +273,9 @@ def analyze_concept_deep(stocks: list, total_amount: float, verbose=False) -> di
     }
 
     # ── 4. 连涨3天+股票 (最多5只, 按连涨天数降序) ──
+    # 如果今天实时下跌(pct < 0)，说明连涨已断，不计入
     strong_stocks = sorted(
-        [sm for sm in stock_momentum if sm['consecutive_days'] >= 3],
+        [sm for sm in stock_momentum if sm['consecutive_days'] >= 3 and sm['pct'] >= 0],
         key=lambda x: (-x['consecutive_days'], -x['pct'])
     )[:5]
 

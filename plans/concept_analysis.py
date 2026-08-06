@@ -328,6 +328,7 @@ def format_report(data: dict) -> str:
             lines.append(f"    趋势: {label} — {t.get('reason', '')}")
 
         # 深度分析
+        deep = c.get('deep', {})
         dist = deep.get('distribution', {})
         mom = deep.get('momentum', {})
         rep = deep.get('representativeness', {})

@@ -5,15 +5,21 @@ import os
 from typing import Dict
 
 
-def _call_llm(prompt: str, max_tokens: int = 800) -> str:
-    """调用 LLM 生成分析文本"""
+def _call_llm(prompt: str, max_tokens: int = 4096) -> str:
+    """调用 LLM 生成分析文本
+
+    NOTE: glm-5.2 等带 reasoning 的模型会先消耗大量 reasoning_tokens，
+    max_tokens 必须足够大以覆盖 reasoning + content，否则 content 为空。
+    实测单次调用 reasoning 约 500-1000 tokens + content 约 300-1000 tokens，
+    故默认 4096 确保充足。若用无 reasoning 模型可适当降低。
+    """
     try:
         import openai
-        
+
         api_key = os.environ.get("OPENAI_API_KEY", "")
         base_url = os.environ.get("OPENAI_BASE_URL", "")
         model = os.environ.get("LLM_MODEL", "")
-        
+
         # Fallback: 读取 Hermes config
         if not api_key:
             import yaml
@@ -24,13 +30,13 @@ def _call_llm(prompt: str, max_tokens: int = 800) -> str:
                 api_key = cfg.get("model", {}).get("api_key", "")
                 base_url = cfg.get("model", {}).get("base_url", "")
                 model = cfg.get("model", {}).get("default", model)
-        
+
         if not api_key:
             print("[LLM] No API key found")
             return ""
-        
+
         client = openai.OpenAI(api_key=api_key, base_url=base_url)
-        
+
         response = client.chat.completions.create(
             model=model,
             messages=[{"role": "user", "content": prompt}],
@@ -38,7 +44,14 @@ def _call_llm(prompt: str, max_tokens: int = 800) -> str:
             temperature=0.7,
         )
         content = response.choices[0].message.content
-        return content.strip() if content else ""
+        if not content or not content.strip():
+            # 如果 content 为空，可能是 reasoning_tokens 耗尽了 max_tokens
+            r_tokens = getattr(response.usage, "completion_tokens_details", None)
+            r_count = getattr(r_tokens, "reasoning_tokens", 0) if r_tokens else 0
+            if r_count and r_count >= max_tokens * 0.8:
+                print(f"[LLM] Warning: max_tokens={max_tokens} 全被 reasoning({r_count}) 消耗，content 为空")
+            return ""
+        return content.strip()
     except Exception as e:
         print(f"[LLM] Error: {e}")
         return ""
@@ -160,22 +173,22 @@ def analyze(symbol: str, company: Dict, fundamentals: Dict, technicals: Dict) ->
     
     # 行业分析
     prompt = _build_industry_prompt(company, fundamentals)
-    result["industry_analysis"] = _call_llm(prompt, max_tokens=800)
-    
+    result["industry_analysis"] = _call_llm(prompt)
+
     # 产业链分析
     prompt = _build_supply_chain_prompt(company)
-    result["supply_chain"] = _call_llm(prompt, max_tokens=500)
-    
+    result["supply_chain"] = _call_llm(prompt)
+
     # 竞争格局
     prompt = _build_competition_prompt(company, fundamentals)
-    result["competition"] = _call_llm(prompt, max_tokens=500)
-    
+    result["competition"] = _call_llm(prompt)
+
     # 业务构成
     prompt = _build_business_prompt(company, fundamentals)
-    result["business_structure"] = _call_llm(prompt, max_tokens=500)
-    
+    result["business_structure"] = _call_llm(prompt)
+
     # 技术面解读
     prompt = _build_tech_interpretation_prompt(technicals)
-    result["tech_interpretation"] = _call_llm(prompt, max_tokens=400)
+    result["tech_interpretation"] = _call_llm(prompt)
     
     return result
