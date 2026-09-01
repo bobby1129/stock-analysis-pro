@@ -397,15 +397,9 @@ def fetch_single_stock(s, sina_data=None):
 # ── 配置加载 ──
 
 def _get_portfolio() -> list:
+    """从 config.yaml 读取持仓列表"""
     config = load_config()
-    portfolio = config.get('portfolio', [])
-    if portfolio:
-        return portfolio
-    pf_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'portfolio.json')
-    if os.path.exists(pf_path):
-        with open(pf_path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    return []
+    return config.get('portfolio', [])
 
 
 def _get_indices() -> list:

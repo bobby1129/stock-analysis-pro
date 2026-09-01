@@ -415,7 +415,7 @@ HTTP requests (push2.eastmoney.com/api/qt/clist/get)
 - **Proxy**: Xray @ 127.0.0.1:10809 (HTTP, 用户态 systemd, whitelist 路由)
 - **Playwright**: Chromium (F10/股吧/搜索/研报；概念板块用HTTP API + Cookie，涨跌家数用HTTP API，期权用新浪)
 - **Dependencies**: `akshare>=1.10.0`, `requests>=2.28.0`, `pyyaml>=6.0`, `jinja2>=3.1.0`, `playwright>=1.40.0`
-- **Working Dir**: `/tmp/stock-analysis-pro/`
+- **Working Dir**: `/home/cat/stock-analysis-pro/`
 - **Config**: `config/config.yaml` (Cookie在此管理, 不提交git)
 - **Cache**: `./cache/` (JSON, TTL 1h)
 - **Watchlist**: `./data/watchlist.json`

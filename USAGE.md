@@ -181,7 +181,7 @@ python3 core/cli.py market --html           # → output/market.html
 
 ## 🔧 技术细节
 
-- **项目位置：** `/tmp/stock-analysis-pro/`
+- **项目位置：** `/home/cat/stock-analysis-pro/`
 - **数据源：** 腾讯行情 + 新浪 K 线/期权 + 东财 F10/新闻/研报/互动易(Playwright) + 东财push2概念(HTTP API+Cookie主链路) + akshare(财务/北向/涨停)
 - **缓存策略：** 行情缓存 1 小时，概念扫描缓存 10 分钟
 - **评分权重：** 技术/基本面/资金/舆情 各 25%（可在 `config/config.yaml` 调整）

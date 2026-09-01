@@ -180,7 +180,7 @@
 | `analysis/smile.py` | etf-options | ✅ 微笑曲线 |
 | `templates/review_report.html` | stock_review | ✅ Jinja2复盘模板 |
 | `templates/options_report.html` | etf-options | ✅ 期权报告模板 |
-| `data/portfolio.json` | stock_review | ✅ 持仓数据 |
+| `data/portfolio.json` | stock_review | ⚠️ 已移除 — 持仓统一在 config.yaml |
 | CLI: review/options/portfolio | 新增 | ✅ 统一入口 |
 | config.yaml 持仓管理 | stock_review | ✅ 合并配置 |
 | Cron Job 更新 | 6c7b513b6407 | ✅ 指向新路径 |
@@ -276,7 +276,7 @@ python3 core/cli.py concept --json
 
 ### 代码结构
 ```
-/tmp/stock-analysis-pro/
+/home/cat/stock-analysis-pro/
 ├── core/cli.py              # CLI入口，stock/concept子命令
 ├── collectors/              # 数据采集层
 │   ├── quote.py             # 行情(东财+新浪兜底)
@@ -584,7 +584,7 @@ python3 plans/concept_analysis.py
 ## 📋 当前代码结构 (2026-06-21)
 
 ```
-/tmp/stock-analysis-pro/
+/home/cat/stock-analysis-pro/
 ├── core/
 │   ├── cli.py              # 489行 CLI入口 (analyze/concept/market/add/rm/list)
 │   └── html_renderer.py    # 81行  Jinja2通用渲染器

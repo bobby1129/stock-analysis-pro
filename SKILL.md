@@ -158,7 +158,7 @@ collectors/          analysis/           plans/
 - 涨跌家数：东财 push2 HTTP API (需 Cookie)
 - 涨跌停数据：akshare 涨停池 (需代理)
 - 概念资金流：东财 push2 HTTP API (需 Cookie, 概念间 sleep 1s)
-- 持仓数据：`data/portfolio.json`
+- 持仓数据：`config/config.yaml` 的 `portfolio` 字段
 
 ### ETF 期权扫描 (options)
 

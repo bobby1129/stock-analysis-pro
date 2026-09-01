@@ -6,7 +6,7 @@
 ## 一、合并前状态
 
 ### 项目A: stock-analysis-pro (主项目，合并目标)
-- 路径: `/tmp/stock-analysis-pro/`
+- 路径: `/home/cat/stock-analysis-pro/`
 - Git: `bobby1129/stock-analysis-pro` (main分支, clean)
 - CLI命令: `analyze`, `market`, `concept`, `analyze-all`, `add`, `rm`, `list`
 - 模板: `stock_report.html`, `concept_report.html`, `market_report.html`
@@ -111,7 +111,7 @@ stock-analysis-pro/
 ├── data/
 │   ├── watchlist.json        # [已有]
 │   ├── concept_cache.json    # [已有]
-│   └── portfolio.json        # [新增] ← stock_review/config.json的portfolio部分
+│   └── portfolio.json        # [已移除] 持仓统一在 config.yaml
 │
 ├── output/                   # [新增] 统一输出目录(原stock_review/output/迁移)
 │
@@ -128,21 +128,21 @@ stock-analysis-pro/
 ### 步骤1: 复制etf-options文件到主项目
 ```bash
 # collectors (3个文件)
-cp /tmp/etf-options-analyzer/collectors/options.py /tmp/stock-analysis-pro/collectors/options.py
-cp /tmp/etf-options-analyzer/collectors/etf_kline.py /tmp/stock-analysis-pro/collectors/etf_kline.py
-cp /tmp/etf-options-analyzer/collectors/greeks.py /tmp/stock-analysis-pro/collectors/greeks.py
+cp /tmp/etf-options-analyzer/collectors/options.py /home/cat/stock-analysis-pro/collectors/options.py
+cp /tmp/etf-options-analyzer/collectors/etf_kline.py /home/cat/stock-analysis-pro/collectors/etf_kline.py
+cp /tmp/etf-options-analyzer/collectors/greeks.py /home/cat/stock-analysis-pro/collectors/greeks.py
 
 # analysis (4个文件)
-cp /tmp/etf-options-analyzer/analysis/hv.py /tmp/stock-analysis-pro/analysis/hv.py
-cp /tmp/etf-options-analyzer/analysis/seller.py /tmp/stock-analysis-pro/analysis/seller.py
-cp /tmp/etf-options-analyzer/analysis/buyer.py /tmp/stock-analysis-pro/analysis/buyer.py
-cp /tmp/etf-options-analyzer/analysis/smile.py /tmp/stock-analysis-pro/analysis/smile.py
+cp /tmp/etf-options-analyzer/analysis/hv.py /home/cat/stock-analysis-pro/analysis/hv.py
+cp /tmp/etf-options-analyzer/analysis/seller.py /home/cat/stock-analysis-pro/analysis/seller.py
+cp /tmp/etf-options-analyzer/analysis/buyer.py /home/cat/stock-analysis-pro/analysis/buyer.py
+cp /tmp/etf-options-analyzer/analysis/smile.py /home/cat/stock-analysis-pro/analysis/smile.py
 
 # plan (1个文件，重命名)
-cp /tmp/etf-options-analyzer/analysis/scanner.py /tmp/stock-analysis-pro/plans/options_scan.py
+cp /tmp/etf-options-analyzer/analysis/scanner.py /home/cat/stock-analysis-pro/plans/options_scan.py
 
 # template (1个文件)
-cp /tmp/etf-options-analyzer/templates/report.html /tmp/stock-analysis-pro/templates/options_report.html
+cp /tmp/etf-options-analyzer/templates/report.html /home/cat/stock-analysis-pro/templates/options_report.html
 
 # html_renderer辅助函数(平值IV计算) → 合并到core/html_renderer.py
 # (手动合并calc_atm_ivs函数)
@@ -215,7 +215,7 @@ portfolio add/rm/list → 持仓管理
 ### 步骤9: 更新Cron Job
 Cron `6c7b513b6407` 的prompt改为:
 ```
-cd /tmp/stock-analysis-pro && python3 core/cli.py review --html
+cd /home/cat/stock-analysis-pro && python3 core/cli.py review --html
 然后读取输出的HTML路径，发送给用户。
 ```
 
@@ -227,7 +227,7 @@ cd /tmp/stock-analysis-pro && python3 core/cli.py review --html
 
 ### 步骤11: 提交推送
 ```bash
-cd /tmp/stock-analysis-pro
+cd /home/cat/stock-analysis-pro
 git add -A
 git commit -m "feat: 合并stock_review + etf-options-analyzer到主项目"
 https_proxy=http://127.0.0.1:10809 git push origin main
@@ -235,7 +235,7 @@ https_proxy=http://127.0.0.1:10809 git push origin main
 
 ### 步骤12: 迁移历史报告
 ```bash
-cp /home/cat/stock_review/output/*.html /tmp/stock-analysis-pro/output/
+cp /home/cat/stock_review/output/*.html /home/cat/stock-analysis-pro/output/
 ```
 
 ### 步骤13: Skill瘦身(后续单独做)
@@ -303,7 +303,7 @@ indices:
 ### 每日复盘 (每工作日17:00)
 ```
 Cron触发 → Agent执行:
-  cd /tmp/stock-analysis-pro && python3 core/cli.py review --html
+  cd /home/cat/stock-analysis-pro && python3 core/cli.py review --html
     ↓
   plans/daily_report.py::run()
     1. collectors/quote.py → 4个指数行情
@@ -317,13 +317,13 @@ Cron触发 → Agent执行:
     ↓
   输出: output/review_YYYYMMDD.html
     ↓
-  Agent通过微信发送 MEDIA:/tmp/stock-analysis-pro/output/review_YYYYMMDD.html
+  Agent通过微信发送 MEDIA:/home/cat/stock-analysis-pro/output/review_YYYYMMDD.html
 ```
 
 ### 概念映射季度检查 (不变)
 ```
 Cron fc5b765ff023: 每季度17日10:00
-  cd /tmp/stock-analysis-pro && python3 scripts/check_concept_mapping.py
+  cd /home/cat/stock-analysis-pro && python3 scripts/check_concept_mapping.py
 ```
 
 ---

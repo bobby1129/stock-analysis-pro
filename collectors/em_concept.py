@@ -507,7 +507,7 @@ async def _fetch_concepts_playwright(
                             slider_detected = True
                             break
                     if slider_detected:
-                        screenshot_path = '/tmp/stock-analysis-pro/cache/slider_captcha.png'
+                        screenshot_path = '/home/cat/stock-analysis-pro/cache/slider_captcha.png'
                         await page.screenshot(path=screenshot_path)
                         print(f'\n⚠️ 东财滑块验证触发！截图: {screenshot_path}')
                         print(f'请手动完成验证，等待中...')
