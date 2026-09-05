@@ -250,10 +250,14 @@ def _classify_entry(stock: Dict, klines: List[Dict]) -> Dict:
             break
     
     # 动态检测：如果K线最后一根不是今天，用实时pct修正
+    # 注意：只在交易日（周一到周五）才修正，周末没有交易
     if recent:
         last_day = recent[-1].get('day', '')
         today_str = datetime.date.today().isoformat()
-        if last_day != today_str:
+        today_weekday = datetime.date.today().weekday()  # 0=周一, 6=周日
+        
+        # 只在交易日且K线不包含今天时才修正
+        if last_day != today_str and today_weekday < 5:
             # K线只到昨天，需要修正今天
             if pct > 0:
                 consecutive_up += 1

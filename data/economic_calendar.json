@@ -1,0 +1,336 @@
+{
+  "description": "重要经济数据发布日期日历（硬编码，定期更新）",
+  "last_updated": "2026-09-05",
+  "events": [
+    {
+      "date": "2026-09-04",
+      "time": "20:30",
+      "country": "US",
+      "indicator": "非农就业数据",
+      "importance": 5,
+      "previous": "15.7万",
+      "forecast": "",
+      "impact": "影响美联储政策预期，市场最敏感数据"
+    },
+    {
+      "date": "2026-09-10",
+      "time": "20:30",
+      "country": "US",
+      "indicator": "CPI月率",
+      "importance": 5,
+      "previous": "0.3%",
+      "forecast": "",
+      "impact": "通胀核心指标，决定加息/降息路径"
+    },
+    {
+      "date": "2026-09-10",
+      "time": "09:30",
+      "country": "CN",
+      "indicator": "CPI年率",
+      "importance": 4,
+      "previous": "0.5%",
+      "forecast": "",
+      "impact": "国内通胀压力，影响货币政策空间"
+    },
+    {
+      "date": "2026-09-10",
+      "time": "09:30",
+      "country": "CN",
+      "indicator": "PPI年率",
+      "importance": 4,
+      "previous": "-0.8%",
+      "forecast": "",
+      "impact": "工业品价格，反映需求端强度"
+    },
+    {
+      "date": "2026-09-11",
+      "time": "16:00",
+      "country": "CN",
+      "indicator": "社会融资规模",
+      "importance": 5,
+      "previous": "2.8万亿",
+      "forecast": "",
+      "impact": "流动性核心指标，对A股极重要"
+    },
+    {
+      "date": "2026-09-11",
+      "time": "16:00",
+      "country": "CN",
+      "indicator": "M2货币供应年率",
+      "importance": 4,
+      "previous": "7.2%",
+      "forecast": "",
+      "impact": "流动性风向标"
+    },
+    {
+      "date": "2026-09-16",
+      "time": "22:15",
+      "country": "US",
+      "indicator": "美联储FOMC利率决议",
+      "importance": 5,
+      "previous": "4.25-4.50%",
+      "forecast": "",
+      "impact": "全球货币政策风向标"
+    },
+    {
+      "date": "2026-09-30",
+      "time": "09:00",
+      "country": "CN",
+      "indicator": "制造业PMI",
+      "importance": 5,
+      "previous": "50.1",
+      "forecast": "",
+      "impact": "经济景气度核心指标"
+    },
+    {
+      "date": "2026-09-30",
+      "time": "09:00",
+      "country": "CN",
+      "indicator": "非制造业PMI",
+      "importance": 4,
+      "previous": "53.2",
+      "forecast": "",
+      "impact": "服务业景气度"
+    },
+    {
+      "date": "2026-10-02",
+      "time": "20:30",
+      "country": "US",
+      "indicator": "非农就业数据",
+      "importance": 5,
+      "previous": "15.7万",
+      "forecast": "",
+      "impact": "影响美联储政策预期，市场最敏感数据"
+    },
+    {
+      "date": "2026-10-10",
+      "time": "09:30",
+      "country": "CN",
+      "indicator": "CPI年率",
+      "importance": 4,
+      "previous": "0.5%",
+      "forecast": "",
+      "impact": "国内通胀压力"
+    },
+    {
+      "date": "2026-10-10",
+      "time": "09:30",
+      "country": "CN",
+      "indicator": "PPI年率",
+      "importance": 4,
+      "previous": "-0.8%",
+      "forecast": "",
+      "impact": "工业品价格"
+    },
+    {
+      "date": "2026-10-13",
+      "time": "20:30",
+      "country": "US",
+      "indicator": "CPI月率",
+      "importance": 5,
+      "previous": "0.3%",
+      "forecast": "",
+      "impact": "通胀核心指标"
+    },
+    {
+      "date": "2026-10-14",
+      "time": "16:00",
+      "country": "CN",
+      "indicator": "社会融资规模",
+      "importance": 5,
+      "previous": "2.8万亿",
+      "forecast": "",
+      "impact": "流动性核心指标"
+    },
+    {
+      "date": "2026-10-14",
+      "time": "16:00",
+      "country": "CN",
+      "indicator": "M2货币供应年率",
+      "importance": 4,
+      "previous": "7.2%",
+      "forecast": "",
+      "impact": "流动性风向标"
+    },
+    {
+      "date": "2026-10-31",
+      "time": "09:00",
+      "country": "CN",
+      "indicator": "制造业PMI",
+      "importance": 5,
+      "previous": "50.1",
+      "forecast": "",
+      "impact": "经济景气度核心指标"
+    },
+    {
+      "date": "2026-10-31",
+      "time": "09:00",
+      "country": "CN",
+      "indicator": "非制造业PMI",
+      "importance": 4,
+      "previous": "53.2",
+      "forecast": "",
+      "impact": "服务业景气度"
+    },
+    {
+      "date": "2026-11-06",
+      "time": "21:30",
+      "country": "US",
+      "indicator": "非农就业数据",
+      "importance": 5,
+      "previous": "15.7万",
+      "forecast": "",
+      "impact": "影响美联储政策预期"
+    },
+    {
+      "date": "2026-11-10",
+      "time": "09:30",
+      "country": "CN",
+      "indicator": "CPI年率",
+      "importance": 4,
+      "previous": "0.5%",
+      "forecast": "",
+      "impact": "国内通胀压力"
+    },
+    {
+      "date": "2026-11-10",
+      "time": "09:30",
+      "country": "CN",
+      "indicator": "PPI年率",
+      "importance": 4,
+      "previous": "-0.8%",
+      "forecast": "",
+      "impact": "工业品价格"
+    },
+    {
+      "date": "2026-11-12",
+      "time": "21:30",
+      "country": "US",
+      "indicator": "CPI月率",
+      "importance": 5,
+      "previous": "0.3%",
+      "forecast": "",
+      "impact": "通胀核心指标"
+    },
+    {
+      "date": "2026-11-13",
+      "time": "16:00",
+      "country": "CN",
+      "indicator": "社会融资规模",
+      "importance": 5,
+      "previous": "2.8万亿",
+      "forecast": "",
+      "impact": "流动性核心指标"
+    },
+    {
+      "date": "2026-11-13",
+      "time": "16:00",
+      "country": "CN",
+      "indicator": "M2货币供应年率",
+      "importance": 4,
+      "previous": "7.2%",
+      "forecast": "",
+      "impact": "流动性风向标"
+    },
+    {
+      "date": "2026-11-30",
+      "time": "09:00",
+      "country": "CN",
+      "indicator": "制造业PMI",
+      "importance": 5,
+      "previous": "50.1",
+      "forecast": "",
+      "impact": "经济景气度核心指标"
+    },
+    {
+      "date": "2026-11-30",
+      "time": "09:00",
+      "country": "CN",
+      "indicator": "非制造业PMI",
+      "importance": 4,
+      "previous": "53.2",
+      "forecast": "",
+      "impact": "服务业景气度"
+    },
+    {
+      "date": "2026-12-04",
+      "time": "21:30",
+      "country": "US",
+      "indicator": "非农就业数据",
+      "importance": 5,
+      "previous": "15.7万",
+      "forecast": "",
+      "impact": "影响美联储政策预期"
+    },
+    {
+      "date": "2026-12-10",
+      "time": "09:30",
+      "country": "CN",
+      "indicator": "CPI年率",
+      "importance": 4,
+      "previous": "0.5%",
+      "forecast": "",
+      "impact": "国内通胀压力"
+    },
+    {
+      "date": "2026-12-10",
+      "time": "09:30",
+      "country": "CN",
+      "indicator": "PPI年率",
+      "importance": 4,
+      "previous": "-0.8%",
+      "forecast": "",
+      "impact": "工业品价格"
+    },
+    {
+      "date": "2026-12-10",
+      "time": "21:30",
+      "country": "US",
+      "indicator": "CPI月率",
+      "importance": 5,
+      "previous": "0.3%",
+      "forecast": "",
+      "impact": "通胀核心指标"
+    },
+    {
+      "date": "2026-12-11",
+      "time": "16:00",
+      "country": "CN",
+      "indicator": "社会融资规模",
+      "importance": 5,
+      "previous": "2.8万亿",
+      "forecast": "",
+      "impact": "流动性核心指标"
+    },
+    {
+      "date": "2026-12-11",
+      "time": "16:00",
+      "country": "CN",
+      "indicator": "M2货币供应年率",
+      "importance": 4,
+      "previous": "7.2%",
+      "forecast": "",
+      "impact": "流动性风向标"
+    },
+    {
+      "date": "2026-12-31",
+      "time": "09:00",
+      "country": "CN",
+      "indicator": "制造业PMI",
+      "importance": 5,
+      "previous": "50.1",
+      "forecast": "",
+      "impact": "经济景气度核心指标"
+    },
+    {
+      "date": "2026-12-31",
+      "time": "09:00",
+      "country": "CN",
+      "indicator": "非制造业PMI",
+      "importance": 4,
+      "previous": "53.2",
+      "forecast": "",
+      "impact": "服务业景气度"
+    }
+  ]
+}

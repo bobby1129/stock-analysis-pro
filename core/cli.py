@@ -101,7 +101,7 @@ def main():
             data = run_market(date=args.date, verbose=not args.json and not args.html)
             if args.html:
                 from core.html_renderer import render
-                path = render(data, "market_report")
+                path = render(data, "global_macro")
                 print(path)
             elif args.json:
                 print(json.dumps(data, ensure_ascii=False, indent=2))

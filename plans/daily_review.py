@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from collectors.macro import global_macro, domestic_macro, zt_pool
 from analysis.macro import analyze_global, analyze_domestic, analyze_event, synthesize
+from collectors.economic_calendar import load_economic_calendar
 
 
 def run(date=None, verbose=True):
@@ -48,7 +49,12 @@ def run(date=None, verbose=True):
     result["event_raw"] = raw_event
     result["event"] = analyze_event(raw_event)
 
-    # 4. 综合研判
+    # 4. 经济日历
+    if verbose:
+        print("📅 加载经济日历...", file=sys.stderr)
+    result["economic_calendar"] = load_economic_calendar(days_ahead=14)
+
+    # 5. 综合研判
     result["synthesize"] = synthesize(result["global"], result["domestic"], result["event"])
 
     if verbose:

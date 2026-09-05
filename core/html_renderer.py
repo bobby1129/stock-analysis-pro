@@ -19,7 +19,7 @@ def render(data: dict, template_name: str, output_dir: str = None, filename: str
     Args:
         data:          Analysis result dict (from plans/ modules)
         template_name: Template name without .html extension
-                       e.g. "stock_report", "concept_report", "market_report"
+                       e.g. "stock_report", "concept_report", "global_macro"
         output_dir:    Output directory (default: cache/)
         filename:      Custom filename (default: auto-generated)
 

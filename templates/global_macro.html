@@ -236,6 +236,58 @@
 </div>
 {% endif %}
 
+{# ===== 5. 经济日历 ===== #}
+{% set cal = data.get('economic_calendar', {}) %}
+{% if cal and cal.events %}
+<div class="section">
+  <div class="section-title"><span class="icon">📅</span> 经济日历 <span style="font-size:11px;color:#999;font-weight:400;margin-left:6px;">{{ cal.date_range }} · {{ cal.total_count }}个事件</span></div>
+
+  <div style="padding: 0 12px 12px;">
+    {% set ns = namespace(current_date='') %}
+    {% for event in cal.events %}
+      {% if event.date != ns.current_date %}
+        {% set ns.current_date = event.date %}
+        <div style="margin-top:4px;padding:6px 10px;background:#f0f4ff;border-radius:6px;font-size:12px;font-weight:600;color:#4a6fa5;display:flex;align-items:center;gap:6px;">
+          <span>{{ event.date }}</span>
+          <span style="font-size:10px;color:#999;font-weight:400;">
+            {% set day_events = cal.events | selectattr('date', 'equalto', event.date) | list %}
+            {% set high_count = day_events | selectattr('importance', 'ge', 5) | list | length %}
+            {% if high_count > 0 %}{{ high_count }}个高重要性{% endif %}
+          </span>
+        </div>
+      {% endif %}
+
+      <div style="display:flex;align-items:center;padding:8px 6px;border-bottom:1px solid #f5f5f5;gap:8px;">
+        <div style="width:20px;text-align:center;font-size:13px;flex-shrink:0;">
+          {% if event.status == 'published' %}✓{% else %}○{% endif %}
+        </div>
+        <div style="width:20px;text-align:center;font-size:12px;flex-shrink:0;">{{ event.importance_label }}</div>
+        <div style="width:42px;font-size:11px;color:#999;flex-shrink:0;">{{ event.time }}</div>
+        <div style="width:22px;text-align:center;font-size:14px;flex-shrink:0;">
+          {% if event.country == 'US' %}🇺🇸{% elif event.country == 'CN' %}🇨🇳{% endif %}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:500;">{{ event.indicator }}</div>
+          <div style="font-size:10px;color:#aaa;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ event.impact }}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          {% if event.previous %}
+          <div style="font-size:10px;color:#bbb;">前值</div>
+          <div style="font-size:12px;font-weight:500;color:#666;">{{ event.previous }}</div>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  {% if cal.last_updated %}
+  <div style="padding:8px 16px;font-size:11px;color:#999;border-top:1px solid var(--card-border);">
+    日历更新于: {{ cal.last_updated }}
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
 {# ===== FOOTER ===== #}
 <div class="footer">
   Stock Analysis Pro · {{ data.get('date', '') }}<br>
