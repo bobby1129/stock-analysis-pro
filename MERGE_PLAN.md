@@ -86,7 +86,7 @@ stock-analysis-pro/
 ├── plans/                    # 编排层(完整策略流程)
 │   ├── stock_analysis.py     # [已有] 个股分析
 │   ├── concept_analysis.py   # [已有] 概念分析
-│   ├── daily_review.py       # [已有] 宏观概览
+│   ├── global_macro.py       # [已有] 宏观概览
 │   ├── daily_report.py       # [新增] 每日复盘 ← 吸收stock_review全部逻辑
 │   └── options_scan.py       # [新增] ← etf-options/analysis/scanner.py
 │

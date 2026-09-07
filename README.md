@@ -181,7 +181,7 @@ stock-analysis-pro/
 │   ├── stock_analysis.py   # 个股分析流程
 │   ├── concept_analysis.py # 概念分析流程
 │   ├── daily_report.py     # 每日复盘流程
-│   ├── daily_review.py     # 宏观市场概览
+│   ├── global_macro.py     # 宏观市场概览
 │   └── options_scan.py     # 期权扫描流程
 ├── templates/              # HTML报告模板
 ├── config/

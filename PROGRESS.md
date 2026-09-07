@@ -338,7 +338,7 @@ python3 core/cli.py concept --json
 |------|------|------|
 | `collectors/macro.py` | ~270 | global_macro(美债/利率/金银油) + domestic_macro(CPI/PMI/M2/LPR) + zt_pool(涨停复盘) |
 | `analysis/macro.py` | ~230 | analyze_global(环境定性) + analyze_domestic(经济周期/流动性) + analyze_event(市场情绪) + synthesize(综合研判) |
-| `plans/daily_review.py` | ~150 | 编排: 国际→国内→事件→综合, 含 format_report 文本输出 |
+| `plans/global_macro.py` | ~150 | 编排: 国际→国内→事件→综合, 含 format_report 文本输出 |
 
 ### 数据验证 (2026-06-14 实测)
 - 美债10Y: 4.48% ✅ | 美联储利率: 4.5% ✅ | 黄金/白银/原油: 实时价格 ✅
@@ -614,7 +614,7 @@ python3 plans/concept_analysis.py
 ├── plans/
 │   ├── stock_analysis.py   # 152行 个股分析编排
 │   ├── concept_analysis.py # 332行 概念分析编排
-│   └── daily_review.py     # 191行 宏观概览编排
+│   └── global_macro.py     # 191行 宏观概览编排
 ├── templates/
 │   ├── base.html           # 197行 暗色主题+CSS变量+移动端
 │   ├── stock_report.html   # 440行 个股报告模板(8模块)

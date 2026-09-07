@@ -97,7 +97,7 @@ def main():
                 print_report(data)
 
         elif args.command == "market":
-            from plans.daily_review import run as run_market, format_report as format_market
+            from plans.global_macro import run as run_market, format_report as format_market
             data = run_market(date=args.date, verbose=not args.json and not args.html)
             if args.html:
                 from core.html_renderer import render
