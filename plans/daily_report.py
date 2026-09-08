@@ -546,7 +546,54 @@ def calc_technical_indicators(klines):
         'resistance': round(sum(recent_highs)/3, 2),
     }
     
-    # ── 8. 综合评分 ──
+    # ── 8. 反转信号检测 ──
+    reversal_signals = []
+    reversal_score = 0
+    kdj = result['kdj']
+    rsi = result['rsi']
+    
+    # 底部反转信号
+    # 1. 超卖共振：KDJ J<0 + RSI<20 + 连跌≥3日
+    if kdj.get('j', 50) < 0 and rsi.get('rsi6', 50) < 20 and streak <= -3:
+        reversal_signals.append("🔥 底部反转：超卖共振（KDJ+RSI+连跌）")
+        reversal_score += 30
+    
+    # 2. KDJ低位金叉 + 量价配合（缩量下跌后放量上涨）
+    if result['kdj']['cross'] == '金叉' and kdj.get('k', 50) < 30:
+        # 检查是否从缩量下跌转为放量上涨
+        if n >= 2 and volumes[-1] > volumes[-2] * 1.3 and closes[-1] > closes[-2]:
+            reversal_signals.append("🔥 底部反转：KDJ低位金叉+放量反弹")
+            reversal_score += 25
+    
+    # 3. MACD绿柱缩短 + 站上MA5
+    if result['macd']['trend'] == '绿柱缩短' and cur > ma5:
+        reversal_signals.append("🟢 企稳信号：MACD绿柱缩短+站上MA5")
+        reversal_score += 20
+    
+    # 顶部反转信号
+    # 1. 超买共振：KDJ J>100 + RSI>80 + 连涨≥3日
+    if kdj.get('j', 50) > 100 and rsi.get('rsi6', 50) > 80 and streak >= 3:
+        reversal_signals.append("⚠️ 顶部反转：超买共振（KDJ+RSI+连涨）")
+        reversal_score -= 30
+    
+    # 2. KDJ高位死叉 + 放量滞涨
+    if result['kdj']['cross'] == '死叉' and kdj.get('k', 50) > 70:
+        price_chg_pct = (closes[-1] - closes[-2]) / closes[-2] * 100 if closes[-2] > 0 else 0
+        if vr > 1.3 and price_chg_pct < 1.0:
+            reversal_signals.append("⚠️ 顶部反转：KDJ高位死叉+放量滞涨")
+            reversal_score -= 25
+    
+    # 3. MACD红柱缩短 + 跌破MA5
+    if result['macd']['trend'] == '红柱缩短' and cur < ma5:
+        reversal_signals.append("🔴 转弱信号：MACD红柱缩短+跌破MA5")
+        reversal_score -= 20
+    
+    result['reversal'] = {
+        'signals': reversal_signals,
+        'score': reversal_score,
+    }
+    
+    # ── 9. 综合评分 ──
     score = 0
     signals = []
     
@@ -606,6 +653,11 @@ def calc_technical_indicators(klines):
     elif streak <= -4:
         signals.append("已" + str(abs(streak)) + "连跌→关注超跌反弹")
         score += 10
+    
+    # 加入反转分数
+    score += reversal_score
+    for rs in reversal_signals:
+        signals.append(rs)
     
     score = max(-100, min(100, score))
     
