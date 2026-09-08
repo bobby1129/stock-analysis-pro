@@ -54,6 +54,29 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 .info-item .info-org { color: #666; font-size: 11px; }
 .up { color: #e74c3c; }
 .down { color: #27ae60; }
+/* 短线指标 */
+.ti-section { margin-top: 10px; background: #f0f4ff; border-radius: 10px; padding: 12px; }
+.ti-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: #336; }
+.ti-advice { font-size: 14px; font-weight: 600; padding: 8px 12px; border-radius: 8px; margin-bottom: 10px; text-align: center; }
+.ti-advice.bullish { background: linear-gradient(135deg, #fff5f5, #ffe8e8); color: #c0392b; }
+.ti-advice.bearish { background: linear-gradient(135deg, #f0fff4, #e8ffe8); color: #27ae60; }
+.ti-advice.neutral { background: #f5f5f5; color: #666; }
+.ti-score-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.ti-score-track { flex: 1; height: 8px; background: #e0e0e0; border-radius: 4px; position: relative; overflow: hidden; }
+.ti-score-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+.ti-score-label { font-size: 12px; color: #999; min-width: 50px; text-align: right; }
+.ti-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+.ti-item { background: #fff; padding: 8px 10px; border-radius: 8px; }
+.ti-item .ti-label { font-size: 11px; color: #999; }
+.ti-item .ti-value { font-size: 13px; font-weight: 600; margin-top: 2px; }
+.ti-signals { margin-top: 8px; }
+.ti-signal { font-size: 12px; padding: 4px 8px; margin-bottom: 4px; border-radius: 6px; background: #fff; line-height: 1.4; }
+.ti-signal.pos { border-left: 3px solid #e74c3c; }
+.ti-signal.neg { border-left: 3px solid #27ae60; }
+.ti-levels { display: flex; justify-content: space-between; margin-top: 8px; padding: 8px 12px; background: #fff; border-radius: 8px; }
+.ti-levels .tl { text-align: center; }
+.ti-levels .tl-label { font-size: 11px; color: #999; }
+.ti-levels .tl-value { font-size: 14px; font-weight: 600; margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -226,6 +249,62 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 <div class="detail-item"><div class="d-label">5日涨跌</div><div class="d-value">{% if chg5 is not none %}<span class="{{ 'up' if chg5 > 0 else 'down' if chg5 < 0 else '' }}">{{ "{:+.2f}%".format(chg5) }}</span>{% else %}--{% endif %}</div></div>
 <div class="detail-item"><div class="d-label">20日涨跌</div><div class="d-value">{% if chg20 is not none %}<span class="{{ 'up' if chg20 > 0 else 'down' if chg20 < 0 else '' }}">{{ "{:+.2f}%".format(chg20) }}</span>{% else %}--{% endif %}</div></div>
 </div>
+
+{% set ti = s.technical_indicators|default({}) %}
+{% if ti %}
+{% set st = ti.short_term|default({}) %}
+{% set score = st.score|default(0) %}
+{% set advice = st.advice|default('') %}
+{% set signals = st.signals|default([]) %}
+{% set kdj = ti.kdj|default({}) %}
+{% set rsi = ti.rsi|default({}) %}
+{% set macd = ti.macd|default({}) %}
+{% set ma = ti.ma|default({}) %}
+{% set vp = ti.vol_price|default({}) %}
+{% set levels = ti.levels|default({}) %}
+<div class="ti-section">
+<div class="ti-title">📐 短线操作提示（次日参考）</div>
+
+{% if score >= 15 %}{% set adv_cls = 'bullish' %}{% elif score <= -15 %}{% set adv_cls = 'bearish' %}{% else %}{% set adv_cls = 'neutral' %}{% endif %}
+<div class="ti-advice {{ adv_cls }}">{{ advice }}</div>
+
+<div class="ti-score-bar">
+<div style="font-size:11px;color:#999;">空</div>
+<div class="ti-score-track">
+{% set pct = ((score + 100) / 200 * 100)|round(0)|int %}
+{% if score >= 15 %}{% set bar_color = '#e74c3c' %}{% elif score <= -15 %}{% set bar_color = '#27ae60' %}{% else %}{% set bar_color = '#999' %}{% endif %}
+<div class="ti-score-fill" style="width:{{ pct }}%;background:{{ bar_color }};"></div>
+</div>
+<div style="font-size:11px;color:#999;">多</div>
+<div class="ti-score-label">{{ score }}分</div>
+</div>
+
+<div class="ti-grid">
+<div class="ti-item"><div class="ti-label">KDJ({{ kdj.k|default('--') }}/{{ kdj.d|default('--') }}/{{ kdj.j|default('--') }})</div><div class="ti-value">{% if kdj.cross %}{{ kdj.cross }} {% endif %}{{ kdj.zone|default('--') }}</div></div>
+<div class="ti-item"><div class="ti-label">RSI6</div><div class="ti-value {{ 'up' if rsi.rsi6|default(50) > 80 else 'down' if rsi.rsi6|default(50) < 20 else '' }}">{{ rsi.rsi6|default('--') }} {{ rsi.zone|default('') }}</div></div>
+<div class="ti-item"><div class="ti-label">MACD</div><div class="ti-value">{% if macd.cross %}{{ macd.cross }} {% endif %}{{ macd.trend|default('--') }}</div></div>
+<div class="ti-item"><div class="ti-label">均线</div><div class="ti-value">{{ ma.arrangement|default('--') }}</div></div>
+<div class="ti-item"><div class="ti-label">量价</div><div class="ti-value">{{ vp.desc|default('--') }} <span style="font-size:11px;color:#999;">(量比{{ vp.ratio|default('--') }})</span></div></div>
+<div class="ti-item"><div class="ti-label">连动</div><div class="ti-value">{{ ti.streak|default('--') }}</div></div>
+</div>
+
+{% if signals %}
+<div class="ti-signals">
+{% for sig in signals %}
+<div class="ti-signal {{ 'pos' if '买入' in sig or '反弹' in sig or '转多' in sig or '多头' in sig or '多方' in sig or '加仓' in sig or '偏多' in sig else 'neg' if '卖出' in sig or '回调' in sig or '转空' in sig or '空头' in sig or '空方' in sig or '减仓' in sig or '偏空' in sig or '乏力' in sig or '了结' in sig else '' }}">{{ sig }}</div>
+{% endfor %}
+</div>
+{% endif %}
+
+{% if levels %}
+<div class="ti-levels">
+<div class="tl"><div class="tl-label">支撑位</div><div class="tl-value down">{{ levels.support|default('--') }}</div></div>
+<div class="tl"><div class="tl-label">压力位</div><div class="tl-value up">{{ levels.resistance|default('--') }}</div></div>
+</div>
+{% endif %}
+
+</div>
+{% endif %}
 
 {# 公告 #}
 <div class="info-section">
