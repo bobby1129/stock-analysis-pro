@@ -22,7 +22,7 @@ def _get_latest_metric(df, keyword: str) -> Dict:
     """从 THS 财务数据中提取最新指标"""
     if df is None or df.empty:
         return {"value": 0.0}
-    match = df[df["metric_name"].str.contains(keyword, na=False)]
+    match = df[df["metric_name"] == keyword]
     if match.empty:
         return {"value": 0.0}
     match = match.sort_values("report_date", ascending=False)
@@ -32,6 +32,26 @@ def _get_latest_metric(df, keyword: str) -> Dict:
     except (ValueError, TypeError):
         val = 0.0
     return {"value": val}
+
+
+def _get_metric_history(df, keyword: str, periods: int = 4) -> list:
+    """获取指标的历史数据（最近N期）"""
+    if df is None or df.empty:
+        return []
+    match = df[df["metric_name"] == keyword]
+    if match.empty:
+        return []
+    match = match.sort_values("report_date", ascending=False).head(periods)
+    history = []
+    for _, row in match.iterrows():
+        try:
+            history.append({
+                "date": str(row.get("report_date", ""))[:10],
+                "value": float(row.get("value", 0)),
+            })
+        except (ValueError, TypeError):
+            pass
+    return history
 
 
 def indicators(symbol: str) -> Dict:
@@ -52,12 +72,26 @@ def indicators(symbol: str) -> Dict:
         result["eps"] = _get_latest_metric(df, "basic_eps")["value"]
         result["nav_per_share"] = _get_latest_metric(df, "calc_per_net_assets")["value"]
         result["ocf_per_share"] = _get_latest_metric(df, "index_per_operating_cash_flow_net")["value"]
+        
+        # 新增：周转率指标
+        result["inventory_turnover"] = _get_latest_metric(df, "inventory_turnover_ratio")["value"]
+        result["inventory_turnover_days"] = _get_latest_metric(df, "inventory_turnover_days")["value"]
+        result["receivable_turnover_days"] = _get_latest_metric(df, "receive_accounts_turnover_days")["value"]
+        
+        # 新增：多期趋势（ROE + 营收/净利同比增速）
+        result["roe_history"] = _get_metric_history(df, "index_weighted_avg_roe", periods=4)
+        result["revenue_yoy_history"] = _get_metric_history(df, "calculate_operating_income_total_yoy_growth_ratio", periods=4)
+        result["net_profit_yoy_history"] = _get_metric_history(df, "calculate_parent_holder_net_profit_yoy_growth_ratio", periods=4)
+        
     except Exception:
         result = {
             "roe": 0.0, "gross_margin": 0.0, "net_margin": 0.0,
             "debt_ratio": 0.0, "current_ratio": 0.0,
             "revenue_growth": 0.0, "net_profit_growth": 0.0,
             "eps": 0.0, "nav_per_share": 0.0, "ocf_per_share": 0.0,
+            "inventory_turnover": 0.0, "inventory_turnover_days": 0.0,
+            "receivable_turnover_days": 0.0,
+            "roe_history": [], "revenue_history": [], "net_profit_history": [],
         }
     
     return result
@@ -101,5 +135,33 @@ def dividend_history(symbol: str, limit: int = 5) -> List[Dict]:
                 "status": str(row.get("进度", "")),
             })
         return divs
+    except Exception:
+        return []
+
+
+def rd_expense_history(symbol: str, periods: int = 4) -> list:
+    """获取研发费用历史（从利润表）"""
+    _ensure_proxy()
+    try:
+        df = ak.stock_financial_report_sina(stock=symbol, symbol='利润表')
+        if df is None or df.empty or '研发费用' not in df.columns:
+            return []
+        
+        # 取最近N期
+        df = df.head(periods)
+        history = []
+        for _, row in df.iterrows():
+            try:
+                rd = float(row.get('研发费用', 0) or 0)
+                rev = float(row.get('营业收入', 0) or 0)
+                ratio = (rd / rev * 100) if rev > 0 else 0
+                history.append({
+                    "date": str(row.get('报告日', '')),
+                    "expense": rd,
+                    "ratio": round(ratio, 2),
+                })
+            except (ValueError, TypeError):
+                pass
+        return history
     except Exception:
         return []

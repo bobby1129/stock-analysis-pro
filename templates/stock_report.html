@@ -288,6 +288,176 @@
     {% if fund.ocf_per_share is not none %}<tr><td>每股现金流</td><td>¥{{ fmt_num(fund.ocf_per_share) }}</td></tr>{% endif %}
   </table>
 
+  {# 现金流质量 #}
+  {% set cq = fund.cash_quality|default({}) %}
+  {% set cq_val = cq.ocf_to_net_profit.value|default(none) if cq.ocf_to_net_profit is mapping else none %}
+  {% if cq_val is not none and cq_val != 0 %}
+  <div style="margin-top:12px;padding:10px 12px;background:var(--card-bg);border-radius:8px;">
+    <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px;">💧 现金流质量</div>
+    <div style="font-size:13px;">经营现金流/净利润 = <span class="{{ 'up' if cq_val > 1 else 'warn' if cq_val > 0.7 else 'down' }}">{{ fmt_num(cq_val, 2) }}</span></div>
+    <div style="font-size:11px;color:var(--text-secondary);margin-top:4px;">
+      {% if cq_val > 1.2 %}✅ 优秀：赚的是真金白银
+      {% elif cq_val > 0.8 %}✅ 良好：现金流健康
+      {% elif cq_val > 0.5 %}⚠️ 一般：部分利润未回款
+      {% else %}❌ 较差：纸面利润多，需警惕
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# 周转效率 #}
+  {% set turn = fund.turnover|default({}) %}
+  {% set inv_days = turn.inventory_turnover_days.value|default(none) if turn.inventory_turnover_days is mapping else none %}
+  {% set recv_days = turn.receivable_turnover_days.value|default(none) if turn.receivable_turnover_days is mapping else none %}
+  {% if inv_days is not none or recv_days is not none %}
+  <div style="margin-top:12px;padding:10px 12px;background:var(--card-bg);border-radius:8px;">
+    <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px;">🔄 周转效率</div>
+    {% if inv_days is not none and inv_days > 0 %}
+    <div style="font-size:13px;">存货周转天数：<span class="{{ 'up' if inv_days < 60 else 'warn' if inv_days < 120 else 'down' }}">{{ fmt_num(inv_days, 0) }}天</span></div>
+    {% endif %}
+    {% if recv_days is not none and recv_days > 0 %}
+    <div style="font-size:13px;">应收回款天数：<span class="{{ 'up' if recv_days < 30 else 'warn' if recv_days < 60 else 'down' }}">{{ fmt_num(recv_days, 0) }}天</span></div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {# 多期趋势 #}
+  {% set trend = fund.trend|default({}) %}
+  {% set roe_hist = trend.roe_history|default([]) %}
+  {% set rev_yoy_hist = trend.revenue_yoy_history|default([]) %}
+  {% set np_yoy_hist = trend.net_profit_yoy_history|default([]) %}
+  {% set rd_hist = trend.rd_history|default([]) %}
+  
+  {% if roe_hist|length > 1 or rev_yoy_hist|length > 1 or np_yoy_hist|length > 1 %}
+  {% call collapsible('📈 多期趋势 (' ~ [roe_hist|length, rev_yoy_hist|length, np_yoy_hist|length]|max ~ '期)', 'trend') %}
+    <table class="data-table" style="font-size:12px;">
+      <tr>
+        <th>指标</th>
+        {% for h in roe_hist %}
+        <th style="text-align:center;">{{ h.date[:7] if h.date|length >= 7 else h.date }}</th>
+        {% endfor %}
+        <th style="text-align:center;">趋势</th>
+      </tr>
+      
+      {# ROE行 #}
+      {% if roe_hist|length > 0 %}
+      <tr>
+        <td style="font-weight:500;">ROE</td>
+        {% for h in roe_hist %}
+        <td style="text-align:center;">
+          {{ fmt_num(h.value, 2) }}%
+          {% if loop.index < roe_hist|length %}
+            {% if h.value > roe_hist[loop.index].value %}
+              <span class="up">↑</span>
+            {% elif h.value < roe_hist[loop.index].value %}
+              <span class="down">↓</span>
+            {% endif %}
+          {% endif %}
+        </td>
+        {% endfor %}
+        <td style="text-align:center;">
+          {% if trend.roe_trend == 'improving' %}<span class="up">↑ 上升</span>
+          {% elif trend.roe_trend == 'declining' %}<span class="down">↓ 下降</span>
+          {% else %}→ 平稳{% endif %}
+        </td>
+      </tr>
+      {% endif %}
+      
+      {# 营收同比行 #}
+      {% if rev_yoy_hist|length > 0 %}
+      <tr>
+        <td style="font-weight:500;">营收同比</td>
+        {% for h in rev_yoy_hist %}
+        <td style="text-align:center;">
+          <span class="{{ 'up' if h.value > 0 else 'down' if h.value < 0 else '' }}">{{ fmt_num(h.value, 1) }}%</span>
+          {% if loop.index < rev_yoy_hist|length %}
+            {% if h.value > rev_yoy_hist[loop.index].value %}
+              <span class="up">↑</span>
+            {% elif h.value < rev_yoy_hist[loop.index].value %}
+              <span class="down">↓</span>
+            {% endif %}
+          {% endif %}
+        </td>
+        {% endfor %}
+        <td style="text-align:center;">
+          {% if trend.revenue_trend == 'improving' %}<span class="up">↑ 上升</span>
+          {% elif trend.revenue_trend == 'declining' %}<span class="down">↓ 下降</span>
+          {% else %}→ 平稳{% endif %}
+        </td>
+      </tr>
+      {% endif %}
+      
+      {# 净利同比行 #}
+      {% if np_yoy_hist|length > 0 %}
+      <tr>
+        <td style="font-weight:500;">净利同比</td>
+        {% for h in np_yoy_hist %}
+        <td style="text-align:center;">
+          <span class="{{ 'up' if h.value > 0 else 'down' if h.value < 0 else '' }}">{{ fmt_num(h.value, 1) }}%</span>
+          {% if loop.index < np_yoy_hist|length %}
+            {% if h.value > np_yoy_hist[loop.index].value %}
+              <span class="up">↑</span>
+            {% elif h.value < np_yoy_hist[loop.index].value %}
+              <span class="down">↓</span>
+            {% endif %}
+          {% endif %}
+        </td>
+        {% endfor %}
+        <td style="text-align:center;">
+          {% if trend.net_profit_trend == 'improving' %}<span class="up">↑ 上升</span>
+          {% elif trend.net_profit_trend == 'declining' %}<span class="down">↓ 下降</span>
+          {% else %}→ 平稳{% endif %}
+        </td>
+      </tr>
+      {% endif %}
+      
+      {# 研发占比行 #}
+      {% if rd_hist|length > 0 %}
+      <tr>
+        <td style="font-weight:500;">研发占比</td>
+        {% for h in rd_hist %}
+        <td style="text-align:center;">
+          {{ h.ratio }}%
+          {% if loop.index < rd_hist|length %}
+            {% if h.ratio > rd_hist[loop.index].ratio %}
+              <span class="up">↑</span>
+            {% elif h.ratio < rd_hist[loop.index].ratio %}
+              <span class="down">↓</span>
+            {% endif %}
+          {% endif %}
+        </td>
+        {% endfor %}
+        <td style="text-align:center;color:var(--text-secondary);font-size:11px;">参考</td>
+      </tr>
+      {% endif %}
+    </table>
+  {% endcall %}
+  {% endif %}
+
+  {# 综合评分 #}
+  {% set fund_score = fund.fund_score|default({}) %}
+  {% if fund_score.total is defined %}
+  <div style="margin-top:12px;padding:12px;background:linear-gradient(135deg,var(--card-bg),var(--bg));border:1px solid var(--card-border);border-radius:8px;">
+    <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px;">🎯 基本面综合评分</div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="font-size:28px;font-weight:700;color:{% if fund_score.total >= 80 %}var(--green){% elif fund_score.total >= 60 %}var(--yellow){% elif fund_score.total >= 40 %}var(--accent){% else %}var(--red){% endif %};">
+        {{ fund_score.total }}
+      </div>
+      <div style="font-size:18px;font-weight:600;color:var(--text-secondary);">/100</div>
+      <div style="font-size:20px;font-weight:700;padding:4px 12px;border-radius:6px;background:{% if fund_score.rating == 'A' %}var(--green){% elif fund_score.rating == 'B' %}var(--yellow){% elif fund_score.rating == 'C' %}var(--accent){% else %}var(--red){% endif %};color:white;">
+        {{ fund_score.rating }}
+      </div>
+    </div>
+    {% if fund_score.details %}
+    <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;font-size:11px;color:var(--text-secondary);">
+      {% for label, got, max_v in fund_score.details %}
+      <span style="padding:2px 6px;background:var(--bg);border-radius:4px;">{{ label }} {{ got }}/{{ max_v }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
   {# Forecast #}
   {% if fund.forecast %}
   {% call collapsible('机构一致预期 (' ~ fund.forecast|length ~ '家)', 'forecast') %}
