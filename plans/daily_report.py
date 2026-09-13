@@ -166,6 +166,43 @@ def tencent_kline(code, days=30):
     return klines
 
 
+def _fetch_index_kline(code, days=60):
+    """获取指数K线数据 (新浪API)
+    
+    code格式: sh000001, sz399001 等
+    返回: [[date, open, close, high, low, volume], ...]
+    """
+    url = (
+        f"https://quotes.sina.cn/cn/api/jsonp_v2.php/var%20_data=/CN_MarketDataService.getKLineData"
+        f"?symbol={code}&scale=240&ma=no&datalen={days}"
+    )
+    raw = safe_request(url, timeout=6, rate_limit=False)
+    if not raw:
+        return []
+    if isinstance(raw, bytes):
+        raw = raw.decode('utf-8', errors='ignore')
+    try:
+        # 解析jsonp: 可能前缀有 /*...*/ 注释，找到 var _data=( 的位置
+        start = raw.index('(') + 1
+        end = raw.rindex(')')
+        json_str = raw[start:end]
+        data = json.loads(json_str)
+    except:
+        return []
+    # 转换为 calc_technical_indicators 期望的格式: [date, open, close, high, low, volume]
+    klines = []
+    for item in data:
+        klines.append([
+            item.get('day', ''),
+            float(item.get('open', 0)),
+            float(item.get('close', 0)),
+            float(item.get('high', 0)),
+            float(item.get('low', 0)),
+            float(item.get('volume', 0)),
+        ])
+    return klines
+
+
 def calc_multi_day_change(klines):
     """计算多日涨跌幅"""
     if not klines or len(klines) < 5:
@@ -803,6 +840,17 @@ def run(date=None, verbose=True):
         indices.append(info)
     result['indices'] = indices
 
+    # 1b. 指数短线技术指标
+    if verbose:
+        print("📐 计算指数短线指标...", file=sys.stderr)
+    for idx_info in indices:
+        code = idx_info['code']
+        klines = _fetch_index_kline(code, days=60)
+        if klines and len(klines) >= 20:
+            ti = calc_technical_indicators(klines)
+            if ti:
+                idx_info['technical_indicators'] = ti
+
     # 2. 市场宽度
     if verbose:
         print("📈 采集涨跌家数...", file=sys.stderr)
@@ -940,6 +988,27 @@ def format_report(data: dict) -> str:
             inflow = c.get('net_inflow', 0) / 1e8 if c.get('net_inflow') else 0
             pct = c.get('change_pct', 0)
             lines.append(f"  {i:2d}. {c['name']:<8s} 涨跌{pct:+.2f}% 净流入{inflow:+.2f}亿")
+
+    # 指数短线指引
+    indices_with_ti = [idx for idx in indices if idx.get('technical_indicators')]
+    if indices_with_ti:
+        lines.append("\n【大盘短线指引】")
+        for idx in indices_with_ti:
+            ti = idx['technical_indicators']
+            st = ti.get('short_term', {})
+            score = st.get('score', 0)
+            advice = st.get('advice', '')
+            ma = ti.get('ma', {})
+            kdj = ti.get('kdj', {})
+            macd_info = ti.get('macd', {})
+            lines.append(f"  {idx['name']}: {score:+d}分 → {advice}")
+            detail_parts = []
+            if ma.get('arrangement'): detail_parts.append(f"均线{ma['arrangement']}")
+            if kdj.get('cross'): detail_parts.append(f"KDJ{kdj['cross']}")
+            if macd_info.get('cross'): detail_parts.append(f"MACD{macd_info['cross']}")
+            if ti.get('vol_price', {}).get('desc'): detail_parts.append(ti['vol_price']['desc'])
+            if detail_parts:
+                lines.append(f"    {' / '.join(detail_parts)}")
 
     # 持仓
     portfolio = data.get('portfolio', [])

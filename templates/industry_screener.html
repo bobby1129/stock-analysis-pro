@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+
+{% block title %}行业异动筛选 {{ data.date }}{% endblock %}
+
+{% block body %}
+<style>
+/* === 行业异动筛选 专用样式 === */
+
+/* 顶部摘要 */
+.summary-bar {
+  display: flex; justify-content: space-around; align-items: center;
+  padding: 14px 12px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-bottom: 1px solid var(--card-border);
+}
+.summary-item { text-align: center; }
+.summary-item .num { font-size: 22px; font-weight: 700; color: var(--accent); }
+.summary-item .lbl { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+/* 行业排名条 */
+.industry-bar-list { padding: 8px 16px 12px; }
+.industry-bar-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.industry-bar-item:last-child { border-bottom: none; }
+.ib-rank {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+.ib-rank.r1 { background: rgba(248,81,73,0.2); color: var(--red); }
+.ib-rank.r2 { background: rgba(219,109,40,0.2); color: var(--orange); }
+.ib-rank.r3 { background: rgba(210,153,34,0.2); color: var(--yellow); }
+.ib-rank.r4, .ib-rank.r5 { background: rgba(88,166,255,0.15); color: var(--accent); }
+.ib-rank.rn { background: rgba(139,148,158,0.1); color: var(--text-muted); }
+.ib-name { flex: 1; font-size: 13px; font-weight: 500; }
+.ib-name .l1 { color: var(--text-muted); font-size: 11px; margin-left: 4px; }
+.ib-count {
+  font-size: 13px; font-weight: 700; color: var(--red);
+  min-width: 35px; text-align: right;
+}
+.ib-bar-wrap { width: 80px; flex-shrink: 0; }
+.ib-bar { height: 6px; background: var(--card-border); border-radius: 3px; overflow: hidden; }
+.ib-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--red), var(--orange)); }
+
+/* 行业详情卡片 */
+.industry-card {
+  margin: 10px 12px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.industry-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--card-border);
+}
+.industry-header .ih-left { display: flex; align-items: center; gap: 8px; }
+.industry-header .ih-tag {
+  padding: 2px 8px; border-radius: 4px;
+  font-size: 11px; font-weight: 600;
+  background: rgba(248,81,73,0.15); color: var(--red);
+}
+.industry-header .ih-name { font-size: 16px; font-weight: 700; }
+.industry-header .ih-count { font-size: 12px; color: var(--text-secondary); }
+
+/* 股票表格 */
+.stock-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.stock-table { width: 100%; border-collapse: collapse; min-width: 700px; }
+.stock-table thead th {
+  position: sticky; top: 0; z-index: 1;
+  background: var(--card);
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+  padding: 8px 6px; text-align: center;
+  border-bottom: 1px solid var(--card-border);
+  white-space: nowrap;
+}
+.stock-table thead th:first-child { text-align: left; padding-left: 16px; }
+.stock-table tbody td {
+  font-size: 12px; padding: 8px 6px; text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  white-space: nowrap;
+}
+.stock-table tbody td:first-child { text-align: left; padding-left: 16px; }
+.stock-table tbody tr:last-child { border-bottom: none; }
+.stock-table tbody tr:hover { background: rgba(88,166,255,0.04); }
+
+.stock-name-cell { text-align: left !important; }
+.stock-name-cell .sn-code { font-size: 10px; color: var(--text-muted); display: block; }
+.stock-name-cell .sn-name { font-weight: 600; font-size: 13px; }
+
+/* 分位色块 */
+.pct-badge {
+  display: inline-block;
+  padding: 1px 6px; border-radius: 4px;
+  font-size: 11px; font-weight: 600;
+  min-width: 36px; text-align: center;
+}
+.pct-low { background: rgba(63,185,80,0.15); color: var(--green); }
+.pct-mid { background: rgba(210,153,34,0.15); color: var(--yellow); }
+.pct-high { background: rgba(248,81,73,0.15); color: var(--red); }
+
+/* 连涨天数标记 */
+.streak-badge {
+  display: inline-block;
+  padding: 1px 6px; border-radius: 4px;
+  font-size: 11px; font-weight: 600;
+}
+.streak-0 { color: var(--text-muted); }
+.streak-1 { color: var(--text-secondary); }
+.streak-2 { background: rgba(210,153,34,0.12); color: var(--yellow); }
+.streak-3 { background: rgba(219,109,40,0.15); color: var(--orange); }
+.streak-4p { background: rgba(248,81,73,0.15); color: var(--red); }
+
+/* 指标说明 */
+.indicator-legend {
+  padding: 10px 16px;
+  font-size: 11px; color: var(--text-muted);
+  line-height: 1.8;
+  border-top: 1px solid var(--card-border);
+}
+.indicator-legend strong { color: var(--text-secondary); }
+
+/* 未归类 */
+.unclassified-list {
+  padding: 8px 16px 12px;
+  font-size: 12px;
+}
+.unclassified-item {
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.unclassified-item:last-child { border-bottom: none; }
+.uc-left .uc-name { font-weight: 500; }
+.uc-left .uc-biz { font-size: 11px; color: var(--text-muted); margin-top: 2px; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.uc-right { font-size: 12px; font-weight: 600; color: var(--red); flex-shrink: 0; }
+</style>
+
+<!-- 顶部摘要 -->
+<div class="summary-bar">
+  <div class="summary-item">
+    <div class="num">{{ data.total_stocks }}</div>
+    <div class="lbl">涨幅&gt;5%</div>
+  </div>
+  <div class="summary-item">
+    <div class="num">{{ data.classified_stocks }}</div>
+    <div class="lbl">已归类</div>
+  </div>
+  <div class="summary-item">
+    <div class="num">{{ data.industry_summary | length }}</div>
+    <div class="lbl">细分行业</div>
+  </div>
+  <div class="summary-item">
+    <div class="num">{{ data.date }}</div>
+    <div class="lbl">日期</div>
+  </div>
+</div>
+
+<!-- 行业排名 -->
+<div class="section">
+  <div class="section-title">
+    <span class="icon">📊</span> 行业归类总览
+  </div>
+  <div class="industry-bar-list">
+    {% for ind in data.industry_summary %}
+    <div class="industry-bar-item">
+      <div class="ib-rank {% if loop.index == 1 %}r1{% elif loop.index == 2 %}r2{% elif loop.index == 3 %}r3{% elif loop.index <= 5 %}r4{% else %}rn{% endif %}">{{ loop.index }}</div>
+      <div class="ib-name">{{ ind.l2 }}<span class="l1">{{ ind.l1 }}</span></div>
+      <div class="ib-bar-wrap">
+        <div class="ib-bar">
+          <div class="ib-bar-fill" style="width: {{ (ind.count / data.industry_summary[0].count * 100) | round | int }}%"></div>
+        </div>
+      </div>
+      <div class="ib-count">{{ ind.count }}只</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- 前5大行业详情 -->
+{% for ind in data.top5_industries %}
+<div class="industry-card">
+  <div class="industry-header">
+    <div class="ih-left">
+      <span class="ih-tag">TOP{{ loop.index }}</span>
+      <span class="ih-name">{{ ind.l1 }} → {{ ind.l2 }}</span>
+    </div>
+    <span class="ih-count">{{ ind.count }}只</span>
+  </div>
+  
+  <div class="stock-table-wrap">
+    <table class="stock-table">
+      <thead>
+        <tr>
+          <th>股票</th>
+          <th>涨幅%</th>
+          <th>连涨<br>天数</th>
+          <th>量比</th>
+          <th>换手率%</th>
+          <th>成交额<br>(亿)</th>
+          <th>振幅%</th>
+          <th>60日<br>分位</th>
+          <th>250日<br>分位</th>
+          <th>PE</th>
+          <th>市值<br>(亿)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in ind.stocks %}
+        <tr>
+          <td class="stock-name-cell">
+            <span class="sn-name">{{ s.name }}</span>
+            <span class="sn-code">{{ s.code }}</span>
+          </td>
+          <td class="up">{{ "%.2f" | format(s.change_pct) }}%</td>
+          <td>
+            {% set d = s.consecutive_days | default(0) %}
+            <span class="streak-badge {% if d == 0 %}streak-0{% elif d == 1 %}streak-1{% elif d == 2 %}streak-2{% elif d == 3 %}streak-3{% else %}streak-4p{% endif %}">{{ d }}天</span>
+          </td>
+          <td>
+            {% set vr = s.volume_ratio | default(0) %}
+            <span class="{% if vr > 2 %}up{% elif vr > 1 %}warn{% else %}flat{% endif %}">{{ "%.2f" | format(vr) }}</span>
+          </td>
+          <td>{{ "%.2f" | format(s.turnover_rate | default(0)) }}%</td>
+          <td>{{ "%.2f" | format((s.amount | default(0)) / 10000) }}</td>
+          <td>{{ "%.2f" | format(s.amplitude | default(0)) }}%</td>
+          <td>
+            {% set p60 = s.percentile_60 %}
+            {% if p60 is not none %}
+            <span class="pct-badge {% if p60 < 30 %}pct-low{% elif p60 < 70 %}pct-mid{% else %}pct-high{% endif %}">{{ "%.0f" | format(p60) }}%</span>
+            {% else %}
+            <span class="flat">-</span>
+            {% endif %}
+          </td>
+          <td>
+            {% set p250 = s.percentile_250 %}
+            {% if p250 is not none %}
+            <span class="pct-badge {% if p250 < 30 %}pct-low{% elif p250 < 70 %}pct-mid{% else %}pct-high{% endif %}">{{ "%.0f" | format(p250) }}%</span>
+            {% else %}
+            <span class="flat">-</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if s.pe is not none %}
+              {% if s.pe < 0 %}<span class="flat">亏损</span>
+              {% elif s.pe > 100 %}<span class="warn">{{ "%.0f" | format(s.pe) }}</span>
+              {% else %}{{ "%.1f" | format(s.pe) }}{% endif %}
+            {% else %}<span class="flat">-</span>{% endif %}
+          </td>
+          <td>
+            {% if s.total_mv is not none %}{{ "%.0f" | format(s.total_mv) }}
+            {% else %}<span class="flat">-</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="indicator-legend">
+    <strong>指标说明:</strong>
+    连涨天数=从最新K线往前数连续收阳天数 |
+    量比=今日成交量/5日均量 |
+    60日分位=当前价在近60日价格区间的位置(低=底部区域) |
+    250日分位=当前价在近250日价格区间的位置 |
+    <span class="pct-badge pct-low" style="font-size:10px">绿=低位</span>
+    <span class="pct-badge pct-mid" style="font-size:10px">黄=中位</span>
+    <span class="pct-badge pct-high" style="font-size:10px">红=高位</span>
+  </div>
+</div>
+{% endfor %}
+
+<!-- 未归类股票 -->
+{% if data.unclassified %}
+<div class="section">
+  <div class="section-title">
+    <span class="icon">❓</span> 未归类 ({{ data.unclassified_count }}只)
+  </div>
+  <div class="collapsible">
+    <div class="collapsible-toggle">
+      <span class="toggle-label">点击展开查看</span>
+      <span class="toggle-arrow">▼</span>
+    </div>
+    <div class="collapsible-content">
+      <div class="unclassified-list">
+        {% for s in data.unclassified %}
+        <div class="unclassified-item">
+          <div class="uc-left">
+            <div class="uc-name">{{ s.code }} {{ s.name }}</div>
+            <div class="uc-biz">{{ s.main_business[:60] if s.main_business else '无数据' }}</div>
+          </div>
+          <div class="uc-right">{{ "%.2f" | format(s.changepercent) }}%</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="footer">
+  行业异动筛选 · {{ data.timestamp }}<br>
+  数据源: 新浪财经(行情) + 同花顺F10(主营业务) · 不依赖东方财富
+</div>
+{% endblock %}
