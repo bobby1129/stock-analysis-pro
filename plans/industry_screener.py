@@ -33,6 +33,7 @@ import time
 import re
 import requests
 from datetime import datetime
+import xml.etree.ElementTree as ET
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -43,6 +44,9 @@ _adapter = HTTPAdapter(max_retries=3, pool_connections=10, pool_maxsize=10)
 SESSION.mount("https://", _adapter)
 SESSION.mount("http://", _adapter)
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+# Proxy for Google News
+PROXY = {"http": "http://127.0.0.1:10809", "https": "http://127.0.0.1:10809"}
 
 
 def safe_request(url, timeout=10, headers=None, max_retries=2):
@@ -289,6 +293,362 @@ INDUSTRY_HIERARCHY = {
         "物业管理": ["物业"],
     },
 }
+
+
+def fetch_google_news_rss(keyword, max_items=10):
+    """通过Google News RSS获取新闻
+    
+    返回: [{"title": str, "date": str, "source": str}, ...]
+    """
+    try:
+        # Google News RSS URL
+        encoded_kw = keyword.replace(" ", "+")
+        url = f"https://news.google.com/rss/search?q={encoded_kw}&hl=zh-CN&gl=CN&ceid=CN:zh-Hans"
+        
+        r = SESSION.get(url, proxies=PROXY, timeout=10, headers={"User-Agent": UA})
+        if r.status_code != 200:
+            return []
+        
+        # 解析RSS XML
+        root = ET.fromstring(r.content)
+        items = root.findall(".//item")[:max_items]
+        
+        news = []
+        for item in items:
+            title = item.find("title").text if item.find("title") is not None else ""
+            pub_date = item.find("pubDate").text if item.find("pubDate") is not None else ""
+            source = item.find("source").text if item.find("source") is not None else ""
+            
+            # 解析日期: "Mon, 15 Sep 2026 10:30:00 GMT" → "9月15日"
+            date_short = ""
+            if pub_date:
+                try:
+                    from email.utils import parsedate_to_datetime
+                    dt = parsedate_to_datetime(pub_date)
+                    date_short = f"{dt.month}月{dt.day}日"
+                except:
+                    # 降级: 取前几个字符
+                    date_short = pub_date[:10]
+            
+            if title:
+                news.append({
+                    "title": title,
+                    "date": date_short,
+                    "source": source
+                })
+        
+        return news
+    except Exception as e:
+        print(f"  [警告] Google News搜索失败: {e}")
+        return []
+
+
+def fetch_industry_news(industries, verbose=True):
+    """为每个行业获取相关新闻 + 生成深度分析
+    
+    industries: [{"l1": str, "l2": str, "stocks": [...]}, ...]
+    返回: industries列表，每个行业增加 "news" / "catalyst" / "timeline" / "value_chain" 字段
+    """
+    if verbose:
+        print("\n[5/5] 获取行业新闻与深度分析...")
+    
+    for i, ind in enumerate(industries):
+        keyword = ind["l2"]
+        if verbose:
+            print(f"  {i+1}/{len(industries)}: {keyword}")
+        
+        news = fetch_google_news_rss(keyword, max_items=10)
+        ind["news"] = news
+        
+        # 从新闻+股票指标生成深度分析
+        ind["catalyst"] = extract_catalyst(news, ind)
+        ind["timeline"] = build_timeline(news, ind)
+        ind["value_chain"] = build_value_chain(ind)
+        
+        time.sleep(0.5)
+    
+    return industries
+
+
+def extract_catalyst(news, ind):
+    """从新闻标题中提取核心催化主题
+    
+    返回: [{"theme": str, "items": [{"title": str, "date": str}], "summary": str}, ...]
+    """
+    if not news:
+        return []
+    
+    # 关键词聚类：按新闻标题中的高频关键词分组
+    # 定义行业相关的催化关键词
+    catalyst_keywords = {
+        "政策": ["政策", "规划", "意见", "补贴", "扶持", "扶持", "国务院", "发改委", "工信部", "财政部", "央行", "证监会"],
+        "技术突破": ["突破", "首创", "量产", "交付", "落地", "发布", "研发", "创新", "新一代"],
+        "需求增长": ["需求", "订单", "增长", "扩产", "紧缺", "涨价", "供不应求", "景气"],
+        "资本动作": ["投资", "融资", "收购", "并购", "上市", "增持", "回购", "分红"],
+        "行业事件": ["展会", "论坛", "峰会", "大会", "签约", "合作", "战略"],
+        "海外动态": ["海外", "国际", "美国", "欧洲", "日本", "韩国", "全球", "出口", "进口"],
+        "供给变化": ["产能", "投产", "扩产", "减产", "停产", "检修", "开工率"],
+        "价格变动": ["涨价", "降价", "价格", "成本", "毛利", "利润"],
+    }
+    
+    # 对每条新闻分类到催化主题
+    theme_items = {}  # theme_name -> [news_item, ...]
+    for n in news:
+        title = n.get("title", "")
+        matched = False
+        for theme, keywords in catalyst_keywords.items():
+            for kw in keywords:
+                if kw in title:
+                    if theme not in theme_items:
+                        theme_items[theme] = []
+                    theme_items[theme].append(n)
+                    matched = True
+                    break
+            if matched:
+                break
+        if not matched:
+            # 未匹配的新闻归入"其他动态"
+            if "其他动态" not in theme_items:
+                theme_items["其他动态"] = []
+            theme_items["其他动态"].append(n)
+    
+    # 按新闻数量排序，取top3主题
+    sorted_themes = sorted(theme_items.items(), key=lambda x: len(x[1]), reverse=True)
+    
+    catalysts = []
+    for theme, items in sorted_themes[:3]:
+        if theme == "其他动态" and len(items) < 2:
+            continue
+        # 生成摘要
+        summary_parts = []
+        for item in items[:2]:
+            summary_parts.append(item["title"][:40])
+        summary = "；".join(summary_parts)
+        
+        catalysts.append({
+            "theme": theme,
+            "count": len(items),
+            "items": [{"title": n["title"], "date": n["date"]} for n in items[:3]],
+            "summary": summary,
+        })
+    
+    return catalysts
+
+
+def build_timeline(news, ind):
+    """从新闻构建行情时间线
+    
+    返回: [{"date": str, "events": [{"title": str, "stocks": [str]}]}, ...]
+    """
+    if not news:
+        return []
+    
+    # 按日期分组
+    date_events = {}
+    stock_names = [s.get("name", "") for s in ind.get("stocks", [])]
+    
+    for n in news:
+        date = n.get("date", "")
+        title = n.get("title", "")
+        
+        if date not in date_events:
+            date_events[date] = []
+        
+        # 检查新闻中是否提到行业内股票
+        mentioned_stocks = []
+        for sname in stock_names:
+            if sname and sname in title:
+                mentioned_stocks.append(sname)
+        
+        date_events[date].append({
+            "title": title,
+            "stocks": mentioned_stocks,
+        })
+    
+    # 按日期排序（最近的在前）
+    timeline = []
+    for date, events in sorted(date_events.items(), key=lambda x: x[0], reverse=True):
+        timeline.append({
+            "date": date,
+            "events": events[:3],  # 每天最多3条
+            "is_highlight": len(events) >= 2 or any(
+                any(kw in e["title"] for kw in ["涨停", "暴涨", "大涨", "突破", "新高"])
+                for e in events
+            ),
+        })
+    
+    return timeline[:7]  # 最多7天
+
+
+def build_value_chain(ind):
+    """基于股票指标构建有价值环节分析
+    
+    返回: {"tiers": [{"tier": int, "label": str, "color": str, "stocks": [...], "logic": str}], "watch_direction": str}
+    """
+    stocks = ind.get("stocks", [])
+    if not stocks:
+        return {"tiers": [], "watch_direction": ""}
+    
+    l2 = ind.get("l2", "")
+    l1 = ind.get("l1", "")
+    
+    # 计算每只股票的综合得分
+    scored = []
+    for s in stocks:
+        score = 0
+        reasons = []
+        
+        # 连涨天数 (权重高)
+        consec = s.get("consecutive_days", 0)
+        if consec >= 3:
+            score += 30
+            reasons.append(f"连涨{consec}天")
+        elif consec >= 2:
+            score += 20
+            reasons.append(f"连涨{consec}天")
+        elif consec >= 1:
+            score += 10
+        
+        # 量比 (资金强度)
+        vol_ratio = s.get("volume_ratio", 0) or 0
+        if vol_ratio >= 3:
+            score += 25
+            reasons.append(f"量比{vol_ratio:.1f}倍")
+        elif vol_ratio >= 2:
+            score += 15
+            reasons.append(f"量比{vol_ratio:.1f}倍")
+        elif vol_ratio >= 1.5:
+            score += 8
+        
+        # 60日分位 (位置)
+        pct60 = s.get("percentile_60d", 0) or 0
+        if pct60 >= 80:
+            score += 15
+            reasons.append("60日高位")
+        elif pct60 >= 60:
+            score += 8
+        elif pct60 <= 20:
+            score += 5
+            reasons.append("60日低位")
+        
+        # 250日分位
+        pct250 = s.get("percentile_250d", 0) or 0
+        if pct250 >= 80:
+            score += 10
+        elif pct250 <= 20:
+            score += 5
+            reasons.append("250日低位")
+        
+        # 涨幅
+        pct = s.get("changepercent", 0) or 0
+        if pct >= 9.5:
+            score += 20
+            reasons.append("涨停")
+        elif pct >= 7:
+            score += 15
+        elif pct >= 5:
+            score += 10
+        
+        # 换手率
+        turnover = s.get("turnoverrate", 0) or 0
+        if turnover >= 10:
+            score += 10
+            reasons.append(f"换手{turnover:.1f}%")
+        
+        scored.append({
+            "code": s.get("code", ""),
+            "name": s.get("name", ""),
+            "score": score,
+            "reasons": reasons,
+            "changepercent": pct,
+            "consecutive_days": consec,
+        })
+    
+    # 按得分排序
+    scored.sort(key=lambda x: x["score"], reverse=True)
+    
+    # 分梯队
+    tiers = []
+    
+    # 第一梯队: 得分>=50 或 涨停+连涨
+    tier1 = [s for s in scored if s["score"] >= 50 or (s["changepercent"] >= 9.5 and s["consecutive_days"] >= 2)]
+    if tier1:
+        tiers.append({
+            "tier": 1,
+            "label": "核心受益",
+            "color": "tier-1",
+            "stocks": tier1[:5],
+            "logic": "资金持续流入+趋势确认，短线动能最强",
+        })
+    
+    # 第二梯队: 得分30-50 或 放量突破
+    tier2 = [s for s in scored if s not in tier1 and (s["score"] >= 30 or s.get("volume_ratio", 0) >= 2.5)]
+    if tier2:
+        tiers.append({
+            "tier": 2,
+            "label": "弹性标的",
+            "color": "tier-2",
+            "stocks": tier2[:5],
+            "logic": "放量启动或补涨逻辑，关注确认信号",
+        })
+    
+    # 第三梯队: 其余
+    tier3 = [s for s in scored if s not in tier1 and s not in tier2]
+    if tier3:
+        tiers.append({
+            "tier": 3,
+            "label": "跟涨观察",
+            "color": "tier-3",
+            "stocks": tier3[:5],
+            "logic": "板块联动或低位补涨，需等待催化",
+        })
+    
+    # 观察方向
+    watch_direction = _generate_watch_direction(l1, l2, stocks)
+    
+    return {"tiers": tiers, "watch_direction": watch_direction}
+
+
+def _generate_watch_direction(l1, l2, stocks):
+    """基于行业生成观察方向建议"""
+    # 根据行业特征给出方向性建议
+    direction_map = {
+        "半导体": "关注上游设备/材料国产替代进展，以及下游AI/汽车需求拉动",
+        "PCB": "关注AI服务器用板需求增量、高端HDI产能扩张节奏",
+        "光伏": "关注产业链价格触底信号、海外订单恢复情况",
+        "风电": "关注海风项目开工节奏、大兆瓦机型渗透率提升",
+        "锂电": "关注固态电池产业化进度、储能需求放量",
+        "新能源车": "关注智驾渗透率提升、出口放量节奏",
+        "汽车零部件": "关注智能化(线控底盘/空悬)渗透率、海外产能布局",
+        "化工": "关注原油价格传导、下游需求复苏节奏",
+        "医药": "关注创新药管线进展、集采政策边际变化",
+        "军工": "关注订单落地节奏、新型号批产进度",
+        "消费电子": "关注AI终端渗透率、新品发布周期",
+        "电力运营": "关注电力市场化改革、绿电交易溢价",
+        "白酒": "关注批价走势、库存去化进度",
+        "房地产": "关注政策放松力度、销售数据拐点",
+        "证券": "关注市场成交量中枢、政策催化(并购重组/降佣)",
+        "人工智能": "关注大模型应用落地、算力需求持续性",
+        "软件": "关注信创订单节奏、AI+应用商业化进展",
+        "通信": "关注5G-A/6G技术演进、算力网络建设",
+        "汽车": "关注智驾渗透率、出口放量节奏",
+    }
+    
+    # 先匹配二级行业，再匹配一级
+    base = direction_map.get(l2, "")
+    if not base:
+        base = direction_map.get(l1, f"关注{l2}板块龙头的业绩兑现与估值切换")
+    
+    # 根据股票特征补充
+    avg_pct = sum(s.get("changepercent", 0) for s in stocks) / max(len(stocks), 1)
+    high_vol = sum(1 for s in stocks if (s.get("volume_ratio", 0) or 0) >= 2)
+    
+    if high_vol >= len(stocks) * 0.5:
+        base += "；板块整体放量，资金关注度较高"
+    if avg_pct >= 8:
+        base += "；短线涨幅较大，注意追高风险"
+    
+    return base
 
 
 def classify_stock(business_text):
@@ -546,7 +906,7 @@ def run(verbose=True):
     
     # 4. 获取前5大行业的详细指标
     if verbose:
-        print("\n[4/4] 获取前5大行业的详细指标...")
+        print("\n[4/5] 获取前5大行业的详细指标...")
     
     top5_industries = []
     for l1_l2, group in sorted_l2[:5]:
@@ -563,6 +923,9 @@ def run(verbose=True):
             "count": len(group),
             "stocks": stocks_with_indicators,
         })
+    
+    # 5. 获取top5行业的新闻动态
+    top5_industries = fetch_industry_news(top5_industries, verbose=verbose)
     
     # 构建结果
     result = {

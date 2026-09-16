@@ -525,576 +525,107 @@
   </div>
 </div>
 
-{% if ind.l2 == 'PCB' %}
-<!-- PCB行业分析信息 -->
-<!-- 核心催化 -->
+{% if ind.news and ind.news | length > 0 %}
+<!-- 行业动态 (动态生成) -->
 <div class="section">
   <div class="section-title">
-    <span class="icon">🔥</span> 核心催化
-  </div>
-  <div class="catalyst-card">
-    <div class="catalyst-main">
-      <h3 class="catalyst-title">三大催化主线</h3>
-      <ul class="catalyst-list">
-        <li>
-          <strong>AI服务器需求爆发：</strong>2026年全球AI服务器出货量预计突破200万台，拉动高端PCB需求增长超110%；单台AI服务器PCB价值量是普通服务器的近10倍
-        </li>
-        <li>
-          <strong>高端产能扩张潮：</strong>PCB上市公司高端产能规划投资超800亿元，全球扩产规划达1012亿元，新增产能2026下半年至2028年集中释放（18层以上高多层板、高阶HDI、IC载板）
-        </li>
-        <li>
-          <strong>国产替代加速：</strong>高端PCB油墨国产化率&lt;15%，高端干膜光刻胶国产化率&lt;10%，内资份额持续提升
-        </li>
-      </ul>
-    </div>
-    <div class="catalyst-global">
-      <h4>海外市场规模</h4>
-      <div class="global-stats">
-        <div class="stat-item">
-          <div class="stat-value">126.5亿</div>
-          <div class="stat-label">2025年AI Server PCB市场（美元）</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">678.4亿</div>
-          <div class="stat-label">2033年预测（CAGR 23%）</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 行业动态 -->
-<div class="section">
-  <div class="section-title">
-    <span class="icon">🌍</span> 行业动态
+    <span class="icon">📰</span> {{ ind.l2 }} · 近期动态
   </div>
   <div class="overseas-card">
+    {% for n in ind.news[:6] %}
     <div class="news-item">
-      <div class="news-date">9月13日</div>
+      <div class="news-date">{{ n.date }}</div>
       <div class="news-content">
-        <strong>鹏鼎控股砸300亿重仓AI</strong> — 全球PCB龙头大幅加码AI高端产能
+        <strong>{{ n.title }}</strong>
+        {% if n.source %}<span style="color: var(--text-muted); font-size: 11px;"> — {{ n.source }}</span>{% endif %}
       </div>
     </div>
-    <div class="news-item">
-      <div class="news-date">9月8日</div>
-      <div class="news-content">
-        <strong>科翔股份拟砸20亿布局AI算力PCB</strong> — 新增高端产能建设
-      </div>
-    </div>
-    <div class="news-item">
-      <div class="news-date">9月6日</div>
-      <div class="news-content">
-        <strong>高盛大幅上调AI服务器PCB预测</strong> — 2028年市场规模达840亿美元，CCL达480亿美元
-      </div>
-    </div>
-    <div class="news-item">
-      <div class="news-date">9月4日</div>
-      <div class="news-content">
-        <strong>金像电投资138亿新台币扩建中坜厂</strong> — 抢占AI服务器PCB机遇
-      </div>
-    </div>
-    <div class="news-item">
-      <div class="news-date">8月12日</div>
-      <div class="news-content">
-        <strong>PCB短缺加剧</strong> — Electronics Weekly报道全球PCB供应紧张态势恶化
-      </div>
-    </div>
-    <div class="news-item">
-      <div class="news-date">7月28日</div>
-      <div class="news-content">
-        <strong>AI数据中心消耗PCB，中国交货期延至2028年</strong> — Evertiq报道产能紧张持续
-      </div>
-    </div>
-    <div class="news-item">
-      <div class="news-date">7月9日</div>
-      <div class="news-content">
-        <strong>中国PCB厂商创纪录投资</strong> — TrendForce：胜宏科技一季度资本支出同比增近5倍
-      </div>
-    </div>
-    <div class="news-item">
-      <div class="news-date">7月8日</div>
-      <div class="news-content">
-        <strong>南华早报：中国电路板厂商资本支出推向纪录高位</strong> — 以迎合AI热潮
-      </div>
-    </div>
-    <div class="news-item">
-      <div class="news-date">6月23日</div>
-      <div class="news-content">
-        <strong>台湾Q1 PCB产出创纪录</strong> — 达2456亿新台币，AI服务器需求驱动
-      </div>
-    </div>
+    {% endfor %}
   </div>
 </div>
+{% endif %}
 
-<!-- 近期行情回顾 -->
+{% if ind.catalyst and ind.catalyst | length > 0 %}
+<!-- 核心催化 (动态生成) -->
+<div class="catalyst-card">
+  <div class="catalyst-title">🔥 核心催化</div>
+  {% for c in ind.catalyst %}
+  <div style="margin-bottom: 12px;">
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+      <span style="background: rgba(248,81,73,0.15); color: var(--red); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">{{ c.theme }}</span>
+      <span style="font-size: 11px; color: var(--text-muted);">{{ c.count }}条相关</span>
+    </div>
+    <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.6; padding-left: 4px;">
+      {{ c.summary }}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if ind.timeline and ind.timeline | length > 0 %}
+<!-- 行情回顾 (动态生成) -->
 <div class="section">
   <div class="section-title">
     <span class="icon">📈</span> 近期行情回顾
   </div>
   <div class="timeline-card">
-    <div class="timeline-item">
-      <div class="timeline-date">9月7日</div>
+    {% for t in ind.timeline %}
+    <div class="timeline-item{% if t.is_highlight %} highlight{% endif %}">
+      <div class="timeline-date">{{ t.date }}</div>
       <div class="timeline-content">
-        <div class="timeline-title">板块启动</div>
-        <div class="timeline-desc">PCB板块单日涨约5%，资金由净流出转为持续净流入，深南电路等核心标的涨停</div>
-      </div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-date">9月8日</div>
-      <div class="timeline-content">
-        <div class="timeline-title">中京电子涨停</div>
-        <div class="timeline-desc">定增落地+高端PCB+AI算力概念</div>
-      </div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-date">9月10日</div>
-      <div class="timeline-content">
-        <div class="timeline-title">超声电子涨停</div>
-        <div class="timeline-desc">AI服务器+高端PCB+业绩增长</div>
-      </div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-date">9月11日</div>
-      <div class="timeline-content">
-        <div class="timeline-title">多股涨停</div>
-        <div class="timeline-desc">澳弘电子、骏亚科技涨停（PCB产能落地+AI赛道+海外布局）</div>
-      </div>
-    </div>
-    <div class="timeline-item highlight">
-      <div class="timeline-date">{{ data.date }}</div>
-      <div class="timeline-content">
-        <div class="timeline-title">板块高潮</div>
-        <div class="timeline-desc">科翔股份、满坤科技、超声电子、嘉立创、天津普林等多股涨停，板块超10只个股同步上涨</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 有价值环节分析 -->
-<div class="section">
-  <div class="section-title">
-    <span class="icon">🎯</span> 有价值环节分析
-  </div>
-  <div class="value-analysis-card">
-    <div class="value-tier">
-      <div class="tier-header tier-1">
-        <span class="tier-badge">第一梯队</span>
-        <span class="tier-name">AI服务器PCB核心标的</span>
-      </div>
-      <div class="tier-stocks">
-        <div class="stock-highlight">
-          <span class="sh-name">满坤科技</span>
-          <span class="sh-code">301132</span>
-          <span class="sh-reason">高端HDI+AI服务器订单饱满</span>
+        {% for e in t.events[:2] %}
+        <div class="timeline-title">{{ e.title[:60] }}{% if e.title | length > 60 %}...{% endif %}</div>
+        {% if e.stocks and e.stocks | length > 0 %}
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+          提及: {% for s in e.stocks[:3] %}{{ s }}{% if not loop.last %}、{% endif %}{% endfor %}
         </div>
-        <div class="stock-highlight">
-          <span class="sh-name">科翔股份</span>
-          <span class="sh-code">300903</span>
-          <span class="sh-reason">高多层板产能扩张+AI算力客户</span>
-        </div>
-        <div class="stock-highlight">
-          <span class="sh-name">超声电子</span>
-          <span class="sh-code">000823</span>
-          <span class="sh-reason">AI服务器+高端PCB+业绩增长</span>
-        </div>
+        {% endif %}
+        {% if not loop.last %}<div style="height: 6px;"></div>{% endif %}
+        {% endfor %}
       </div>
     </div>
-    <div class="value-tier">
-      <div class="tier-header tier-2">
-        <span class="tier-badge">第二梯队</span>
-        <span class="tier-name">产能释放+新赛道拓展</span>
-      </div>
-      <div class="tier-stocks">
-        <div class="stock-highlight">
-          <span class="sh-name">威尔高</span>
-          <span class="sh-code">301251</span>
-          <span class="sh-reason">新产能爬坡+新兴赛道</span>
-        </div>
-        <div class="stock-highlight">
-          <span class="sh-name">嘉立创</span>
-          <span class="sh-code">001232</span>
-          <span class="sh-reason">PCB打样龙头+AI订单增长</span>
-        </div>
-        <div class="stock-highlight">
-          <span class="sh-name">天津普林</span>
-          <span class="sh-code">002134</span>
-          <span class="sh-reason">业绩高增+新产能释放+AI电源</span>
-        </div>
-      </div>
-    </div>
-    <div class="value-tier">
-      <div class="tier-header tier-3">
-        <span class="tier-badge">关注方向</span>
-        <span class="tier-name">上游设备与材料国产替代</span>
-      </div>
-      <div class="tier-desc">
-        PCB"半导体化"趋势下，设备量价齐升，感光干膜、高端油墨国产替代空间大。重点关注泰国基地、珠海基地等新产能爬坡企业的业绩弹性。
-      </div>
-    </div>
+    {% endfor %}
   </div>
 </div>
 {% endif %}
 
-{% if ind.l2 == '零部件' %}
-<!-- 汽车零部件行业分析信息 -->
-<!-- 核心催化 -->
-<div class="section">
-  <div class="section-title">
-    <span class="icon">🔥</span> 核心催化
-  </div>
-  <div class="catalyst-card">
-    <div class="catalyst-main">
-      <h3 class="catalyst-title">三大催化主线</h3>
-      <ul class="catalyst-list">
-        <li>
-          <strong>智能驾驶政策落地：</strong>工信部推进L3级自动驾驶准入，智能网联新能源汽车产业发展"十五五"规划发布，政策红利持续释放
-        </li>
-        <li>
-          <strong>新能源汽车渗透率提升：</strong>2026年新能源汽车渗透率预计突破50%，带动零部件需求持续增长，特别是智能座舱、ADAS相关零部件
-        </li>
-        <li>
-          <strong>出海加速：</strong>中国汽车零部件企业加速全球化布局，海外订单增长显著，部分企业海外收入占比突破30%
-        </li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-<!-- 行业动态 -->
-<div class="section">
-  <div class="section-title">
-    <span class="icon">🌍</span> 行业动态
-  </div>
-  <div class="overseas-card">
-    <div class="news-item">
-      <div class="news-date">9月14日</div>
-      <div class="news-content">
-        <strong>A股汽车板块集体涨停</strong> — 一份万字文件藏着万亿机遇，智能驾驶政策超预期
-      </div>
-    </div>
-    <div class="news-item">
-      <div class="news-date">9月11日</div>
-      <div class="news-content">
-        <strong>工信部发布会介绍智能网联新能源汽车产业</strong> — 装备工业一司司长郭守刚出席，介绍高质量发展情况
-      </div>
-    </div>
-    <div class="news-item">
-      <div class="news-date">9月7日</div>
-      <div class="news-content">
-        <strong>日盈电子涨停</strong> — 汽车电子+智能驾驶+资金布局，成为板块领涨标的
-      </div>
-    </div>
-    <div class="news-item">
-      <div class="news-date">9月</div>
-      <div class="news-content">
-        <strong>零跑汽车发布全新架构辅助驾驶方案</strong> — 技术突破带动产业链估值提升
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 近期行情回顾 -->
-<div class="section">
-  <div class="section-title">
-    <span class="icon">📈</span> 近期行情回顾
-  </div>
-  <div class="timeline-card">
-    <div class="timeline-item">
-      <div class="timeline-date">9月7日</div>
-      <div class="timeline-content">
-        <div class="timeline-title">板块启动</div>
-        <div class="timeline-desc">日盈电子涨停，汽车电子+智能驾驶概念领涨</div>
-      </div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-date">9月11日</div>
-      <div class="timeline-content">
-        <div class="timeline-title">政策催化</div>
-        <div class="timeline-desc">工信部发布会介绍智能网联新能源汽车产业，L3级自动驾驶准入推进</div>
-      </div>
-    </div>
-    <div class="timeline-item highlight">
-      <div class="timeline-date">{{ data.date }}</div>
-      <div class="timeline-content">
-        <div class="timeline-title">板块高潮</div>
-        <div class="timeline-desc">汽车板块集体涨停，智能驾驶政策超预期，万亿机遇开启</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 有价值环节分析 -->
+{% if ind.value_chain and ind.value_chain.tiers and ind.value_chain.tiers | length > 0 %}
+<!-- 有价值环节分析 (动态生成) -->
 <div class="section">
   <div class="section-title">
     <span class="icon">🎯</span> 有价值环节分析
   </div>
   <div class="value-analysis-card">
+    {% for tier in ind.value_chain.tiers %}
     <div class="value-tier">
-      <div class="tier-header tier-1">
-        <span class="tier-badge">第一梯队</span>
-        <span class="tier-name">智能驾驶核心标的</span>
+      <div class="tier-header {{ tier.color }}">
+        <span class="tier-badge">第{{ tier.tier }}梯队</span>
+        <span style="font-size: 13px; font-weight: 600; color: var(--text-primary);">{{ tier.label }}</span>
+        <span style="font-size: 11px; color: var(--text-muted); margin-left: auto;">{{ tier.stocks | length }}只</span>
       </div>
-      <div class="tier-stocks">
-        <div class="stock-highlight">
-          <span class="sh-name">昌红科技</span>
-          <span class="sh-code">300151</span>
-          <span class="sh-reason">汽车电子+智能座舱</span>
-        </div>
-        <div class="stock-highlight">
-          <span class="sh-name">欧莱新材</span>
-          <span class="sh-code">688530</span>
-          <span class="sh-reason">新能源汽车材料</span>
+      <div style="padding: 10px 16px;">
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">{{ tier.logic }}</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+          {% for s in tier.stocks %}
+          <div style="background: rgba(255,255,255,0.05); border-radius: 6px; padding: 6px 10px; font-size: 12px;">
+            <span style="font-weight: 600; color: var(--text-primary);">{{ s.name }}</span>
+            <span style="color: var(--text-muted); font-size: 10px; margin-left: 4px;">{{ s.code }}</span>
+            {% if s.reasons %}
+            <div style="font-size: 10px; color: var(--accent); margin-top: 2px;">{{ s.reasons[:2] | join(' · ') }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
         </div>
       </div>
     </div>
-    <div class="value-tier">
-      <div class="tier-header tier-2">
-        <span class="tier-badge">关注方向</span>
-        <span class="tier-name">ADAS+智能座舱+出海</span>
-      </div>
-      <div class="tier-desc">
-        重点关注智能驾驶感知层（激光雷达、摄像头）、决策层（域控制器）、执行层（线控底盘）三大环节，以及具备海外产能布局的零部件企业。
-      </div>
+    {% endfor %}
+    {% if ind.value_chain.watch_direction %}
+    <div style="padding: 12px 16px; border-top: 1px solid var(--card-border); background: rgba(88,166,255,0.05);">
+      <div style="font-size: 11px; font-weight: 600; color: var(--accent); margin-bottom: 4px;">👀 观察方向</div>
+      <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">{{ ind.value_chain.watch_direction }}</div>
     </div>
-  </div>
-</div>
-{% endif %}
-
-{% if ind.l2 == '化工' %}
-<!-- 基础化工行业分析信息 -->
-<!-- 核心催化 -->
-<div class="section">
-  <div class="section-title">
-    <span class="icon">🔥</span> 核心催化
-  </div>
-  <div class="catalyst-card">
-    <div class="catalyst-main">
-      <h3 class="catalyst-title">三大催化主线</h3>
-      <ul class="catalyst-list">
-        <li>
-          <strong>供给收缩：</strong>环保政策趋严，部分化工子行业产能出清，供给端持续收缩，产品价格企稳回升
-        </li>
-        <li>
-          <strong>需求复苏：</strong>下游房地产、基建需求边际改善，化工品需求端逐步回暖，库存周期进入补库阶段
-        </li>
-        <li>
-          <strong>成本支撑：</strong>原油价格高位运行，化工品成本支撑较强，部分产品价差扩大，盈利改善明显
-        </li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-<!-- 行业动态 -->
-<div class="section">
-  <div class="section-title">
-    <span class="icon">🌍</span> 行业动态
-  </div>
-  <div class="overseas-card">
-    <div class="news-item">
-      <div class="news-date">9月</div>
-      <div class="news-content">
-        <strong>化工品涨价潮</strong> — 多个子行业产品价格上调，MDI、钛白粉、纯碱等领涨
-      </div>
-    </div>
-    <div class="news-item">
-      <div class="news-date">9月</div>
-      <div class="news-content">
-        <strong>环保限产加码</strong> — 部分地区化工企业限产停产，供给端进一步收缩
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 有价值环节分析 -->
-<div class="section">
-  <div class="section-title">
-    <span class="icon">🎯</span> 有价值环节分析
-  </div>
-  <div class="value-analysis-card">
-    <div class="value-tier">
-      <div class="tier-header tier-1">
-        <span class="tier-badge">关注方向</span>
-        <span class="tier-name">涨价+供给侧改革</span>
-      </div>
-      <div class="tier-desc">
-        重点关注具备涨价逻辑的化工子行业（MDI、钛白粉、纯碱、农药等），以及受益于供给侧改革的龙头企业。
-      </div>
-    </div>
-  </div>
-</div>
-{% endif %}
-
-{% if ind.l2 == '工程机械' %}
-<!-- 工程机械行业分析信息 -->
-<!-- 核心催化 -->
-<div class="section">
-  <div class="section-title">
-    <span class="icon">🔥</span> 核心催化
-  </div>
-  <div class="catalyst-card">
-    <div class="catalyst-main">
-      <h3 class="catalyst-title">三大催化主线</h3>
-      <ul class="catalyst-list">
-        <li>
-          <strong>基建投资加速：</strong>专项债发行提速，重大基建项目开工率提升，工程机械需求端显著改善
-        </li>
-        <li>
-          <strong>设备更新周期：</strong>上一轮设备销售高峰（2019-2020年）进入更新换代期，替换需求释放
-        </li>
-        <li>
-          <strong>出口高增长：</strong>工程机械出口持续高增，海外市场拓展顺利，部分企业出口增速超50%
-        </li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-<!-- 行业动态 -->
-<div class="section">
-  <div class="section-title">
-    <span class="icon">🌍</span> 行业动态
-  </div>
-  <div class="overseas-card">
-    <div class="news-item">
-      <div class="news-date">9月</div>
-      <div class="news-content">
-        <strong>基建项目集中开工</strong> — 多地重大基础设施项目集中开工，工程机械需求旺盛
-      </div>
-    </div>
-    <div class="news-item">
-      <div class="news-date">9月</div>
-      <div class="news-content">
-        <strong>挖掘机销量回暖</strong> — 8月挖掘机销量同比增长，国内需求企稳回升
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 有价值环节分析 -->
-<div class="section">
-  <div class="section-title">
-    <span class="icon">🎯</span> 有价值环节分析
-  </div>
-  <div class="value-analysis-card">
-    <div class="value-tier">
-      <div class="tier-header tier-1">
-        <span class="tier-badge">关注方向</span>
-        <span class="tier-name">主机厂+核心零部件</span>
-      </div>
-      <div class="tier-desc">
-        重点关注挖掘机、起重机等主机厂龙头，以及液压件、发动机等核心零部件国产替代企业。
-      </div>
-    </div>
-  </div>
-</div>
-{% endif %}
-
-{% if ind.l2 == '信息安全' %}
-<!-- 信息安全行业分析信息 -->
-<!-- 核心催化 -->
-<div class="section">
-  <div class="section-title">
-    <span class="icon">🔥</span> 核心催化
-  </div>
-  <div class="catalyst-card">
-    <div class="catalyst-main">
-      <h3 class="catalyst-title">三大催化主线</h3>
-      <ul class="catalyst-list">
-        <li>
-          <strong>数据安全法落地：</strong>数据安全法、个人信息保护法实施细则出台，企业合规需求激增，信息安全投入加速
-        </li>
-        <li>
-          <strong>信创替代加速：</strong>党政、金融、电信等关键行业信创替代进入深水区，国产信息安全产品需求旺盛
-        </li>
-        <li>
-          <strong>AI安全新需求：</strong>大模型应用带来新的安全挑战，AI安全防护、数据隐私计算等新赛道快速成长
-        </li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-<!-- 行业动态 -->
-<div class="section">
-  <div class="section-title">
-    <span class="icon">🌍</span> 行业动态
-  </div>
-  <div class="overseas-card">
-    <div class="news-item">
-      <div class="news-date">9月</div>
-      <div class="news-content">
-        <strong>数据安全合规需求激增</strong> — 企业加大信息安全投入，安全产品和服务需求旺盛
-      </div>
-    </div>
-    <div class="news-item">
-      <div class="news-date">9月</div>
-      <div class="news-content">
-        <strong>信创替代进入深水区</strong> — 金融、电信等关键行业国产化率快速提升
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 有价值环节分析 -->
-<div class="section">
-  <div class="section-title">
-    <span class="icon">🎯</span> 有价值环节分析
-  </div>
-  <div class="value-analysis-card">
-    <div class="value-tier">
-      <div class="tier-header tier-1">
-        <span class="tier-badge">关注方向</span>
-        <span class="tier-name">数据安全+信创+AI安全</span>
-      </div>
-      <div class="tier-desc">
-        重点关注数据安全、隐私计算、信创安全、AI安全等高景气赛道，以及具备核心技术优势的龙头企业。
-      </div>
-    </div>
-  </div>
-</div>
-{% endif %}
-
-{% if ind.l2 == '化学制药' %}
-<!-- 化学制药行业分析信息 -->
-<!-- 核心催化 -->
-<div class="section">
-  <div class="section-title">
-    <span class="icon">🔥</span> 核心催化
-  </div>
-  <div class="catalyst-card">
-    <div class="catalyst-main">
-      <h3 class="catalyst-title">三大催化主线</h3>
-      <ul class="catalyst-list">
-        <li>
-          <strong>集采政策边际缓和：</strong>集采规则优化，降幅趋缓，企业盈利预期改善
-        </li>
-        <li>
-          <strong>创新药出海：</strong>国产创新药海外授权交易活跃，License-out金额创新高
-        </li>
-        <li>
-          <strong>需求刚性：</strong>人口老龄化加速，医药需求持续增长，化学制药作为基础用药需求稳定
-        </li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-<!-- 有价值环节分析 -->
-<div class="section">
-  <div class="section-title">
-    <span class="icon">🎯</span> 有价值环节分析
-  </div>
-  <div class="value-analysis-card">
-    <div class="value-tier">
-      <div class="tier-header tier-1">
-        <span class="tier-badge">关注方向</span>
-        <span class="tier-name">创新药+原料药+制剂出口</span>
-      </div>
-      <div class="tier-desc">
-        重点关注具备创新药研发能力的企业、原料药制剂一体化企业，以及制剂出口能力强的企业。
-      </div>
-    </div>
+    {% endif %}
   </div>
 </div>
 {% endif %}
