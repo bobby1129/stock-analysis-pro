@@ -28,7 +28,7 @@ from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import load_config
-from collectors.em_concept import fetch_concept_list
+from collectors.ths_concept import fetch_ths_concept_fund_flow, fetch_ths_concept_by_change
 
 # ── 全局请求会话 ──
 SESSION = requests.Session()
@@ -861,16 +861,26 @@ def run(date=None, verbose=True):
             print(f"  ⚠️ 涨跌家数异常: {e}", file=sys.stderr)
         result['breadth'] = {"up": 0, "down": 0, "flat": 0, "limit_up": 0, "limit_down": 0}
 
-    # 3. 概念资金流 Top10
+    # 3. 概念资金流 Top10 + 涨幅 Top10 (同花顺)
     if verbose:
         print("💰 采集概念资金流...", file=sys.stderr)
     try:
-        concepts = fetch_concept_list(top_n=10)
-        result['concepts'] = concepts
+        concepts_fund = fetch_ths_concept_fund_flow(top_n=10)
+        result['concepts_fund'] = concepts_fund
     except Exception as e:
         if verbose:
             print(f"  ⚠️ 概念资金流异常: {e}", file=sys.stderr)
-        result['concepts'] = []
+        result['concepts_fund'] = []
+    
+    if verbose:
+        print("📈 采集概念涨幅榜...", file=sys.stderr)
+    try:
+        concepts_change = fetch_ths_concept_by_change(top_n=10)
+        result['concepts_change'] = concepts_change
+    except Exception as e:
+        if verbose:
+            print(f"  ⚠️ 概念涨幅榜异常: {e}", file=sys.stderr)
+        result['concepts_change'] = []
 
     time.sleep(0.5)
 
@@ -980,14 +990,25 @@ def format_report(data: dict) -> str:
         lines.append(f"  上涨: {breadth['up']}  下跌: {breadth['down']}  平盘: {breadth.get('flat', 0)}")
         lines.append(f"  涨停: {breadth.get('limit_up', 0)}  跌停: {breadth.get('limit_down', 0)}")
 
-    # 概念资金流
-    concepts = data.get('concepts', [])
-    if concepts:
-        lines.append(f"\n【概念资金流 Top10】")
-        for i, c in enumerate(concepts, 1):
-            inflow = c.get('net_inflow', 0) / 1e8 if c.get('net_inflow') else 0
+    # 概念资金流 Top10
+    concepts_fund = data.get('concepts_fund', [])
+    if concepts_fund:
+        lines.append(f"\n【概念资金净流入 Top10】")
+        for i, c in enumerate(concepts_fund, 1):
+            net = c.get('net', 0)
             pct = c.get('change_pct', 0)
-            lines.append(f"  {i:2d}. {c['name']:<8s} 涨跌{pct:+.2f}% 净流入{inflow:+.2f}亿")
+            leader = c.get('leader', '')
+            lines.append(f"  {i:2d}. {c['name']:<10s} 净流入{net:>6.2f}亿 涨跌{pct:>5.2f}% 领涨:{leader}")
+    
+    # 概念涨幅 Top10
+    concepts_change = data.get('concepts_change', [])
+    if concepts_change:
+        lines.append(f"\n【概念涨幅 Top10】")
+        for i, c in enumerate(concepts_change, 1):
+            net = c.get('net', 0)
+            pct = c.get('change_pct', 0)
+            leader = c.get('leader', '')
+            lines.append(f"  {i:2d}. {c['name']:<10s} 涨跌{pct:>5.2f}% 净流入{net:>6.2f}亿 领涨:{leader}")
 
     # 指数短线指引
     indices_with_ti = [idx for idx in indices if idx.get('technical_indicators')]

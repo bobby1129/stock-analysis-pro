@@ -74,6 +74,7 @@ CLI command
 | `info.py` | 56 | 东财F10 + 同花顺(akshare) | 公司全称/行业/实控人/法人/主营业务/产品类型/公司简介 | ✅ |
 | `sentiment.py` | 280 | 东财股吧+互动易+新闻搜索+分析师评级 | 股吧热帖 + 互动易问答 + 东财新闻 + 分析师评级(reportapi) | ✅ |
 | `em_concept.py` | 797 | 东财push2 (HTTP API主链路 + Playwright辅助F10) | 概念列表(按资金流入排序) + 成分股(按成交额,前100只) + 离线增量缓存 | ✅ |
+| `ths_concept.py` | ~90 | 同花顺 data.10jqka.com.cn | 概念资金流向(净流入/流出) + 概念涨幅榜，无需Cookie，不触发滑块 | ✅ |
 | `em_browser.py` | 376 | Playwright Chromium | 共享浏览器会话(F10/股吧/搜索/研报)，避免重复启动浏览器 | ✅ |
 | `concept.py` | 215 | 东财push2 HTTP API | 概念排行 + 成分股(100只) + 新闻 | ✅ |
 | `macro.py` | 354 | akshare + 新浪 | global_macro(美债/利率) + 新浪(金银油) + domestic_macro(CPI/PMI/M2/LPR) + zt_pool(涨停复盘) | ✅ |
@@ -117,7 +118,7 @@ CLI command
 |------|------|----------|------|
 | `stock_analysis.py` | 175 | 行情→公司概况→技术面→基本面→资金面→舆情面→估值→综合评分→业务深度分析(LLM) | ✅ |
 | `concept_analysis.py` | 340 | 概念排行→趋势定性(100只成分股,剔除北交所)→新闻归因→机会筛选(涨跌分布+综合评分), 含地域过滤+龙头去重 | ✅ |
-| `daily_report.py` | 619 | 每日复盘: 指数行情→涨跌家数→概念资金流→宏观数据→持仓分析→自选股→格式化输出 | ✅ |
+| `daily_report.py` | 619 | 每日复盘: 指数行情→涨跌家数→概念板块TOP10(同花顺资金净流入+涨幅)→宏观数据→持仓分析→自选股→格式化输出 | ✅ |
 | `industry_screener.py` | ~500 | 行业异动筛选: 涨幅>5%股票→同花顺F10主营业务→二级行业归类→Top5行业详细指标 | ✅ |
 | `options_scan.py` | ~270 | ETF期权全市场扫描: 合约数据→HV计算→D/R/S风险收益排序→卖方Top10→买方Top10(BS胜率) | ✅ |
 
@@ -237,6 +238,7 @@ vim config/config.yaml
 | 东财搜索 | `search-api-web.eastmoney.com` | 概念新闻搜索 | JSONP格式, 需剥离 `jQuery()` 包装 |
 | 东财分析师评级 | `reportapi.eastmoney.com` | 机构评级数据 | JSON格式 |
 | 东财push2 | `push2.eastmoney.com` | 概念列表+成分股 | HTTP API + Cookie (主链路, 1s间隔) / Playwright (F10等动态页面辅助) |
+| 同花顺概念 | `data.10jqka.com.cn` | 概念资金流向+涨幅榜 | 无需Cookie，不触发滑块，GBK编码 |
 
 ### 4.2 Playwright (浏览器自动化)
 

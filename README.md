@@ -11,7 +11,7 @@ A股全维度分析 + ETF 期权分析工具 — 个股深度分析、概念板�
 每日收盘后自动生成综合报告，覆盖：
 - **指数概览** — 上证/深证/创业板/科创50 实时行情
 - **涨跌统计** — 涨跌家数、涨停跌停数、赚钱效应分析
-- **概念资金流** — 资金净流入 Top10 概念板块
+- **概念板块 TOP10** — 资金净流入 TOP10 + 涨幅 TOP10（同花顺数据源，无需 Cookie）
 - **持仓跟踪** — 当日持仓盈亏、涨跌、风险提示
 - **自选股监控** — 自选股列表及表现
 
@@ -176,6 +176,7 @@ stock-analysis-pro/
 │   ├── info.py             # 公司F10 (东财)
 │   ├── sentiment.py        # 舆情 (股吧/新闻/互动易)
 │   ├── em_concept.py       # 概念板块 (HTTP API主链路 + Playwright辅助F10)
+│   ├── ths_concept.py      # 同花顺概念板块 (资金流向/涨幅榜, 无需Cookie)
 │   ├── em_browser.py       # 共享Playwright浏览器会话
 │   ├── macro.py            # 宏观数据 (akshare + 新浪)
 │   ├── options.py          # 期权数据 (新浪hq.sinajs.cn)

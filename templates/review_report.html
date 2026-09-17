@@ -383,22 +383,55 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 </div>
 {% endif %}
 
-{# ── 概念板块资金流入 TOP10 ── #}
-{% set concepts = data.concepts|default([]) %}
-{% if concepts %}
+{# ── 概念资金净流入 TOP10 ── #}
+{% set concepts_fund = data.concepts_fund|default([]) %}
+{% set concepts_change = data.concepts_change|default([]) %}
+{% if concepts_fund or concepts_change %}
 <div class="section">
-<div class="section-title">💰 概念板块资金流入 TOP10</div>
-<div class="flow-list">
-{% for item in data.concepts %}
+<div class="section-title">💰 概念板块 TOP10</div>
+
+{% if concepts_fund %}
+<div style="margin-top: 20px; margin-bottom: 24px;">
+<div style="font-size: 14px; font-weight: 600; color: #333; margin-bottom: 12px; text-align: center;">📊 资金净流入 TOP10</div>
+<div style="display: grid; grid-template-columns: 1fr 80px 90px; gap: 8px; font-size: 12px; color: #999; padding: 8px 12px; border-bottom: 1px solid #e0e0e0; font-weight: 500;">
+<div>概念名称</div>
+<div style="text-align: right;">涨幅</div>
+<div style="text-align: right;">净流入</div>
+</div>
+{% for item in concepts_fund %}
 {% set cp = item.change_pct|default(0) %}
-{% set inflow = item.net_inflow|default(0) / 1e8 %}
-<div class="flow-row">
-<div class="name">{{ item.name }}</div>
-<div class="change {{ 'up' if cp > 0 else 'down' if cp < 0 else '' }}">{{ "{:+.2f}%".format(cp) }}</div>
-<div class="amount">{{ "{:+.2f}".format(inflow) }}亿</div>
+{% set net = item.net|default(0) %}
+{% set leader = item.leader|default('') %}
+<div style="display: grid; grid-template-columns: 1fr 80px 90px; gap: 8px; padding: 10px 12px; border-bottom: 1px solid #f5f5f5; align-items: center;">
+<div style="font-size: 14px; color: #333;">{{ item.name }}<div style="font-size: 11px; color: #999; margin-top: 2px;">领涨: {{ leader }}</div></div>
+<div style="text-align: right; font-size: 13px; font-weight: 500; color: {{ '#e74c3c' if cp > 0 else '#27ae60' if cp < 0 else '#999' }};">{{ "{:+.2f}%".format(cp) }}</div>
+<div style="text-align: right; font-size: 13px; font-weight: 500; color: {{ '#e74c3c' if net > 0 else '#27ae60' if net < 0 else '#999' }};">{{ "{:+.2f}亿".format(net) }}</div>
 </div>
 {% endfor %}
 </div>
+{% endif %}
+
+{% if concepts_change %}
+<div style="margin-bottom: 16px;">
+<div style="font-size: 14px; font-weight: 600; color: #333; margin-bottom: 12px; text-align: center;">📈 涨幅 TOP10</div>
+<div style="display: grid; grid-template-columns: 1fr 80px 90px; gap: 8px; font-size: 12px; color: #999; padding: 8px 12px; border-bottom: 1px solid #e0e0e0; font-weight: 500;">
+<div>概念名称</div>
+<div style="text-align: right;">涨幅</div>
+<div style="text-align: right;">净流入</div>
+</div>
+{% for item in concepts_change %}
+{% set cp = item.change_pct|default(0) %}
+{% set net = item.net|default(0) %}
+{% set leader = item.leader|default('') %}
+<div style="display: grid; grid-template-columns: 1fr 80px 90px; gap: 8px; padding: 10px 12px; border-bottom: 1px solid #f5f5f5; align-items: center;">
+<div style="font-size: 14px; color: #333;">{{ item.name }}<div style="font-size: 11px; color: #999; margin-top: 2px;">领涨: {{ leader }}</div></div>
+<div style="text-align: right; font-size: 13px; font-weight: 500; color: {{ '#e74c3c' if cp > 0 else '#27ae60' if cp < 0 else '#999' }};">{{ "{:+.2f}%".format(cp) }}</div>
+<div style="text-align: right; font-size: 13px; font-weight: 500; color: {{ '#e74c3c' if net > 0 else '#27ae60' if net < 0 else '#999' }};">{{ "{:+.2f}亿".format(net) }}</div>
+</div>
+{% endfor %}
+</div>
+{% endif %}
+
 </div>
 {% endif %}
 
