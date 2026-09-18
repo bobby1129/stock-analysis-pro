@@ -1,0 +1,21 @@
+{
+  "date": "2026-09-18",
+  "timestamp": "2026-09-18T15:09:30.914877",
+  "total_stocks": 0,
+  "distribution": {
+    "limit_up": 0,
+    "up_gt_5": 0,
+    "up_gt_3": 0,
+    "up": 0,
+    "flat": 0,
+    "down": 0,
+    "down_gt_3": 0,
+    "down_gt_5": 0,
+    "limit_down": 0
+  },
+  "sentiment": {
+    "earn_effect": 0,
+    "lose_effect": 0,
+    "up_down_ratio": 0.0
+  }
+}

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    width: 1080px;
+    height: 1920px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #fff;
+    padding: 120px 50px 120px;
+    overflow: hidden;
+}
+.header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+.date {
+    font-size: 28px;
+    color: #888;
+    margin-bottom: 5px;
+}
+.title {
+    font-size: 56px;
+    font-weight: bold;
+    background: linear-gradient(90deg, #ffd700, #ffb700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.section {
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    padding: 25px 30px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,215,0,0.2);
+}
+.section-title {
+    font-size: 34px;
+    color: #ffd700;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(255,215,0,0.3);
+}
+.breadth-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+.breadth-item {
+    text-align: center;
+    padding: 12px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+}
+.breadth-label {
+    font-size: 22px;
+    color: #888;
+    margin-bottom: 5px;
+}
+.breadth-value {
+    font-size: 44px;
+    font-weight: bold;
+}
+.breadth-value.up { color: #ff4757; }
+.breadth-value.down { color: #2ed573; }
+.breadth-value.flat { color: #ffa502; }
+.bar-container {
+    height: 30px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 15px;
+    overflow: hidden;
+    display: flex;
+    margin-top: 10px;
+}
+.bar-up {
+    height: 100%;
+    background: linear-gradient(90deg, #ff4757, #ff6b81);
+}
+.bar-flat {
+    height: 100%;
+    background: linear-gradient(90deg, #ffa502, #ffb74d);
+}
+.bar-down {
+    height: 100%;
+    background: linear-gradient(90deg, #2ed573, #7bed9f);
+}
+.limit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+.limit-item {
+    text-align: center;
+    padding: 15px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+}
+.limit-label {
+    font-size: 24px;
+    color: #888;
+    margin-bottom: 5px;
+}
+.limit-value {
+    font-size: 44px;
+    font-weight: bold;
+}
+.limit-value.zt { color: #ff4757; }
+.limit-value.dt { color: #2ed573; }
+.lb-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    margin-bottom: 6px;
+}
+.lb-level {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffd700;
+    width: 80px;
+}
+.lb-count {
+    font-size: 26px;
+    color: #ff4757;
+    width: 80px;
+    text-align: center;
+}
+.lb-names {
+    font-size: 22px;
+    color: #ccc;
+    flex: 1;
+}
+.vol-chart {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    height: 200px;
+    padding: 10px 0;
+    border-bottom: 2px solid rgba(255,215,0,0.3);
+}
+.vol-bar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 50px;
+}
+.vol-bar {
+    width: 35px;
+    background: linear-gradient(180deg, #ffd700, #ff9500);
+    border-radius: 5px 5px 0 0;
+    min-height: 10px;
+}
+.vol-label {
+    font-size: 16px;
+    color: #888;
+    margin-top: 8px;
+    transform: rotate(-45deg);
+    white-space: nowrap;
+}
+.vol-value {
+    font-size: 14px;
+    color: #ffd700;
+    margin-bottom: 5px;
+}
+.footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 22px;
+    color: #666;
+}
+</style>
+</head>
+<body>
+    <div class="header">
+        <div class="date">2026年09月18日</div>
+        <div class="title">市场情绪日报</div>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">涨跌家数</div>
+        <div class="breadth-grid">
+            <div class="breadth-item">
+                <div class="breadth-label">上涨</div>
+                <div class="breadth-value up">3980</div>
+            </div>
+            <div class="breadth-item">
+                <div class="breadth-label">平盘</div>
+                <div class="breadth-value flat">176</div>
+            </div>
+            <div class="breadth-item">
+                <div class="breadth-label">下跌</div>
+                <div class="breadth-value down">1130</div>
+            </div>
+        </div>
+        <div class="bar-container">
+            <div class="bar-up" style="width: 75.3%"></div>
+            <div class="bar-flat" style="width: 3.3%"></div>
+            <div class="bar-down" style="width: 21.4%"></div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">全市场成交量趋势（亿元）</div>
+        <div class="vol-chart">
+            
+            <div class="vol-bar-container">
+                <div class="vol-bar" style="height:100%"></div>
+                <div class="vol-label">08-31</div>
+                <div class="vol-value">577</div>
+            </div>
+            
+            <div class="vol-bar-container">
+                <div class="vol-bar" style="height:99%"></div>
+                <div class="vol-label">09-01</div>
+                <div class="vol-value">574</div>
+            </div>
+            
+            <div class="vol-bar-container">
+                <div class="vol-bar" style="height:89%"></div>
+                <div class="vol-label">09-02</div>
+                <div class="vol-value">516</div>
+            </div>
+            
+            <div class="vol-bar-container">
+                <div class="vol-bar" style="height:86%"></div>
+                <div class="vol-label">09-03</div>
+                <div class="vol-value">497</div>
+            </div>
+            
+            <div class="vol-bar-container">
+                <div class="vol-bar" style="height:93%"></div>
+                <div class="vol-label">09-04</div>
+                <div class="vol-value">537</div>
+            </div>
+            
+            <div class="vol-bar-container">
+                <div class="vol-bar" style="height:82%"></div>
+                <div class="vol-label">09-07</div>
+                <div class="vol-value">477</div>
+            </div>
+            
+            <div class="vol-bar-container">
+                <div class="vol-bar" style="height:92%"></div>
+                <div class="vol-label">09-08</div>
+                <div class="vol-value">530</div>
+            </div>
+            
+            <div class="vol-bar-container">
+                <div class="vol-bar" style="height:89%"></div>
+                <div class="vol-label">09-09</div>
+                <div class="vol-value">518</div>
+            </div>
+            
+            <div class="vol-bar-container">
+                <div class="vol-bar" style="height:84%"></div>
+                <div class="vol-label">09-10</div>
+                <div class="vol-value">485</div>
+            </div>
+            
+            <div class="vol-bar-container">
+                <div class="vol-bar" style="height:100%"></div>
+                <div class="vol-label">09-11</div>
+                <div class="vol-value">579</div>
+            </div>
+            
+            <div class="vol-bar-container">
+                <div class="vol-bar" style="height:79%"></div>
+                <div class="vol-label">09-14</div>
+                <div class="vol-value">459</div>
+            </div>
+            
+            <div class="vol-bar-container">
+                <div class="vol-bar" style="height:76%"></div>
+                <div class="vol-label">09-15</div>
+                <div class="vol-value">441</div>
+            </div>
+            
+            <div class="vol-bar-container">
+                <div class="vol-bar" style="height:79%"></div>
+                <div class="vol-label">09-16</div>
+                <div class="vol-value">459</div>
+            </div>
+            
+            <div class="vol-bar-container">
+                <div class="vol-bar" style="height:78%"></div>
+                <div class="vol-label">09-17</div>
+                <div class="vol-value">453</div>
+            </div>
+            
+            <div class="vol-bar-container">
+                <div class="vol-bar" style="height:84%"></div>
+                <div class="vol-label">09-18</div>
+                <div class="vol-value">486</div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">涨跌停统计</div>
+        <div class="limit-grid">
+            <div class="limit-item">
+                <div class="limit-label">涨停</div>
+                <div class="limit-value zt">78</div>
+            </div>
+            <div class="limit-item">
+                <div class="limit-label">跌停</div>
+                <div class="limit-value dt">0</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">连板梯队</div>
+        
+        <div class="lb-item">
+            <div class="lb-level">4板</div>
+            <div class="lb-count">2家</div>
+            <div class="lb-names">华瓷股份、锡华科技</div>
+        </div>
+        
+        <div class="lb-item">
+            <div class="lb-level">3板</div>
+            <div class="lb-count">2家</div>
+            <div class="lb-names">内蒙新华、世联行</div>
+        </div>
+        
+        <div class="lb-item">
+            <div class="lb-level">2板</div>
+            <div class="lb-count">7家</div>
+            <div class="lb-names">华软科技、经纬股份、华纺股份、南华生物、龙头股份</div>
+        </div>
+        
+        <div class="lb-item">
+            <div class="lb-level">1板</div>
+            <div class="lb-count">19家</div>
+            <div class="lb-names">百通能源、福龙马、海安集团、中电鑫龙、国脉文化</div>
+        </div>
+        
+    </div>
+    
+    <div class="footer">
+        数据来源：沪深A股 | 仅供参考，不构成投资建议
+    </div>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    width: 1080px;
+    height: 1920px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #fff;
+    padding: 120px 50px 120px;
+    overflow: hidden;
+}
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.date {
+    font-size: 28px;
+    color: #888;
+    margin-bottom: 5px;
+}
+.title {
+    font-size: 56px;
+    font-weight: bold;
+    background: linear-gradient(90deg, #ffd700, #ffb700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.section {
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    padding: 28px 30px;
+    margin-bottom: 25px;
+    border: 1px solid rgba(255,215,0,0.2);
+}
+.section-title {
+    font-size: 32px;
+    color: #ffd700;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(255,215,0,0.3);
+}
+.signal-row {
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+.signal-rank {
+    font-size: 26px;
+    font-weight: bold;
+    color: #ffd700;
+    width: 40px;
+    flex-shrink: 0;
+}
+.signal-name {
+    font-size: 26px;
+    width: 160px;
+    flex-shrink: 0;
+}
+.signal-code {
+    font-size: 22px;
+    color: #888;
+    flex: 1;
+    text-align: center;
+}
+.signal-change {
+    font-size: 26px;
+    font-weight: bold;
+    flex: 1;
+    text-align: center;
+}
+.signal-vol {
+    font-size: 24px;
+    color: #ffa502;
+    flex: 1;
+    text-align: right;
+}
+.lb-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 18px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+.lb-level {
+    font-size: 30px;
+    font-weight: bold;
+    color: #ffd700;
+    width: 90px;
+}
+.lb-count {
+    font-size: 28px;
+    color: #ff4757;
+    width: 80px;
+    text-align: center;
+}
+.lb-names {
+    font-size: 24px;
+    color: #ccc;
+    flex: 1;
+}
+.footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 20px;
+    color: #666;
+}
+</style>
+</head>
+<body>
+    <div class="header">
+        <div class="date">2026年09月18日</div>
+        <div class="title">异常信号捕捉</div>
+    </div>
+    
+    
+        <div class="section">
+            <div class="section-title">⚠️ 放量滞涨（量比>3 涨幅<1%）</div>
+            
+            <div class="signal-row">
+                <div class="signal-rank">1</div>
+                <div class="signal-name">中晶科技</div>
+                <div class="signal-code">003026</div>
+                <div class="signal-change" style="color:#ff4757">+0.54%</div>
+                <div class="signal-vol">量比4.7</div>
+            </div>
+            
+            <div class="signal-row">
+                <div class="signal-rank">2</div>
+                <div class="signal-name">上海物贸</div>
+                <div class="signal-code">600822</div>
+                <div class="signal-change" style="color:#ff4757">+0.21%</div>
+                <div class="signal-vol">量比4.2</div>
+            </div>
+            
+        </div>
+        
+        <div class="section">
+            <div class="section-title">🚀 缩量新高（量比<0.8 涨幅>5%）</div>
+            
+            <div class="signal-row">
+                <div class="signal-rank">1</div>
+                <div class="signal-name">福龙马</div>
+                <div class="signal-code">603686</div>
+                <div class="signal-change" style="color:#ff4757">+10.03%</div>
+                <div class="signal-vol">量比0.5</div>
+            </div>
+            
+        </div>
+        
+        <div class="section">
+            <div class="section-title">⚡ 放量急拉（量比>2 涨幅>5%）</div>
+            
+            <div class="signal-row">
+                <div class="signal-rank">1</div>
+                <div class="signal-name">经纬股份</div>
+                <div class="signal-code">301390</div>
+                <div class="signal-change" style="color:#ff4757">+20.00%</div>
+                <div class="signal-vol">量比2.8</div>
+            </div>
+            
+            <div class="signal-row">
+                <div class="signal-rank">2</div>
+                <div class="signal-name">托伦斯</div>
+                <div class="signal-code">301583</div>
+                <div class="signal-change" style="color:#ff4757">+20.00%</div>
+                <div class="signal-vol">量比3.0</div>
+            </div>
+            
+            <div class="signal-row">
+                <div class="signal-rank">3</div>
+                <div class="signal-name">高凌信息</div>
+                <div class="signal-code">688175</div>
+                <div class="signal-change" style="color:#ff4757">+19.98%</div>
+                <div class="signal-vol">量比5.0</div>
+            </div>
+            
+            <div class="signal-row">
+                <div class="signal-rank">4</div>
+                <div class="signal-name">佰奥智能</div>
+                <div class="signal-code">300836</div>
+                <div class="signal-change" style="color:#ff4757">+19.42%</div>
+                <div class="signal-vol">量比3.9</div>
+            </div>
+            
+            <div class="signal-row">
+                <div class="signal-rank">5</div>
+                <div class="signal-name">东微半导</div>
+                <div class="signal-code">688261</div>
+                <div class="signal-change" style="color:#ff4757">+15.16%</div>
+                <div class="signal-vol">量比5.2</div>
+            </div>
+            
+            <div class="signal-row">
+                <div class="signal-rank">6</div>
+                <div class="signal-name">云天励飞-U</div>
+                <div class="signal-code">688343</div>
+                <div class="signal-change" style="color:#ff4757">+15.09%</div>
+                <div class="signal-vol">量比3.1</div>
+            </div>
+            
+        </div>
+        
+    
+    <div class="section">
+        <div class="section-title">🔥 连板梯队</div>
+        
+        <div class="lb-item">
+            <div class="lb-level">4板</div>
+            <div class="lb-count">2家</div>
+            <div class="lb-names">华瓷股份、锡华科技</div>
+        </div>
+        
+        <div class="lb-item">
+            <div class="lb-level">3板</div>
+            <div class="lb-count">2家</div>
+            <div class="lb-names">内蒙新华、世联行</div>
+        </div>
+        
+        <div class="lb-item">
+            <div class="lb-level">2板</div>
+            <div class="lb-count">7家</div>
+            <div class="lb-names">华软科技、经纬股份、华纺股份、南华生物、龙头股份…等7家</div>
+        </div>
+        
+        <div class="lb-item">
+            <div class="lb-level">1板</div>
+            <div class="lb-count">19家</div>
+            <div class="lb-names">百通能源、福龙马、海安集团、中电鑫龙、国脉文化…等19家</div>
+        </div>
+        
+    </div>
+    
+    <div class="footer">
+        数据来源：沪深A股 | 仅供参考，不构成投资建议
+    </div>
+</body>
+</html>

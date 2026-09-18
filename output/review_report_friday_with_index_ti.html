@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>股票复盘 - 2026-09-11</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; background: #f5f6f8; color: #1a1a2e; font-size: 14px; line-height: 1.5; padding-bottom: 30px; }
+.header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; padding: 18px 16px 14px; text-align: center; }
+.header h1 { font-size: 18px; font-weight: 600; }
+.header .time { font-size: 12px; opacity: 0.7; margin-top: 4px; }
+.section { margin: 10px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.section-title { font-size: 15px; font-weight: 600; padding: 12px 16px 8px; }
+.index-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #f0f2f5; }
+.index-item { background: #fff; padding: 12px; }
+.index-item .name { font-size: 13px; color: #666; }
+.index-item .price { font-size: 16px; font-weight: 600; margin: 2px 0; }
+.index-item .pct { font-size: 12px; }
+.macro-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: #f0f2f5; }
+.macro-item { background: #fff; padding: 10px 8px; text-align: center; }
+.macro-item .label { font-size: 11px; color: #999; margin-bottom: 4px; }
+.macro-item .value { font-size: 14px; font-weight: 600; color: #1a1a2e; }
+.macro-item .unit { font-size: 10px; color: #999; }
+.flow-list { padding: 0 12px 12px; }
+.flow-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f5f5f5; }
+.flow-row:last-child { border-bottom: none; }
+.flow-row .name { flex: 1; font-size: 13px; }
+.flow-row .change { width: 55px; text-align: right; font-size: 12px; }
+.flow-row .amount { width: 70px; text-align: right; font-size: 12px; font-weight: 500; }
+.stock-card { border-bottom: 1px solid #f5f5f5; }
+.stock-card:last-child { border-bottom: none; }
+.stock-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; cursor: pointer; }
+.stock-header .left { flex: 1; }
+.stock-header .stock-name { font-size: 15px; font-weight: 600; }
+.stock-header .stock-code { font-size: 11px; color: #999; margin-left: 6px; }
+.stock-header .stock-note { font-size: 11px; color: #999; margin-top: 2px; }
+.stock-header .right { text-align: right; }
+.stock-header .stock-price { font-size: 17px; font-weight: 700; }
+.stock-header .stock-change { font-size: 13px; }
+.expand-icon { display: inline-block; transition: transform 0.2s; color: #999; font-size: 12px; margin-left: 8px; }
+.expand-icon.open { transform: rotate(90deg); }
+.stock-detail { display: none; padding: 0 16px 12px; }
+.stock-detail.show { display: block; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.detail-item { background: #f8f9fa; padding: 8px 10px; border-radius: 8px; }
+.detail-item .d-label { font-size: 11px; color: #999; }
+.detail-item .d-value { font-size: 14px; font-weight: 600; margin-top: 2px; }
+.info-section { margin-top: 8px; }
+.info-section .info-title { font-size: 12px; font-weight: 600; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid #eee; }
+.info-item { font-size: 12px; padding: 4px 0; border-bottom: 1px dashed #f0f0f0; line-height: 1.4; color: #333; }
+.info-item:last-child { border-bottom: none; }
+.info-item .info-date { color: #999; font-size: 11px; margin-left: 4px; }
+.info-item .info-org { color: #666; font-size: 11px; }
+.up { color: #e74c3c; }
+.down { color: #27ae60; }
+/* 短线指标 */
+.ti-section { margin-top: 10px; background: #f0f4ff; border-radius: 10px; padding: 12px; }
+.ti-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: #336; }
+.ti-advice { font-size: 14px; font-weight: 600; padding: 8px 12px; border-radius: 8px; margin-bottom: 10px; text-align: center; }
+.ti-advice.bullish { background: linear-gradient(135deg, #fff5f5, #ffe8e8); color: #c0392b; }
+.ti-advice.bearish { background: linear-gradient(135deg, #f0fff4, #e8ffe8); color: #27ae60; }
+.ti-advice.neutral { background: #f5f5f5; color: #666; }
+.ti-score-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.ti-score-track { flex: 1; height: 8px; background: #e0e0e0; border-radius: 4px; position: relative; overflow: hidden; }
+.ti-score-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+.ti-score-label { font-size: 12px; color: #999; min-width: 50px; text-align: right; }
+.ti-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+.ti-item { background: #fff; padding: 8px 10px; border-radius: 8px; }
+.ti-item .ti-label { font-size: 11px; color: #999; }
+.ti-item .ti-value { font-size: 13px; font-weight: 600; margin-top: 2px; }
+.ti-signals { margin-top: 8px; }
+.ti-signal { font-size: 12px; padding: 4px 8px; margin-bottom: 4px; border-radius: 6px; background: #fff; line-height: 1.4; }
+.ti-signal.pos { border-left: 3px solid #e74c3c; }
+.ti-signal.neg { border-left: 3px solid #27ae60; }
+.ti-levels { display: flex; justify-content: space-between; margin-top: 8px; padding: 8px 12px; background: #fff; border-radius: 8px; }
+.ti-levels .tl { text-align: center; }
+.ti-levels .tl-label { font-size: 11px; color: #999; }
+.ti-levels .tl-value { font-size: 14px; font-weight: 600; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+<h1>📊 每日股票复盘</h1>
+<div class="time">2026-09-11 18:30</div>
+</div>
+
+<div class="section">
+<div class="section-title">📈 大盘指数</div>
+<div class="index-grid">
+<div class="index-item">
+<div class="name">上证指数</div>
+<div class="price down">3,888.11</div>
+<div class="pct down">-1.18%</div>
+</div>
+<div class="index-item">
+<div class="name">深证成指</div>
+<div class="price down">13,471.26</div>
+<div class="pct down">-1.08%</div>
+</div>
+<div class="index-item">
+<div class="name">创业板指</div>
+<div class="price down">3,322.04</div>
+<div class="pct down">-0.49%</div>
+</div>
+<div class="index-item">
+<div class="name">科创50</div>
+<div class="price down">1,553.39</div>
+<div class="pct down">-1.01%</div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">🌐 宏观环境</div>
+<div class="macro-grid">
+<div class="macro-item">
+<div class="label">10Y美债</div>
+<div class="value">4.830<span class="unit">%</span></div>
+</div>
+<div class="macro-item">
+<div class="label">美联储利率</div>
+<div class="value">3.63<span class="unit">%</span></div>
+</div>
+<div class="macro-item">
+<div class="label">美元/人民币</div>
+<div class="value">6.7145</div>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: #f0f2f5;">
+<div style="background:#fff; padding:10px 8px; text-align:center;">
+<div style="font-size:11px;color:#999;">COMEX黄金</div>
+<div style="font-size:15px;font-weight:600;margin-top:4px;" class="up">
+4,391.26<span style="font-size:11px;color:#999;"> 美元</span>
+</div>
+<div style="font-size:12px;margin-top:2px;" class="up">+0.03%</div>
+</div>
+<div style="background:#fff; padding:10px 8px; text-align:center;">
+<div style="font-size:11px;color:#999;">COMEX白银</div>
+<div style="font-size:15px;font-weight:600;margin-top:4px;" class="up">
+64.52<span style="font-size:11px;color:#999;"> 美元</span>
+</div>
+<div style="font-size:12px;margin-top:2px;" class="up">+0.07%</div>
+</div>
+<div style="background:#fff; padding:10px 8px; text-align:center;">
+<div style="font-size:11px;color:#999;">WTI原油</div>
+<div style="font-size:15px;font-weight:600;margin-top:4px;" class="">
+99.02<span style="font-size:11px;color:#999;"> 美元</span>
+</div>
+<div style="font-size:12px;margin-top:2px;" class="">+0.00%</div>
+</div>
+</div>
+
+<div style="padding: 8px 16px 12px;">
+<div style="background:#f8f9fa; padding:10px; text-align:center; border-radius:8px;">
+<div style="font-size:11px;color:#999;">A股总成交额</div>
+<div style="font-size:15px;font-weight:600;margin-top:4px;">
+19,718.98<span style="font-size:11px;color:#999;"> 亿</span>
+</div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">🎯 市场情绪</div>
+
+<div style="display:flex;gap:4px;padding:8px 16px 12px;">
+<div style="background:#e74c3c;height:20px;border-radius:4px;width:12%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;">619</div>
+<div style="background:#888;height:20px;border-radius:4px;width:1%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;">46</div>
+<div style="background:#27ae60;height:20px;border-radius:4px;width:87%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;">4619</div>
+</div>
+
+<div class="macro-grid">
+<div class="macro-item"><div class="label">🔴 上涨</div><div class="value up">619</div></div>
+<div class="macro-item"><div class="label">⚪ 平盘</div><div class="value">46</div></div>
+<div class="macro-item"><div class="label">🟢 下跌</div><div class="value down">4619</div></div>
+</div>
+
+<div style="padding: 0 16px 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #f0f2f5;">
+<div style="background:#fff; padding:10px; text-align:center;">
+<div style="font-size:11px;color:#999;">🔴 涨停</div>
+<div style="font-size:15px;font-weight:600;margin-top:4px;" class="up">40</div>
+</div>
+<div style="background:#fff; padding:10px; text-align:center;">
+<div style="font-size:11px;color:#999;">🟢 跌停</div>
+<div style="font-size:15px;font-weight:600;margin-top:4px;" class="down">21</div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">💼 持仓个股</div>
+
+
+<div class="stock-card">
+<div class="stock-header" onclick="toggleDetail(this)">
+<div class="left">
+<span class="stock-name">瑞芯微</span>
+<span class="stock-code">603893</span>
+<div class="stock-note">SoC芯片设计</div>
+</div>
+<div class="right">
+<div class="stock-price down">180.30</div>
+<div class="stock-change down">-1.29%</div>
+</div>
+<span class="expand-icon">▶</span>
+</div>
+
+<div class="stock-detail">
+<div class="detail-grid">
+<div class="detail-item"><div class="d-label">PE(动)</div><div class="d-value">44.41</div></div>
+<div class="detail-item"><div class="d-label">PB</div><div class="d-value">15.50</div></div>
+<div class="detail-item"><div class="d-label">总市值</div><div class="d-value">762.9亿</div></div>
+<div class="detail-item"><div class="d-label">成交量</div><div class="d-value">7.8万手</div></div>
+<div class="detail-item"><div class="d-label">成交额</div><div class="d-value">13.88亿</div></div>
+<div class="detail-item"><div class="d-label">振幅</div><div class="d-value">3.12%</div></div>
+<div class="detail-item"><div class="d-label">量比</div><div class="d-value">0.84</div></div>
+<div class="detail-item"><div class="d-label">5日涨跌</div><div class="d-value"><span class="down">-6.43%</span></div></div>
+<div class="detail-item"><div class="d-label">20日涨跌</div><div class="d-value"><span class="down">-14.76%</span></div></div>
+</div>
+
+<div class="ti-section">
+<div class="ti-title">📐 短线操作提示（次日参考）</div>
+
+<div class="ti-advice bullish">🟢 短线偏多，谨慎持有</div>
+
+<div class="ti-score-bar">
+<div style="font-size:11px;color:#999;">空</div>
+<div class="ti-score-track">
+<div class="ti-score-fill" style="width:65%;background:#e74c3c;"></div>
+</div>
+<div style="font-size:11px;color:#999;">多</div>
+<div class="ti-score-label">30分</div>
+</div>
+
+<div class="ti-grid">
+<div class="ti-item"><div class="ti-label">KDJ(23.5/35.3/-0.0)</div><div class="ti-value">超卖</div></div>
+<div class="ti-item"><div class="ti-label">RSI6</div><div class="ti-value down">17.6 超卖</div></div>
+<div class="ti-item"><div class="ti-label">MACD</div><div class="ti-value">绿柱放大</div></div>
+<div class="ti-item"><div class="ti-label">均线</div><div class="ti-value">向下发散</div></div>
+<div class="ti-item"><div class="ti-label">量价</div><div class="ti-value">量价平稳 <span style="font-size:11px;color:#999;">(量比0.93)</span></div></div>
+<div class="ti-item"><div class="ti-label">连动</div><div class="ti-value">4日跌</div></div>
+</div>
+
+<div class="ti-signals">
+<div class="ti-signal pos">KDJ超卖区→关注反弹</div>
+<div class="ti-signal pos">RSI超卖→可能反弹</div>
+<div class="ti-signal pos">已4连跌→关注超跌反弹</div>
+</div>
+
+<div class="ti-levels">
+<div class="tl"><div class="tl-label">支撑位</div><div class="tl-value down">181.37</div></div>
+<div class="tl"><div class="tl-label">压力位</div><div class="tl-value up">206.44</div></div>
+</div>
+
+</div>
+
+<div class="info-section">
+<div class="info-title">📢 最新公告</div>
+<div class="info-item">投资者关系活动记录表(2026年半年度业绩说明会)2026-09-11<span class="info-date"></span></div>
+<div class="info-item">关于2022年第二期股票期权与限制性股票激励计划预留授予限制性股票第三期解除限售暨上市公告2026-09-09<span class="info-date"></span></div>
+<div class="info-item">投资者关系活动记录表(2026年8月)2026-09-08<span class="info-date"></span></div>
+</div>
+
+<div class="info-section">
+<div class="info-title">📝 最新研报</div>
+<div class="info-item" style="color:#999;">暂无</div>
+</div>
+
+<div class="info-section">
+<div class="info-title">📰 最新新闻</div>
+<div class="info-item">瑞芯微：预计三季度业绩保持正常增长趋势2026-09-11 | 财联社<span class="info-date"></span></div>
+<div class="info-item">瑞芯微：预计三季度业绩将保持增长 尽快推出新一代旗舰产品2026-09-11 | 上海证券报·中国证券网<span class="info-date"></span></div>
+<div class="info-item">瑞芯微：RK182X已在陪伴机器人场景实现量产 即将推出新一代端侧协处理器2026-09-11 | 科创板日报<span class="info-date"></span></div>
+</div>
+
+</div>
+</div>
+
+<div class="stock-card">
+<div class="stock-header" onclick="toggleDetail(this)">
+<div class="left">
+<span class="stock-name">伊利股份</span>
+<span class="stock-code">600887</span>
+<div class="stock-note">乳制品</div>
+</div>
+<div class="right">
+<div class="stock-price up">26.66</div>
+<div class="stock-change up">+0.45%</div>
+</div>
+<span class="expand-icon">▶</span>
+</div>
+
+<div class="stock-detail">
+<div class="detail-grid">
+<div class="detail-item"><div class="d-label">PE(动)</div><div class="d-value">14.64</div></div>
+<div class="detail-item"><div class="d-label">PB</div><div class="d-value">3.14</div></div>
+<div class="detail-item"><div class="d-label">总市值</div><div class="d-value">1686.3亿</div></div>
+<div class="detail-item"><div class="d-label">成交量</div><div class="d-value">48.3万手</div></div>
+<div class="detail-item"><div class="d-label">成交额</div><div class="d-value">12.82亿</div></div>
+<div class="detail-item"><div class="d-label">振幅</div><div class="d-value">1.47%</div></div>
+<div class="detail-item"><div class="d-label">量比</div><div class="d-value">0.86</div></div>
+<div class="detail-item"><div class="d-label">5日涨跌</div><div class="d-value"><span class="up">+0.19%</span></div></div>
+<div class="detail-item"><div class="d-label">20日涨跌</div><div class="d-value"><span class="up">+5.67%</span></div></div>
+</div>
+
+<div class="ti-section">
+<div class="ti-title">📐 短线操作提示（次日参考）</div>
+
+<div class="ti-advice neutral">⚪ 短线中性，观望为主</div>
+
+<div class="ti-score-bar">
+<div style="font-size:11px;color:#999;">空</div>
+<div class="ti-score-track">
+<div class="ti-score-fill" style="width:50%;background:#999;"></div>
+</div>
+<div style="font-size:11px;color:#999;">多</div>
+<div class="ti-score-label">0分</div>
+</div>
+
+<div class="ti-grid">
+<div class="ti-item"><div class="ti-label">KDJ(50.0/59.7/30.8)</div><div class="ti-value">中性</div></div>
+<div class="ti-item"><div class="ti-label">RSI6</div><div class="ti-value ">55.4 中性</div></div>
+<div class="ti-item"><div class="ti-label">MACD</div><div class="ti-value">红柱缩短</div></div>
+<div class="ti-item"><div class="ti-label">均线</div><div class="ti-value">交叉缠绕</div></div>
+<div class="ti-item"><div class="ti-label">量价</div><div class="ti-value">量价平稳 <span style="font-size:11px;color:#999;">(量比0.95)</span></div></div>
+<div class="ti-item"><div class="ti-label">连动</div><div class="ti-value">2日涨</div></div>
+</div>
+
+
+<div class="ti-levels">
+<div class="tl"><div class="tl-label">支撑位</div><div class="tl-value down">26.36</div></div>
+<div class="tl"><div class="tl-label">压力位</div><div class="tl-value up">26.98</div></div>
+</div>
+
+</div>
+
+<div class="info-section">
+<div class="info-title">📢 最新公告</div>
+<div class="info-item">内蒙古伊利实业集团股份有限公司关于回购股份事项前十名股东持股情况的公告2026-09-12<span class="info-date"></span></div>
+<div class="info-item">内蒙古伊利实业集团股份有限公司关于为控股子公司提供担保的进展公告2026-09-12<span class="info-date"></span></div>
+<div class="info-item">内蒙古伊利实业集团股份有限公司2026年第一次临时股东会会议资料2026-09-09<span class="info-date"></span></div>
+</div>
+
+<div class="info-section">
+<div class="info-title">📝 最新研报</div>
+<div class="info-item" style="color:#999;">暂无</div>
+</div>
+
+<div class="info-section">
+<div class="info-title">📰 最新新闻</div>
+<div class="info-item">伊利股份上半年实现总营收644.9亿元 核心经营利润率持续提升2026-09-03 | 经济参考报<span class="info-date"></span></div>
+<div class="info-item">【调研快报】伊利股份接待参与伊利股份2026年半年度业绩说明会的广大投资者调研2026-08-31 | 东方财富Choice数据<span class="info-date"></span></div>
+<div class="info-item">每经品牌100指数缩量震荡，“牛散”陈发树加码成分股伊利股份2026-08-30 | 每日经济新闻<span class="info-date"></span></div>
+</div>
+
+</div>
+</div>
+
+<div class="stock-card">
+<div class="stock-header" onclick="toggleDetail(this)">
+<div class="left">
+<span class="stock-name">九号公司</span>
+<span class="stock-code">689009</span>
+<div class="stock-note">智能短交通</div>
+</div>
+<div class="right">
+<div class="stock-price down">37.15</div>
+<div class="stock-change down">-0.67%</div>
+</div>
+<span class="expand-icon">▶</span>
+</div>
+
+<div class="stock-detail">
+<div class="detail-grid">
+<div class="detail-item"><div class="d-label">PE(动)</div><div class="d-value">13.56</div></div>
+<div class="detail-item"><div class="d-label">PB</div><div class="d-value">4.22</div></div>
+<div class="detail-item"><div class="d-label">总市值</div><div class="d-value">273.4亿</div></div>
+<div class="detail-item"><div class="d-label">成交量</div><div class="d-value">997.9万手</div></div>
+<div class="detail-item"><div class="d-label">成交额</div><div class="d-value">3.67亿</div></div>
+<div class="detail-item"><div class="d-label">振幅</div><div class="d-value">3.26%</div></div>
+<div class="detail-item"><div class="d-label">量比</div><div class="d-value">1.08</div></div>
+<div class="detail-item"><div class="d-label">5日涨跌</div><div class="d-value"><span class="down">-8.45%</span></div></div>
+<div class="detail-item"><div class="d-label">20日涨跌</div><div class="d-value"><span class="down">-15.57%</span></div></div>
+</div>
+
+<div class="ti-section">
+<div class="ti-title">📐 短线操作提示（次日参考）</div>
+
+<div class="ti-advice neutral">⚪ 短线中性，观望为主</div>
+
+<div class="ti-score-bar">
+<div style="font-size:11px;color:#999;">空</div>
+<div class="ti-score-track">
+<div class="ti-score-fill" style="width:50%;background:#999;"></div>
+</div>
+<div style="font-size:11px;color:#999;">多</div>
+<div class="ti-score-label">0分</div>
+</div>
+
+<div class="ti-grid">
+<div class="ti-item"><div class="ti-label">KDJ(10.2/12.1/6.4)</div><div class="ti-value">低位</div></div>
+<div class="ti-item"><div class="ti-label">RSI6</div><div class="ti-value down">15.4 超卖</div></div>
+<div class="ti-item"><div class="ti-label">MACD</div><div class="ti-value">绿柱放大</div></div>
+<div class="ti-item"><div class="ti-label">均线</div><div class="ti-value">空头排列</div></div>
+<div class="ti-item"><div class="ti-label">量价</div><div class="ti-value">量价平稳 <span style="font-size:11px;color:#999;">(量比1.01)</span></div></div>
+<div class="ti-item"><div class="ti-label">连动</div><div class="ti-value">4日跌</div></div>
+</div>
+
+<div class="ti-signals">
+<div class="ti-signal pos">RSI超卖→可能反弹</div>
+<div class="ti-signal neg">均线空头排列→趋势向下</div>
+<div class="ti-signal pos">已4连跌→关注超跌反弹</div>
+</div>
+
+<div class="ti-levels">
+<div class="tl"><div class="tl-label">支撑位</div><div class="tl-value down">37.32</div></div>
+<div class="tl"><div class="tl-label">压力位</div><div class="tl-value up">42.49</div></div>
+</div>
+
+</div>
+
+<div class="info-section">
+<div class="info-title">📢 最新公告</div>
+<div class="info-item">九号有限公司关于以集中竞价交易方式回购公司股份的进展公告2026-09-02<span class="info-date"></span></div>
+<div class="info-item">九号有限公司投资者关系活动记录表(2026年半年度业绩说明会)2026-08-25<span class="info-date"></span></div>
+<div class="info-item">九号有限公司关于召开2026年半年度业绩说明会的公告2026-08-15<span class="info-date"></span></div>
+</div>
+
+<div class="info-section">
+<div class="info-title">📝 最新研报</div>
+<div class="info-item" style="color:#999;">暂无</div>
+</div>
+
+<div class="info-section">
+<div class="info-title">📰 最新新闻</div>
+<div class="info-item">九号公司已回购571万份存托凭证 总支付2.2亿元2026-09-01 | 财中社<span class="info-date"></span></div>
+<div class="info-item">九号公司：截至8月31日公司累计回购存托凭证5711564份2026-09-01 | 证券日报<span class="info-date"></span></div>
+<div class="info-item">电动两轮车龙头九号公司年内回购存托凭证2.2亿元 上半年App软件服务费收入超1亿元2026-09-01 | 每日经济新闻<span class="info-date"></span></div>
+</div>
+
+</div>
+</div>
+
+<div class="stock-card">
+<div class="stock-header" onclick="toggleDetail(this)">
+<div class="left">
+<span class="stock-name">新希望</span>
+<span class="stock-code">000876</span>
+<div class="stock-note">农牧食品</div>
+</div>
+<div class="right">
+<div class="stock-price down">7.52</div>
+<div class="stock-change down">-1.18%</div>
+</div>
+<span class="expand-icon">▶</span>
+</div>
+
+<div class="stock-detail">
+<div class="detail-grid">
+<div class="detail-item"><div class="d-label">PE(动)</div><div class="d-value">-10.96</div></div>
+<div class="detail-item"><div class="d-label">PB</div><div class="d-value">1.81</div></div>
+<div class="detail-item"><div class="d-label">总市值</div><div class="d-value">373.1亿</div></div>
+<div class="detail-item"><div class="d-label">成交量</div><div class="d-value">55.8万手</div></div>
+<div class="detail-item"><div class="d-label">成交额</div><div class="d-value">4.19亿</div></div>
+<div class="detail-item"><div class="d-label">振幅</div><div class="d-value">2.23%</div></div>
+<div class="detail-item"><div class="d-label">量比</div><div class="d-value">0.44</div></div>
+<div class="detail-item"><div class="d-label">5日涨跌</div><div class="d-value"><span class="down">-3.84%</span></div></div>
+<div class="detail-item"><div class="d-label">20日涨跌</div><div class="d-value"><span class="up">+8.51%</span></div></div>
+</div>
+
+<div class="ti-section">
+<div class="ti-title">📐 短线操作提示（次日参考）</div>
+
+<div class="ti-advice neutral">⚪ 短线中性，观望为主</div>
+
+<div class="ti-score-bar">
+<div style="font-size:11px;color:#999;">空</div>
+<div class="ti-score-track">
+<div class="ti-score-fill" style="width:48%;background:#999;"></div>
+</div>
+<div style="font-size:11px;color:#999;">多</div>
+<div class="ti-score-label">-5分</div>
+</div>
+
+<div class="ti-grid">
+<div class="ti-item"><div class="ti-label">KDJ(69.6/75.6/57.7)</div><div class="ti-value">中性</div></div>
+<div class="ti-item"><div class="ti-label">RSI6</div><div class="ti-value ">70.0 偏强</div></div>
+<div class="ti-item"><div class="ti-label">MACD</div><div class="ti-value">红柱缩短</div></div>
+<div class="ti-item"><div class="ti-label">均线</div><div class="ti-value">多头排列</div></div>
+<div class="ti-item"><div class="ti-label">量价</div><div class="ti-value">缩量下跌 <span style="font-size:11px;color:#999;">(量比0.55)</span></div></div>
+<div class="ti-item"><div class="ti-label">连动</div><div class="ti-value">2日跌</div></div>
+</div>
+
+<div class="ti-signals">
+<div class="ti-signal pos">均线多头排列→趋势向上</div>
+<div class="ti-signal ">🔴 转弱信号：MACD红柱缩短+跌破MA5</div>
+</div>
+
+<div class="ti-levels">
+<div class="tl"><div class="tl-label">支撑位</div><div class="tl-value down">7.0</div></div>
+<div class="tl"><div class="tl-label">压力位</div><div class="tl-value up">7.93</div></div>
+</div>
+
+</div>
+
+<div class="info-section">
+<div class="info-title">📢 最新公告</div>
+<div class="info-item">关于2024年员工持股计划出售完毕的公告2026-09-09<span class="info-date"></span></div>
+<div class="info-item">2026年8月销售情况简报2026-09-08<span class="info-date"></span></div>
+<div class="info-item">关于希望转2可选择回售结果公告2026-09-03<span class="info-date"></span></div>
+</div>
+
+<div class="info-section">
+<div class="info-title">📝 最新研报</div>
+<div class="info-item" style="color:#999;">暂无</div>
+</div>
+
+<div class="info-section">
+<div class="info-title">📰 最新新闻</div>
+<div class="info-item">新希望：2026年8月份销售情况简报2026-09-07 | 证券日报<span class="info-date"></span></div>
+<div class="info-item">新希望：8月销售商品猪120.61万头 同比增长26.28%2026-09-07 | 第一财经<span class="info-date"></span></div>
+<div class="info-item">新希望：8月商品猪销售收入15.05亿元，同比下降1.89%2026-09-07 | 界面新闻<span class="info-date"></span></div>
+</div>
+
+</div>
+</div>
+
+<div class="stock-card">
+<div class="stock-header" onclick="toggleDetail(this)">
+<div class="left">
+<span class="stock-name">韦尔股份</span>
+<span class="stock-code">603501</span>
+<div class="stock-note">豪威集团</div>
+</div>
+<div class="right">
+<div class="stock-price down">76.88</div>
+<div class="stock-change down">-2.60%</div>
+</div>
+<span class="expand-icon">▶</span>
+</div>
+
+<div class="stock-detail">
+<div class="detail-grid">
+<div class="detail-item"><div class="d-label">PE(动)</div><div class="d-value">39.64</div></div>
+<div class="detail-item"><div class="d-label">PB</div><div class="d-value">2.98</div></div>
+<div class="detail-item"><div class="d-label">总市值</div><div class="d-value">967.0亿</div></div>
+<div class="detail-item"><div class="d-label">成交量</div><div class="d-value">19.1万手</div></div>
+<div class="detail-item"><div class="d-label">成交额</div><div class="d-value">14.70亿</div></div>
+<div class="detail-item"><div class="d-label">振幅</div><div class="d-value">2.76%</div></div>
+<div class="detail-item"><div class="d-label">量比</div><div class="d-value">1.28</div></div>
+<div class="detail-item"><div class="d-label">5日涨跌</div><div class="d-value"><span class="down">-5.18%</span></div></div>
+<div class="detail-item"><div class="d-label">20日涨跌</div><div class="d-value"><span class="down">-16.56%</span></div></div>
+</div>
+
+<div class="ti-section">
+<div class="ti-title">📐 短线操作提示（次日参考）</div>
+
+<div class="ti-advice bearish">🔴 短线偏空，注意控制仓位</div>
+
+<div class="ti-score-bar">
+<div style="font-size:11px;color:#999;">空</div>
+<div class="ti-score-track">
+<div class="ti-score-fill" style="width:42%;background:#27ae60;"></div>
+</div>
+<div style="font-size:11px;color:#999;">多</div>
+<div class="ti-score-label">-15分</div>
+</div>
+
+<div class="ti-grid">
+<div class="ti-item"><div class="ti-label">KDJ(15.4/19.8/6.7)</div><div class="ti-value">低位</div></div>
+<div class="ti-item"><div class="ti-label">RSI6</div><div class="ti-value ">29.8 偏弱</div></div>
+<div class="ti-item"><div class="ti-label">MACD</div><div class="ti-value">绿柱放大</div></div>
+<div class="ti-item"><div class="ti-label">均线</div><div class="ti-value">空头排列</div></div>
+<div class="ti-item"><div class="ti-label">量价</div><div class="ti-value">量价平稳 <span style="font-size:11px;color:#999;">(量比1.27)</span></div></div>
+<div class="ti-item"><div class="ti-label">连动</div><div class="ti-value">4日跌</div></div>
+</div>
+
+<div class="ti-signals">
+<div class="ti-signal neg">均线空头排列→趋势向下</div>
+<div class="ti-signal pos">已4连跌→关注超跌反弹</div>
+</div>
+
+<div class="ti-levels">
+<div class="tl"><div class="tl-label">支撑位</div><div class="tl-value down">77.88</div></div>
+<div class="tl"><div class="tl-label">压力位</div><div class="tl-value up">83.01</div></div>
+</div>
+
+</div>
+
+<div class="info-section">
+<div class="info-title">📢 最新公告</div>
+<div class="info-item">投资者交流活动记录表-2026年8月2026-08-27<span class="info-date"></span></div>
+<div class="info-item">2026年第三季度主要经营数据的公告2026-08-25<span class="info-date"></span></div>
+<div class="info-item">关于会计政策变更的公告2026-08-25<span class="info-date"></span></div>
+</div>
+
+<div class="info-section">
+<div class="info-title">📝 最新研报</div>
+<div class="info-item" style="color:#999;">暂无</div>
+</div>
+
+<div class="info-section">
+<div class="info-title">📰 最新新闻</div>
+<div class="info-item">燧原科技科创板上市，上海算力芯片方阵挺进“硬科技”深水区2026-09-11 | 上观新闻<span class="info-date"></span></div>
+<div class="info-item">从“被投者”到“投资人” 上海产业龙头组团做LP2026-08-27 | 上海证券报·中国证券网<span class="info-date"></span></div>
+<div class="info-item">净利骤降近40%，现金流缩水78%：豪威集团的“优等生”叙事为何突然中断？2026-08-25 | 国际金融报<span class="info-date"></span></div>
+</div>
+
+</div>
+</div>
+
+<div class="stock-card">
+<div class="stock-header" onclick="toggleDetail(this)">
+<div class="left">
+<span class="stock-name">柯力传感</span>
+<span class="stock-code">603662</span>
+<div class="stock-note">传感器龙头</div>
+</div>
+<div class="right">
+<div class="stock-price down">46.76</div>
+<div class="stock-change down">-2.93%</div>
+</div>
+<span class="expand-icon">▶</span>
+</div>
+
+<div class="stock-detail">
+<div class="detail-grid">
+<div class="detail-item"><div class="d-label">PE(动)</div><div class="d-value">50.24</div></div>
+<div class="detail-item"><div class="d-label">PB</div><div class="d-value">4.72</div></div>
+<div class="detail-item"><div class="d-label">总市值</div><div class="d-value">131.3亿</div></div>
+<div class="detail-item"><div class="d-label">成交量</div><div class="d-value">3.7万手</div></div>
+<div class="detail-item"><div class="d-label">成交额</div><div class="d-value">1.72亿</div></div>
+<div class="detail-item"><div class="d-label">振幅</div><div class="d-value">4.01%</div></div>
+<div class="detail-item"><div class="d-label">量比</div><div class="d-value">1.25</div></div>
+<div class="detail-item"><div class="d-label">5日涨跌</div><div class="d-value"><span class="down">-7.95%</span></div></div>
+<div class="detail-item"><div class="d-label">20日涨跌</div><div class="d-value"><span class="down">-14.66%</span></div></div>
+</div>
+
+<div class="ti-section">
+<div class="ti-title">📐 短线操作提示（次日参考）</div>
+
+<div class="ti-advice bullish">🟢 短线偏多，可持仓或加仓</div>
+
+<div class="ti-score-bar">
+<div style="font-size:11px;color:#999;">空</div>
+<div class="ti-score-track">
+<div class="ti-score-fill" style="width:72%;background:#e74c3c;"></div>
+</div>
+<div style="font-size:11px;color:#999;">多</div>
+<div class="ti-score-label">45分</div>
+</div>
+
+<div class="ti-grid">
+<div class="ti-item"><div class="ti-label">KDJ(19.8/33.4/-7.3)</div><div class="ti-value">超卖</div></div>
+<div class="ti-item"><div class="ti-label">RSI6</div><div class="ti-value down">9.3 超卖</div></div>
+<div class="ti-item"><div class="ti-label">MACD</div><div class="ti-value">绿柱放大</div></div>
+<div class="ti-item"><div class="ti-label">均线</div><div class="ti-value">空头排列</div></div>
+<div class="ti-item"><div class="ti-label">量价</div><div class="ti-value">量价平稳 <span style="font-size:11px;color:#999;">(量比1.25)</span></div></div>
+<div class="ti-item"><div class="ti-label">连动</div><div class="ti-value">4日跌</div></div>
+</div>
+
+<div class="ti-signals">
+<div class="ti-signal pos">KDJ超卖区→关注反弹</div>
+<div class="ti-signal pos">RSI超卖→可能反弹</div>
+<div class="ti-signal neg">均线空头排列→趋势向下</div>
+<div class="ti-signal pos">已4连跌→关注超跌反弹</div>
+<div class="ti-signal ">🔥 底部反转：超卖共振（KDJ+RSI+连跌）</div>
+</div>
+
+<div class="ti-levels">
+<div class="tl"><div class="tl-label">支撑位</div><div class="tl-value down">47.71</div></div>
+<div class="tl"><div class="tl-label">压力位</div><div class="tl-value up">52.73</div></div>
+</div>
+
+</div>
+
+<div class="info-section">
+<div class="info-title">📢 最新公告</div>
+<div class="info-item">柯力传感董事会薪酬与考核委员会关于2026年限制性股票激励计划激励对象名单的公示情况说明及核查意见2026-09-09<span class="info-date"></span></div>
+<div class="info-item">柯力传感2026年半年度业绩说明会公告2026-09-09<span class="info-date"></span></div>
+<div class="info-item">柯力传感2026年第一次临时股东会会议资料2026-09-09<span class="info-date"></span></div>
+</div>
+
+<div class="info-section">
+<div class="info-title">📝 最新研报</div>
+<div class="info-item" style="color:#999;">暂无</div>
+</div>
+
+<div class="info-section">
+<div class="info-title">📰 最新新闻</div>
+<div class="info-item">柯力传感战略投资优理奇机器人2026-08-27 | 界面新闻<span class="info-date"></span></div>
+<div class="info-item">柯力传感：2026年半年度营业收入同比增长22.27%2026-08-27 | 证券日报<span class="info-date"></span></div>
+<div class="info-item">优理奇机器人，获柯力传感数千万元战投2026-08-27 | 科创板日报<span class="info-date"></span></div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+
+<div class="section">
+<div class="section-title">💰 概念板块资金流入 TOP10</div>
+<div class="flow-list">
+<div class="flow-row">
+<div class="name">5G概念</div>
+<div class="change down">-0.36%</div>
+<div class="amount">+44.88亿</div>
+</div>
+<div class="flow-row">
+<div class="name">光通信模块</div>
+<div class="change up">+0.07%</div>
+<div class="amount">+43.37亿</div>
+</div>
+<div class="flow-row">
+<div class="name">被动元件概念</div>
+<div class="change up">+2.54%</div>
+<div class="amount">+33.69亿</div>
+</div>
+<div class="flow-row">
+<div class="name">MLCC</div>
+<div class="change up">+1.72%</div>
+<div class="amount">+28.28亿</div>
+</div>
+<div class="flow-row">
+<div class="name">超级电容</div>
+<div class="change down">-1.15%</div>
+<div class="amount">+24.26亿</div>
+</div>
+<div class="flow-row">
+<div class="name">F5G概念</div>
+<div class="change down">-0.17%</div>
+<div class="amount">+24.00亿</div>
+</div>
+<div class="flow-row">
+<div class="name">算力概念</div>
+<div class="change down">-1.38%</div>
+<div class="amount">+21.27亿</div>
+</div>
+<div class="flow-row">
+<div class="name">CPO概念</div>
+<div class="change down">-0.57%</div>
+<div class="amount">+21.16亿</div>
+</div>
+<div class="flow-row">
+<div class="name">高压快充</div>
+<div class="change down">-0.99%</div>
+<div class="amount">+15.16亿</div>
+</div>
+<div class="flow-row">
+<div class="name">通信技术</div>
+<div class="change down">-0.51%</div>
+<div class="amount">+12.67亿</div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">🧭 大盘短线指引（次日参考）</div>
+
+
+<div style="padding: 12px 16px; border-bottom: 1px solid #f0f0f0;">
+<div style="font-size:14px;font-weight:600;margin-bottom:8px;">上证指数 <span style="font-size:12px;color:#999;font-weight:400;">sh000001</span></div>
+
+<div class="ti-advice bearish">🔴 短线偏空，注意控制仓位</div>
+
+<div class="ti-score-bar">
+<div style="font-size:11px;color:#999;">空</div>
+<div class="ti-score-track">
+<div class="ti-score-fill" style="width:35%;background:#27ae60;"></div>
+</div>
+<div style="font-size:11px;color:#999;">多</div>
+<div class="ti-score-label">-30分</div>
+</div>
+
+<div class="ti-grid">
+<div class="ti-item"><div class="ti-label">KDJ(35.5/45.6/15.2)</div><div class="ti-value">中性</div></div>
+<div class="ti-item"><div class="ti-label">RSI6</div><div class="ti-value ">22.1 偏弱</div></div>
+<div class="ti-item"><div class="ti-label">MACD</div><div class="ti-value">死叉 绿柱放大</div></div>
+<div class="ti-item"><div class="ti-label">均线</div><div class="ti-value">向下发散</div></div>
+<div class="ti-item"><div class="ti-label">量价</div><div class="ti-value">量价平稳 <span style="font-size:11px;color:#999;">(量比1.12)</span></div></div>
+<div class="ti-item"><div class="ti-label">连动</div><div class="ti-value">2日跌</div></div>
+</div>
+
+<div class="ti-signals">
+<div class="ti-signal neg">MACD死叉→趋势转空</div>
+</div>
+
+<div class="ti-levels">
+<div class="tl"><div class="tl-label">支撑位</div><div class="tl-value down">3894.58</div></div>
+<div class="tl"><div class="tl-label">压力位</div><div class="tl-value up">3987.22</div></div>
+</div>
+</div>
+
+<div style="padding: 12px 16px; border-bottom: 1px solid #f0f0f0;">
+<div style="font-size:14px;font-weight:600;margin-bottom:8px;">深证成指 <span style="font-size:12px;color:#999;font-weight:400;">sz399001</span></div>
+
+<div class="ti-advice bearish">🔴 短线偏空，建议减仓或离场</div>
+
+<div class="ti-score-bar">
+<div style="font-size:11px;color:#999;">空</div>
+<div class="ti-score-track">
+<div class="ti-score-fill" style="width:25%;background:#27ae60;"></div>
+</div>
+<div style="font-size:11px;color:#999;">多</div>
+<div class="ti-score-label">-50分</div>
+</div>
+
+<div class="ti-grid">
+<div class="ti-item"><div class="ti-label">KDJ(31.0/31.6/29.8)</div><div class="ti-value">死叉 中性</div></div>
+<div class="ti-item"><div class="ti-label">RSI6</div><div class="ti-value ">39.2 偏弱</div></div>
+<div class="ti-item"><div class="ti-label">MACD</div><div class="ti-value">绿柱放大</div></div>
+<div class="ti-item"><div class="ti-label">均线</div><div class="ti-value">空头排列</div></div>
+<div class="ti-item"><div class="ti-label">量价</div><div class="ti-value">量价平稳 <span style="font-size:11px;color:#999;">(量比1.05)</span></div></div>
+<div class="ti-item"><div class="ti-label">连动</div><div class="ti-value">2日跌</div></div>
+</div>
+
+<div class="ti-signals">
+<div class="ti-signal neg">KDJ死叉→短线卖出信号</div>
+<div class="ti-signal neg">均线空头排列→趋势向下</div>
+</div>
+
+<div class="ti-levels">
+<div class="tl"><div class="tl-label">支撑位</div><div class="tl-value down">13414.56</div></div>
+<div class="tl"><div class="tl-label">压力位</div><div class="tl-value up">13959.14</div></div>
+</div>
+</div>
+
+<div style="padding: 12px 16px; border-bottom: 1px solid #f0f0f0;">
+<div style="font-size:14px;font-weight:600;margin-bottom:8px;">创业板指 <span style="font-size:12px;color:#999;font-weight:400;">sz399006</span></div>
+
+<div class="ti-advice bullish">🟢 短线偏多，谨慎持有</div>
+
+<div class="ti-score-bar">
+<div style="font-size:11px;color:#999;">空</div>
+<div class="ti-score-track">
+<div class="ti-score-fill" style="width:60%;background:#e74c3c;"></div>
+</div>
+<div style="font-size:11px;color:#999;">多</div>
+<div class="ti-score-label">20分</div>
+</div>
+
+<div class="ti-grid">
+<div class="ti-item"><div class="ti-label">KDJ(34.0/30.3/41.4)</div><div class="ti-value">中性</div></div>
+<div class="ti-item"><div class="ti-label">RSI6</div><div class="ti-value ">52.2 中性</div></div>
+<div class="ti-item"><div class="ti-label">MACD</div><div class="ti-value">红柱放大</div></div>
+<div class="ti-item"><div class="ti-label">均线</div><div class="ti-value">交叉缠绕</div></div>
+<div class="ti-item"><div class="ti-label">量价</div><div class="ti-value">量价平稳 <span style="font-size:11px;color:#999;">(量比1.03)</span></div></div>
+<div class="ti-item"><div class="ti-label">连动</div><div class="ti-value">4日跌</div></div>
+</div>
+
+<div class="ti-signals">
+<div class="ti-signal pos">已4连跌→关注超跌反弹</div>
+</div>
+
+<div class="ti-levels">
+<div class="tl"><div class="tl-label">支撑位</div><div class="tl-value down">3270.98</div></div>
+<div class="tl"><div class="tl-label">压力位</div><div class="tl-value up">3433.21</div></div>
+</div>
+</div>
+
+<div style="padding: 12px 16px; border-bottom: 1px solid #f0f0f0;">
+<div style="font-size:14px;font-weight:600;margin-bottom:8px;">科创50 <span style="font-size:12px;color:#999;font-weight:400;">sh000688</span></div>
+
+<div class="ti-advice bearish">🔴 短线偏空，注意控制仓位</div>
+
+<div class="ti-score-bar">
+<div style="font-size:11px;color:#999;">空</div>
+<div class="ti-score-track">
+<div class="ti-score-fill" style="width:42%;background:#27ae60;"></div>
+</div>
+<div style="font-size:11px;color:#999;">多</div>
+<div class="ti-score-label">-15分</div>
+</div>
+
+<div class="ti-grid">
+<div class="ti-item"><div class="ti-label">KDJ(17.8/22.1/9.1)</div><div class="ti-value">低位</div></div>
+<div class="ti-item"><div class="ti-label">RSI6</div><div class="ti-value ">28.5 偏弱</div></div>
+<div class="ti-item"><div class="ti-label">MACD</div><div class="ti-value">绿柱放大</div></div>
+<div class="ti-item"><div class="ti-label">均线</div><div class="ti-value">空头排列</div></div>
+<div class="ti-item"><div class="ti-label">量价</div><div class="ti-value">量价平稳 <span style="font-size:11px;color:#999;">(量比1.37)</span></div></div>
+<div class="ti-item"><div class="ti-label">连动</div><div class="ti-value">4日跌</div></div>
+</div>
+
+<div class="ti-signals">
+<div class="ti-signal neg">均线空头排列→趋势向下</div>
+<div class="ti-signal pos">已4连跌→关注超跌反弹</div>
+</div>
+
+<div class="ti-levels">
+<div class="tl"><div class="tl-label">支撑位</div><div class="tl-value down">1548.47</div></div>
+<div class="tl"><div class="tl-label">压力位</div><div class="tl-value up">1668.5</div></div>
+</div>
+</div>
+
+</div>
+
+<div style="text-align:center; padding: 20px 16px; color: #999; font-size: 11px;">
+数据更新: 2026-09-11 18:30<br>数据来源: 新浪财经 / 腾讯财经 / 东方财富
+</div>
+
+<script>
+function toggleDetail(el) {
+  var detail = el.nextElementSibling;
+  var icon = el.querySelector(".expand-icon");
+  detail.classList.toggle("show");
+  icon.classList.toggle("open");
+}
+</script>
+
+</body>
+</html>

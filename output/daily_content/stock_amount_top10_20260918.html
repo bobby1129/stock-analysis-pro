@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    width: 1080px;
+    height: 1920px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #fff;
+    padding: 120px 60px 120px;
+    overflow: hidden;
+}
+.header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+.date {
+    font-size: 32px;
+    color: #888;
+    margin-bottom: 15px;
+}
+.title {
+    font-size: 64px;
+    font-weight: bold;
+    background: linear-gradient(90deg, #ffd700, #ffb700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.table-header {
+    display: flex;
+    align-items: center;
+    padding: 20px 30px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    margin-bottom: 25px;
+    border: 1px solid rgba(255,215,0,0.2);
+}
+.header-rank {
+    font-size: 28px;
+    color: #ffd700;
+    width: 50px;
+    flex-shrink: 0;
+}
+.header-name {
+    font-size: 28px;
+    color: #ffd700;
+    width: 140px;
+    flex-shrink: 0;
+}
+.header-code {
+    font-size: 28px;
+    color: #ffd700;
+    width: 100px;
+    flex-shrink: 0;
+}
+.header-price {
+    font-size: 28px;
+    color: #ffd700;
+    flex: 1;
+    text-align: right;
+}
+.header-change {
+    font-size: 28px;
+    color: #ffd700;
+    flex: 1;
+    text-align: right;
+}
+.header-amount {
+    font-size: 28px;
+    color: #ffd700;
+    flex: 1;
+    text-align: right;
+}
+.stock-row {
+    display: flex;
+    align-items: center;
+    padding: 28px 30px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    margin-bottom: 25px;
+    border: 1px solid rgba(255,215,0,0.1);
+}
+.rank {
+    font-size: 36px;
+    font-weight: bold;
+    color: #ffd700;
+    width: 50px;
+    flex-shrink: 0;
+}
+.stock-name {
+    font-size: 32px;
+    font-weight: bold;
+    width: 140px;
+    flex-shrink: 0;
+}
+.stock-code {
+    font-size: 28px;
+    color: #888;
+    width: 100px;
+    flex-shrink: 0;
+}
+.stock-price {
+    font-size: 32px;
+    flex: 1;
+    text-align: right;
+}
+.stock-change {
+    font-size: 32px;
+    flex: 1;
+    text-align: right;
+}
+.stock-amount {
+    font-size: 32px;
+    flex: 1;
+    text-align: right;
+}
+.footer {
+    text-align: center;
+    margin-top: 50px;
+    font-size: 24px;
+    color: #666;
+}
+</style>
+</head>
+<body>
+    <div class="header">
+        <div class="date">2026年09月18日</div>
+        <div class="title">个股成交额 TOP10</div>
+    </div>
+    
+    <div class="table-header">
+        <div class="header-rank">排名</div>
+        <div class="header-name">股票</div>
+        <div class="header-code">代码</div>
+        <div class="header-price">现价</div>
+        <div class="header-change">涨幅</div>
+        <div class="header-amount">成交额</div>
+    </div>
+    
+    
+        <div class="stock-row">
+            <div class="rank">1</div>
+            <div class="stock-name">中际旭创</div>
+            <div class="stock-code">300308</div>
+            <div class="stock-price">926.430</div>
+            <div class="stock-change" style="color:#ff4757">+3.40%</div>
+            <div class="stock-amount">270.80亿</div>
+        </div>
+        
+        <div class="stock-row">
+            <div class="rank">2</div>
+            <div class="stock-name">新易盛</div>
+            <div class="stock-code">300502</div>
+            <div class="stock-price">445.000</div>
+            <div class="stock-change" style="color:#ff4757">+4.87%</div>
+            <div class="stock-amount">185.11亿</div>
+        </div>
+        
+        <div class="stock-row">
+            <div class="rank">3</div>
+            <div class="stock-name">中国巨石</div>
+            <div class="stock-code">600176</div>
+            <div class="stock-price">45.020</div>
+            <div class="stock-change" style="color:#2ed573">-4.52%</div>
+            <div class="stock-amount">177.50亿</div>
+        </div>
+        
+        <div class="stock-row">
+            <div class="rank">4</div>
+            <div class="stock-name">兆易创新</div>
+            <div class="stock-code">603986</div>
+            <div class="stock-price">388.180</div>
+            <div class="stock-change" style="color:#ff4757">+4.95%</div>
+            <div class="stock-amount">157.88亿</div>
+        </div>
+        
+        <div class="stock-row">
+            <div class="rank">5</div>
+            <div class="stock-name">亨通光电</div>
+            <div class="stock-code">600487</div>
+            <div class="stock-price">69.490</div>
+            <div class="stock-change" style="color:#ff4757">+1.46%</div>
+            <div class="stock-amount">156.52亿</div>
+        </div>
+        
+        <div class="stock-row">
+            <div class="rank">6</div>
+            <div class="stock-name">长鑫科技</div>
+            <div class="stock-code">688825</div>
+            <div class="stock-price">55.540</div>
+            <div class="stock-change" style="color:#ff4757">+3.87%</div>
+            <div class="stock-amount">144.64亿</div>
+        </div>
+        
+        <div class="stock-row">
+            <div class="rank">7</div>
+            <div class="stock-name">东山精密</div>
+            <div class="stock-code">002384</div>
+            <div class="stock-price">196.150</div>
+            <div class="stock-change" style="color:#ff4757">+1.35%</div>
+            <div class="stock-amount">138.79亿</div>
+        </div>
+        
+        <div class="stock-row">
+            <div class="rank">8</div>
+            <div class="stock-name">寒武纪科技</div>
+            <div class="stock-code">688256</div>
+            <div class="stock-price">1113.140</div>
+            <div class="stock-change" style="color:#ff4757">+0.65%</div>
+            <div class="stock-amount">135.15亿</div>
+        </div>
+        
+        <div class="stock-row">
+            <div class="rank">9</div>
+            <div class="stock-name">天孚通信</div>
+            <div class="stock-code">300394</div>
+            <div class="stock-price">284.660</div>
+            <div class="stock-change" style="color:#ff4757">+2.52%</div>
+            <div class="stock-amount">130.43亿</div>
+        </div>
+        
+        <div class="stock-row">
+            <div class="rank">10</div>
+            <div class="stock-name">生益科技</div>
+            <div class="stock-code">600183</div>
+            <div class="stock-price">143.930</div>
+            <div class="stock-change" style="color:#2ed573">-1.44%</div>
+            <div class="stock-amount">125.66亿</div>
+        </div>
+        
+    
+    <div class="footer">
+        数据来源：新浪财经 | 仅供参考，不构成投资建议
+    </div>
+</body>
+</html>

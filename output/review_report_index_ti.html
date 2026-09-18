@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>股票复盘 - 2026-09-13</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; background: #f5f6f8; color: #1a1a2e; font-size: 14px; line-height: 1.5; padding-bottom: 30px; }
+.header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; padding: 18px 16px 14px; text-align: center; }
+.header h1 { font-size: 18px; font-weight: 600; }
+.header .time { font-size: 12px; opacity: 0.7; margin-top: 4px; }
+.section { margin: 10px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.section-title { font-size: 15px; font-weight: 600; padding: 12px 16px 8px; }
+.index-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #f0f2f5; }
+.index-item { background: #fff; padding: 12px; }
+.index-item .name { font-size: 13px; color: #666; }
+.index-item .price { font-size: 16px; font-weight: 600; margin: 2px 0; }
+.index-item .pct { font-size: 12px; }
+.macro-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: #f0f2f5; }
+.macro-item { background: #fff; padding: 10px 8px; text-align: center; }
+.macro-item .label { font-size: 11px; color: #999; margin-bottom: 4px; }
+.macro-item .value { font-size: 14px; font-weight: 600; color: #1a1a2e; }
+.macro-item .unit { font-size: 10px; color: #999; }
+.flow-list { padding: 0 12px 12px; }
+.flow-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f5f5f5; }
+.flow-row:last-child { border-bottom: none; }
+.flow-row .name { flex: 1; font-size: 13px; }
+.flow-row .change { width: 55px; text-align: right; font-size: 12px; }
+.flow-row .amount { width: 70px; text-align: right; font-size: 12px; font-weight: 500; }
+.stock-card { border-bottom: 1px solid #f5f5f5; }
+.stock-card:last-child { border-bottom: none; }
+.stock-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; cursor: pointer; }
+.stock-header .left { flex: 1; }
+.stock-header .stock-name { font-size: 15px; font-weight: 600; }
+.stock-header .stock-code { font-size: 11px; color: #999; margin-left: 6px; }
+.stock-header .stock-note { font-size: 11px; color: #999; margin-top: 2px; }
+.stock-header .right { text-align: right; }
+.stock-header .stock-price { font-size: 17px; font-weight: 700; }
+.stock-header .stock-change { font-size: 13px; }
+.expand-icon { display: inline-block; transition: transform 0.2s; color: #999; font-size: 12px; margin-left: 8px; }
+.expand-icon.open { transform: rotate(90deg); }
+.stock-detail { display: none; padding: 0 16px 12px; }
+.stock-detail.show { display: block; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.detail-item { background: #f8f9fa; padding: 8px 10px; border-radius: 8px; }
+.detail-item .d-label { font-size: 11px; color: #999; }
+.detail-item .d-value { font-size: 14px; font-weight: 600; margin-top: 2px; }
+.info-section { margin-top: 8px; }
+.info-section .info-title { font-size: 12px; font-weight: 600; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid #eee; }
+.info-item { font-size: 12px; padding: 4px 0; border-bottom: 1px dashed #f0f0f0; line-height: 1.4; color: #333; }
+.info-item:last-child { border-bottom: none; }
+.info-item .info-date { color: #999; font-size: 11px; margin-left: 4px; }
+.info-item .info-org { color: #666; font-size: 11px; }
+.up { color: #e74c3c; }
+.down { color: #27ae60; }
+/* 短线指标 */
+.ti-section { margin-top: 10px; background: #f0f4ff; border-radius: 10px; padding: 12px; }
+.ti-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: #336; }
+.ti-advice { font-size: 14px; font-weight: 600; padding: 8px 12px; border-radius: 8px; margin-bottom: 10px; text-align: center; }
+.ti-advice.bullish { background: linear-gradient(135deg, #fff5f5, #ffe8e8); color: #c0392b; }
+.ti-advice.bearish { background: linear-gradient(135deg, #f0fff4, #e8ffe8); color: #27ae60; }
+.ti-advice.neutral { background: #f5f5f5; color: #666; }
+.ti-score-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.ti-score-track { flex: 1; height: 8px; background: #e0e0e0; border-radius: 4px; position: relative; overflow: hidden; }
+.ti-score-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+.ti-score-label { font-size: 12px; color: #999; min-width: 50px; text-align: right; }
+.ti-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+.ti-item { background: #fff; padding: 8px 10px; border-radius: 8px; }
+.ti-item .ti-label { font-size: 11px; color: #999; }
+.ti-item .ti-value { font-size: 13px; font-weight: 600; margin-top: 2px; }
+.ti-signals { margin-top: 8px; }
+.ti-signal { font-size: 12px; padding: 4px 8px; margin-bottom: 4px; border-radius: 6px; background: #fff; line-height: 1.4; }
+.ti-signal.pos { border-left: 3px solid #e74c3c; }
+.ti-signal.neg { border-left: 3px solid #27ae60; }
+.ti-levels { display: flex; justify-content: space-between; margin-top: 8px; padding: 8px 12px; background: #fff; border-radius: 8px; }
+.ti-levels .tl { text-align: center; }
+.ti-levels .tl-label { font-size: 11px; color: #999; }
+.ti-levels .tl-value { font-size: 14px; font-weight: 600; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+<h1>📊 每日股票复盘</h1>
+<div class="time">2026-09-13 01:11</div>
+</div>
+
+<div class="section">
+<div class="section-title">📈 大盘指数</div>
+<div class="index-grid">
+<div class="index-item">
+<div class="name">上证指数</div>
+<div class="price up">3,753.00</div>
+<div class="pct up">+0.53%</div>
+</div>
+<div class="index-item">
+<div class="name">深证成指</div>
+<div class="price up">3,317.00</div>
+<div class="pct up">+0.17%</div>
+</div>
+<div class="index-item">
+<div class="name">创业板指</div>
+<div class="price up">3,927.00</div>
+<div class="pct up">+0.27%</div>
+</div>
+<div class="index-item">
+<div class="name">科创50</div>
+<div class="price down">3,831.00</div>
+<div class="pct down">-0.69%</div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">🌐 宏观环境</div>
+<div class="macro-grid">
+<div class="macro-item">
+<div class="label">10Y美债</div>
+<div class="value">4.150<span class="unit">%</span></div>
+</div>
+<div class="macro-item">
+<div class="label">美联储利率</div>
+<div class="value">5.25<span class="unit">%</span></div>
+</div>
+<div class="macro-item">
+<div class="label">美元/人民币</div>
+<div class="value">7.2500</div>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: #f0f2f5;">
+<div style="background:#fff; padding:10px 8px; text-align:center;">
+<div style="font-size:11px;color:#999;">COMEX黄金</div>
+<div style="font-size:15px;font-weight:600;margin-top:4px;" class="up">
+1,950.50<span style="font-size:11px;color:#999;"> 美元</span>
+</div>
+<div style="font-size:12px;margin-top:2px;" class="up">+0.30%</div>
+</div>
+<div style="background:#fff; padding:10px 8px; text-align:center;">
+<div style="font-size:11px;color:#999;">COMEX白银</div>
+<div style="font-size:15px;font-weight:600;margin-top:4px;" class="up">
+23.80<span style="font-size:11px;color:#999;"> 美元</span>
+</div>
+<div style="font-size:12px;margin-top:2px;" class="up">+0.50%</div>
+</div>
+<div style="background:#fff; padding:10px 8px; text-align:center;">
+<div style="font-size:11px;color:#999;">WTI原油</div>
+<div style="font-size:15px;font-weight:600;margin-top:4px;" class="down">
+85.20<span style="font-size:11px;color:#999;"> 美元</span>
+</div>
+<div style="font-size:12px;margin-top:2px;" class="down">-0.80%</div>
+</div>
+</div>
+
+<div style="padding: 8px 16px 12px;">
+<div style="background:#f8f9fa; padding:10px; text-align:center; border-radius:8px;">
+<div style="font-size:11px;color:#999;">A股总成交额</div>
+<div style="font-size:15px;font-weight:600;margin-top:4px;">
+8,500.00<span style="font-size:11px;color:#999;"> 亿</span>
+</div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">🎯 市场情绪</div>
+
+<div style="display:flex;gap:4px;padding:8px 16px 12px;">
+<div style="background:#e74c3c;height:20px;border-radius:4px;width:56%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;">2500</div>
+<div style="background:#888;height:20px;border-radius:4px;width:4%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;">200</div>
+<div style="background:#27ae60;height:20px;border-radius:4px;width:40%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;">1800</div>
+</div>
+
+<div class="macro-grid">
+<div class="macro-item"><div class="label">🔴 上涨</div><div class="value up">2500</div></div>
+<div class="macro-item"><div class="label">⚪ 平盘</div><div class="value">200</div></div>
+<div class="macro-item"><div class="label">🟢 下跌</div><div class="value down">1800</div></div>
+</div>
+
+<div style="padding: 0 16px 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #f0f2f5;">
+<div style="background:#fff; padding:10px; text-align:center;">
+<div style="font-size:11px;color:#999;">🔴 涨停</div>
+<div style="font-size:15px;font-weight:600;margin-top:4px;" class="up">45</div>
+</div>
+<div style="background:#fff; padding:10px; text-align:center;">
+<div style="font-size:11px;color:#999;">🟢 跌停</div>
+<div style="font-size:15px;font-weight:600;margin-top:4px;" class="down">12</div>
+</div>
+</div>
+</div>
+
+
+
+<div class="section">
+<div class="section-title">💰 概念板块资金流入 TOP10</div>
+<div class="flow-list">
+<div class="flow-row">
+<div class="name">半导体</div>
+<div class="change up">+2.50%</div>
+<div class="amount">+15.00亿</div>
+</div>
+<div class="flow-row">
+<div class="name">人工智能</div>
+<div class="change up">+1.80%</div>
+<div class="amount">+12.00亿</div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">🧭 大盘短线指引（次日参考）</div>
+
+
+<div style="padding: 12px 16px; border-bottom: 1px solid #f0f0f0;">
+<div style="font-size:14px;font-weight:600;margin-bottom:8px;">上证指数 <span style="font-size:12px;color:#999;font-weight:400;">sh000001</span></div>
+
+<div class="ti-advice bearish">🔴 短线偏空，注意控制仓位</div>
+
+<div class="ti-score-bar">
+<div style="font-size:11px;color:#999;">空</div>
+<div class="ti-score-track">
+<div class="ti-score-fill" style="width:35%;background:#27ae60;"></div>
+</div>
+<div style="font-size:11px;color:#999;">多</div>
+<div class="ti-score-label">-30分</div>
+</div>
+
+<div class="ti-grid">
+<div class="ti-item"><div class="ti-label">KDJ(35.5/45.6/15.2)</div><div class="ti-value">中性</div></div>
+<div class="ti-item"><div class="ti-label">RSI6</div><div class="ti-value ">22.1 偏弱</div></div>
+<div class="ti-item"><div class="ti-label">MACD</div><div class="ti-value">死叉 绿柱放大</div></div>
+<div class="ti-item"><div class="ti-label">均线</div><div class="ti-value">向下发散</div></div>
+<div class="ti-item"><div class="ti-label">量价</div><div class="ti-value">量价平稳 <span style="font-size:11px;color:#999;">(量比1.12)</span></div></div>
+<div class="ti-item"><div class="ti-label">连动</div><div class="ti-value">2日跌</div></div>
+</div>
+
+<div class="ti-signals">
+<div class="ti-signal neg">MACD死叉→趋势转空</div>
+</div>
+
+<div class="ti-levels">
+<div class="tl"><div class="tl-label">支撑位</div><div class="tl-value down">3894.58</div></div>
+<div class="tl"><div class="tl-label">压力位</div><div class="tl-value up">3987.22</div></div>
+</div>
+</div>
+
+<div style="padding: 12px 16px; border-bottom: 1px solid #f0f0f0;">
+<div style="font-size:14px;font-weight:600;margin-bottom:8px;">深证成指 <span style="font-size:12px;color:#999;font-weight:400;">sz399001</span></div>
+
+<div class="ti-advice bearish">🔴 短线偏空，建议减仓或离场</div>
+
+<div class="ti-score-bar">
+<div style="font-size:11px;color:#999;">空</div>
+<div class="ti-score-track">
+<div class="ti-score-fill" style="width:25%;background:#27ae60;"></div>
+</div>
+<div style="font-size:11px;color:#999;">多</div>
+<div class="ti-score-label">-50分</div>
+</div>
+
+<div class="ti-grid">
+<div class="ti-item"><div class="ti-label">KDJ(31.0/31.6/29.8)</div><div class="ti-value">死叉 中性</div></div>
+<div class="ti-item"><div class="ti-label">RSI6</div><div class="ti-value ">39.2 偏弱</div></div>
+<div class="ti-item"><div class="ti-label">MACD</div><div class="ti-value">绿柱放大</div></div>
+<div class="ti-item"><div class="ti-label">均线</div><div class="ti-value">空头排列</div></div>
+<div class="ti-item"><div class="ti-label">量价</div><div class="ti-value">量价平稳 <span style="font-size:11px;color:#999;">(量比1.05)</span></div></div>
+<div class="ti-item"><div class="ti-label">连动</div><div class="ti-value">2日跌</div></div>
+</div>
+
+<div class="ti-signals">
+<div class="ti-signal neg">KDJ死叉→短线卖出信号</div>
+<div class="ti-signal neg">均线空头排列→趋势向下</div>
+</div>
+
+<div class="ti-levels">
+<div class="tl"><div class="tl-label">支撑位</div><div class="tl-value down">13414.56</div></div>
+<div class="tl"><div class="tl-label">压力位</div><div class="tl-value up">13959.14</div></div>
+</div>
+</div>
+
+<div style="padding: 12px 16px; border-bottom: 1px solid #f0f0f0;">
+<div style="font-size:14px;font-weight:600;margin-bottom:8px;">创业板指 <span style="font-size:12px;color:#999;font-weight:400;">sz399006</span></div>
+
+<div class="ti-advice bullish">🟢 短线偏多，谨慎持有</div>
+
+<div class="ti-score-bar">
+<div style="font-size:11px;color:#999;">空</div>
+<div class="ti-score-track">
+<div class="ti-score-fill" style="width:60%;background:#e74c3c;"></div>
+</div>
+<div style="font-size:11px;color:#999;">多</div>
+<div class="ti-score-label">20分</div>
+</div>
+
+<div class="ti-grid">
+<div class="ti-item"><div class="ti-label">KDJ(34.0/30.3/41.4)</div><div class="ti-value">中性</div></div>
+<div class="ti-item"><div class="ti-label">RSI6</div><div class="ti-value ">52.2 中性</div></div>
+<div class="ti-item"><div class="ti-label">MACD</div><div class="ti-value">红柱放大</div></div>
+<div class="ti-item"><div class="ti-label">均线</div><div class="ti-value">交叉缠绕</div></div>
+<div class="ti-item"><div class="ti-label">量价</div><div class="ti-value">量价平稳 <span style="font-size:11px;color:#999;">(量比1.03)</span></div></div>
+<div class="ti-item"><div class="ti-label">连动</div><div class="ti-value">4日跌</div></div>
+</div>
+
+<div class="ti-signals">
+<div class="ti-signal pos">已4连跌→关注超跌反弹</div>
+</div>
+
+<div class="ti-levels">
+<div class="tl"><div class="tl-label">支撑位</div><div class="tl-value down">3270.98</div></div>
+<div class="tl"><div class="tl-label">压力位</div><div class="tl-value up">3433.21</div></div>
+</div>
+</div>
+
+<div style="padding: 12px 16px; border-bottom: 1px solid #f0f0f0;">
+<div style="font-size:14px;font-weight:600;margin-bottom:8px;">科创50 <span style="font-size:12px;color:#999;font-weight:400;">sh000688</span></div>
+
+<div class="ti-advice bearish">🔴 短线偏空，注意控制仓位</div>
+
+<div class="ti-score-bar">
+<div style="font-size:11px;color:#999;">空</div>
+<div class="ti-score-track">
+<div class="ti-score-fill" style="width:42%;background:#27ae60;"></div>
+</div>
+<div style="font-size:11px;color:#999;">多</div>
+<div class="ti-score-label">-15分</div>
+</div>
+
+<div class="ti-grid">
+<div class="ti-item"><div class="ti-label">KDJ(17.8/22.1/9.1)</div><div class="ti-value">低位</div></div>
+<div class="ti-item"><div class="ti-label">RSI6</div><div class="ti-value ">28.5 偏弱</div></div>
+<div class="ti-item"><div class="ti-label">MACD</div><div class="ti-value">绿柱放大</div></div>
+<div class="ti-item"><div class="ti-label">均线</div><div class="ti-value">空头排列</div></div>
+<div class="ti-item"><div class="ti-label">量价</div><div class="ti-value">量价平稳 <span style="font-size:11px;color:#999;">(量比1.37)</span></div></div>
+<div class="ti-item"><div class="ti-label">连动</div><div class="ti-value">4日跌</div></div>
+</div>
+
+<div class="ti-signals">
+<div class="ti-signal neg">均线空头排列→趋势向下</div>
+<div class="ti-signal pos">已4连跌→关注超跌反弹</div>
+</div>
+
+<div class="ti-levels">
+<div class="tl"><div class="tl-label">支撑位</div><div class="tl-value down">1548.47</div></div>
+<div class="tl"><div class="tl-label">压力位</div><div class="tl-value up">1668.5</div></div>
+</div>
+</div>
+
+</div>
+
+<div style="text-align:center; padding: 20px 16px; color: #999; font-size: 11px;">
+数据更新: 2026-09-13 01:11<br>数据来源: 新浪财经 / 腾讯财经 / 东方财富
+</div>
+
+<script>
+function toggleDetail(el) {
+  var detail = el.nextElementSibling;
+  var icon = el.querySelector(".expand-icon");
+  detail.classList.toggle("show");
+  icon.classList.toggle("open");
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,3442 @@
+{
+  "date": "2026-09-17",
+  "timestamp": "2026-09-17 19:17:51",
+  "total_stocks": 186,
+  "classified_stocks": 103,
+  "unclassified_count": 83,
+  "industry_summary": [
+    {
+      "l1": "汽车",
+      "l2": "零部件",
+      "count": 25,
+      "stocks": [
+        {
+          "code": "600609",
+          "name": "金杯汽车",
+          "changepercent": 10.154
+        },
+        {
+          "code": "603960",
+          "name": "克来机电",
+          "changepercent": 10.032
+        },
+        {
+          "code": "603626",
+          "name": "科森科技",
+          "changepercent": 10.026
+        },
+        {
+          "code": "600699",
+          "name": "均胜电子",
+          "changepercent": 10.022
+        },
+        {
+          "code": "600641",
+          "name": "先导基电",
+          "changepercent": 10.015
+        },
+        {
+          "code": "605088",
+          "name": "冠盛股份",
+          "changepercent": 10.014
+        },
+        {
+          "code": "603009",
+          "name": "北特科技",
+          "changepercent": 10.009
+        },
+        {
+          "code": "600822",
+          "name": "上海物贸",
+          "changepercent": 9.965
+        },
+        {
+          "code": "301225",
+          "name": "恒勃股份",
+          "changepercent": 9.406
+        },
+        {
+          "code": "301550",
+          "name": "斯菱智驱",
+          "changepercent": 8.17
+        },
+        {
+          "code": "000572",
+          "name": "海马汽车",
+          "changepercent": 7.921
+        },
+        {
+          "code": "603179",
+          "name": "新泉股份",
+          "changepercent": 7.265
+        },
+        {
+          "code": "603266",
+          "name": "天龙股份",
+          "changepercent": 7.259
+        },
+        {
+          "code": "000700",
+          "name": "模塑科技",
+          "changepercent": 6.828
+        },
+        {
+          "code": "600933",
+          "name": "爱柯迪",
+          "changepercent": 6.769
+        },
+        {
+          "code": "002510",
+          "name": "天汽模",
+          "changepercent": 6.643
+        },
+        {
+          "code": "300695",
+          "name": "兆丰股份",
+          "changepercent": 6.473
+        },
+        {
+          "code": "300938",
+          "name": "信测标准",
+          "changepercent": 6.201
+        },
+        {
+          "code": "603917",
+          "name": "合力科技",
+          "changepercent": 6.002
+        },
+        {
+          "code": "301107",
+          "name": "瑜欣电子",
+          "changepercent": 5.915
+        },
+        {
+          "code": "603997",
+          "name": "继峰股份",
+          "changepercent": 5.736
+        },
+        {
+          "code": "300539",
+          "name": "横河精密",
+          "changepercent": 5.728
+        },
+        {
+          "code": "301000",
+          "name": "肇民科技",
+          "changepercent": 5.64
+        },
+        {
+          "code": "603677",
+          "name": "奇精机械",
+          "changepercent": 5.442
+        },
+        {
+          "code": "603286",
+          "name": "日盈电子",
+          "changepercent": 5.27
+        }
+      ]
+    },
+    {
+      "l1": "基础化工",
+      "l2": "化工",
+      "count": 5,
+      "stocks": [
+        {
+          "code": "600792",
+          "name": "云煤能源",
+          "changepercent": 10.103
+        },
+        {
+          "code": "600929",
+          "name": "雪天盐业",
+          "changepercent": 10
+        },
+        {
+          "code": "002453",
+          "name": "华软科技",
+          "changepercent": 9.977
+        },
+        {
+          "code": "300243",
+          "name": "瑞丰高材",
+          "changepercent": 6.902
+        },
+        {
+          "code": "002789",
+          "name": "*ST建艺",
+          "changepercent": 6.375
+        }
+      ]
+    },
+    {
+      "l1": "公用事业",
+      "l2": "固废处理",
+      "count": 5,
+      "stocks": [
+        {
+          "code": "601872",
+          "name": "招商轮船",
+          "changepercent": 10.02
+        },
+        {
+          "code": "600026",
+          "name": "中远海能",
+          "changepercent": 6.612
+        },
+        {
+          "code": "603162",
+          "name": "海通发展",
+          "changepercent": 6.505
+        },
+        {
+          "code": "300816",
+          "name": "艾可蓝",
+          "changepercent": 6.254
+        },
+        {
+          "code": "002827",
+          "name": "高争民爆",
+          "changepercent": 5.502
+        }
+      ]
+    },
+    {
+      "l1": "建筑装饰",
+      "l2": "建筑工程",
+      "count": 5,
+      "stocks": [
+        {
+          "code": "003001",
+          "name": "中岩大地",
+          "changepercent": 10.016
+        },
+        {
+          "code": "000011",
+          "name": "深物业A",
+          "changepercent": 6.436
+        },
+        {
+          "code": "300517",
+          "name": "海波重科",
+          "changepercent": 6.2
+        },
+        {
+          "code": "300137",
+          "name": "先河环保",
+          "changepercent": 5.711
+        },
+        {
+          "code": "300649",
+          "name": "杭州园林",
+          "changepercent": 5.063
+        }
+      ]
+    },
+    {
+      "l1": "医药生物",
+      "l2": "化学制药",
+      "count": 4,
+      "stocks": [
+        {
+          "code": "300434",
+          "name": "金石亚药",
+          "changepercent": 19.981
+        },
+        {
+          "code": "300401",
+          "name": "花园生物",
+          "changepercent": 7.114
+        },
+        {
+          "code": "300683",
+          "name": "海特生物",
+          "changepercent": 6.539
+        },
+        {
+          "code": "301075",
+          "name": "多瑞医药",
+          "changepercent": 6.087
+        }
+      ]
+    },
+    {
+      "l1": "社会服务",
+      "l2": "教育",
+      "count": 4,
+      "stocks": [
+        {
+          "code": "688004",
+          "name": "博汇科技",
+          "changepercent": 12.903
+        },
+        {
+          "code": "603230",
+          "name": "内蒙新华",
+          "changepercent": 9.964
+        },
+        {
+          "code": "300338",
+          "name": "*ST开元",
+          "changepercent": 7.509
+        },
+        {
+          "code": "300559",
+          "name": "佳发教育",
+          "changepercent": 6.26
+        }
+      ]
+    },
+    {
+      "l1": "电力设备",
+      "l2": "输配电设备",
+      "count": 3,
+      "stocks": [
+        {
+          "code": "601091",
+          "name": "N沈鼓",
+          "changepercent": 373.804
+        },
+        {
+          "code": "300813",
+          "name": "泰林生物",
+          "changepercent": 10.579
+        },
+        {
+          "code": "300992",
+          "name": "泰福泵业",
+          "changepercent": 5.872
+        }
+      ]
+    },
+    {
+      "l1": "机械设备",
+      "l2": "工程机械",
+      "count": 3,
+      "stocks": [
+        {
+          "code": "300112",
+          "name": "万讯自控",
+          "changepercent": 12.647
+        },
+        {
+          "code": "300553",
+          "name": "集智股份",
+          "changepercent": 10.519
+        },
+        {
+          "code": "301633",
+          "name": "港迪技术",
+          "changepercent": 10.332
+        }
+      ]
+    },
+    {
+      "l1": "汽车",
+      "l2": "整车",
+      "count": 3,
+      "stocks": [
+        {
+          "code": "000980",
+          "name": "众泰汽车",
+          "changepercent": 10.233
+        },
+        {
+          "code": "000868",
+          "name": "安凯客车",
+          "changepercent": 10.027
+        },
+        {
+          "code": "000981",
+          "name": "山子高科",
+          "changepercent": 9.854
+        }
+      ]
+    },
+    {
+      "l1": "基础化工",
+      "l2": "新材料",
+      "count": 3,
+      "stocks": [
+        {
+          "code": "000920",
+          "name": "沃顿科技",
+          "changepercent": 10.017
+        },
+        {
+          "code": "688203",
+          "name": "海正生材",
+          "changepercent": 7.968
+        },
+        {
+          "code": "600516",
+          "name": "方大炭素",
+          "changepercent": 5.153
+        }
+      ]
+    },
+    {
+      "l1": "通信",
+      "l2": "通信设备",
+      "count": 3,
+      "stocks": [
+        {
+          "code": "002796",
+          "name": "世嘉科技",
+          "changepercent": 10.007
+        },
+        {
+          "code": "300987",
+          "name": "川网传媒",
+          "changepercent": 8.286
+        },
+        {
+          "code": "603236",
+          "name": "移远通信",
+          "changepercent": 5.621
+        }
+      ]
+    },
+    {
+      "l1": "电力设备",
+      "l2": "风电",
+      "count": 3,
+      "stocks": [
+        {
+          "code": "601218",
+          "name": "吉鑫科技",
+          "changepercent": 9.962
+        },
+        {
+          "code": "002487",
+          "name": "大金重工",
+          "changepercent": 5.235
+        },
+        {
+          "code": "002080",
+          "name": "中材科技",
+          "changepercent": 5.029
+        }
+      ]
+    },
+    {
+      "l1": "计算机",
+      "l2": "软件服务",
+      "count": 2,
+      "stocks": [
+        {
+          "code": "301390",
+          "name": "经纬股份",
+          "changepercent": 20
+        },
+        {
+          "code": "688178",
+          "name": "万德斯",
+          "changepercent": 5.02
+        }
+      ]
+    },
+    {
+      "l1": "计算机",
+      "l2": "AI算力",
+      "count": 2,
+      "stocks": [
+        {
+          "code": "688802",
+          "name": "沐曦股份",
+          "changepercent": 14.436
+        },
+        {
+          "code": "300010",
+          "name": "ST豆神",
+          "changepercent": 7.625
+        }
+      ]
+    },
+    {
+      "l1": "建筑材料",
+      "l2": "玻璃",
+      "count": 2,
+      "stocks": [
+        {
+          "code": "600293",
+          "name": "三峡新材",
+          "changepercent": 10.032
+        },
+        {
+          "code": "002613",
+          "name": "北玻股份",
+          "changepercent": 6.017
+        }
+      ]
+    },
+    {
+      "l1": "电力设备",
+      "l2": "电力运营",
+      "count": 2,
+      "stocks": [
+        {
+          "code": "605162",
+          "name": "新中港",
+          "changepercent": 10.009
+        },
+        {
+          "code": "300153",
+          "name": "科泰电源",
+          "changepercent": 6.997
+        }
+      ]
+    },
+    {
+      "l1": "社会服务",
+      "l2": "旅游",
+      "count": 2,
+      "stocks": [
+        {
+          "code": "600593",
+          "name": "大连圣亚",
+          "changepercent": 10.008
+        },
+        {
+          "code": "603099",
+          "name": "长白山",
+          "changepercent": 5.434
+        }
+      ]
+    },
+    {
+      "l1": "计算机",
+      "l2": "物联网",
+      "count": 2,
+      "stocks": [
+        {
+          "code": "301678",
+          "name": "新恒汇",
+          "changepercent": 8.95
+        },
+        {
+          "code": "000725",
+          "name": "京东方Ａ",
+          "changepercent": 5.505
+        }
+      ]
+    },
+    {
+      "l1": "轻工制造",
+      "l2": "家居",
+      "count": 2,
+      "stocks": [
+        {
+          "code": "002631",
+          "name": "德尔未来",
+          "changepercent": 7.124
+        },
+        {
+          "code": "300749",
+          "name": "顶固集创",
+          "changepercent": 5.499
+        }
+      ]
+    },
+    {
+      "l1": "公用事业",
+      "l2": "环保工程",
+      "count": 2,
+      "stocks": [
+        {
+          "code": "300950",
+          "name": "德固特",
+          "changepercent": 5.933
+        },
+        {
+          "code": "603822",
+          "name": "ST嘉澳",
+          "changepercent": 5.723
+        }
+      ]
+    },
+    {
+      "l1": "交通运输",
+      "l2": "物流",
+      "count": 1,
+      "stocks": [
+        {
+          "code": "600354",
+          "name": "敦煌种业",
+          "changepercent": 10.045
+        }
+      ]
+    },
+    {
+      "l1": "计算机",
+      "l2": "信息安全",
+      "count": 1,
+      "stocks": [
+        {
+          "code": "002339",
+          "name": "积成电子",
+          "changepercent": 10.027
+        }
+      ]
+    },
+    {
+      "l1": "商贸零售",
+      "l2": "百货",
+      "count": 1,
+      "stocks": [
+        {
+          "code": "001216",
+          "name": "华瓷股份",
+          "changepercent": 10.017
+        }
+      ]
+    },
+    {
+      "l1": "电子",
+      "l2": "电子元器件",
+      "count": 1,
+      "stocks": [
+        {
+          "code": "002655",
+          "name": "共达电声",
+          "changepercent": 10.011
+        }
+      ]
+    },
+    {
+      "l1": "电子",
+      "l2": "连接器",
+      "count": 1,
+      "stocks": [
+        {
+          "code": "001365",
+          "name": "天海电子",
+          "changepercent": 10
+        }
+      ]
+    },
+    {
+      "l1": "电子",
+      "l2": "PCB",
+      "count": 1,
+      "stocks": [
+        {
+          "code": "605058",
+          "name": "澳弘电子",
+          "changepercent": 9.993
+        }
+      ]
+    },
+    {
+      "l1": "公用事业",
+      "l2": "水务",
+      "count": 1,
+      "stocks": [
+        {
+          "code": "688296",
+          "name": "和达科技",
+          "changepercent": 9.831
+        }
+      ]
+    },
+    {
+      "l1": "医药生物",
+      "l2": "医疗器械",
+      "count": 1,
+      "stocks": [
+        {
+          "code": "688613",
+          "name": "奥精医疗",
+          "changepercent": 9.654
+        }
+      ]
+    },
+    {
+      "l1": "基础化工",
+      "l2": "塑料",
+      "count": 1,
+      "stocks": [
+        {
+          "code": "688147",
+          "name": "微导纳米",
+          "changepercent": 8.315
+        }
+      ]
+    },
+    {
+      "l1": "传媒",
+      "l2": "影视",
+      "count": 1,
+      "stocks": [
+        {
+          "code": "600088",
+          "name": "中视传媒",
+          "changepercent": 7.641
+        }
+      ]
+    },
+    {
+      "l1": "交通运输",
+      "l2": "农产品流通",
+      "count": 1,
+      "stocks": [
+        {
+          "code": "600108",
+          "name": "亚盛集团",
+          "changepercent": 6.818
+        }
+      ]
+    },
+    {
+      "l1": "有色金属",
+      "l2": "铝",
+      "count": 1,
+      "stocks": [
+        {
+          "code": "300489",
+          "name": "光智科技",
+          "changepercent": 6.249
+        }
+      ]
+    },
+    {
+      "l1": "建筑材料",
+      "l2": "玻纤",
+      "count": 1,
+      "stocks": [
+        {
+          "code": "300196",
+          "name": "长海股份",
+          "changepercent": 6.042
+        }
+      ]
+    },
+    {
+      "l1": "家用电器",
+      "l2": "消费电子",
+      "count": 1,
+      "stocks": [
+        {
+          "code": "002824",
+          "name": "和胜股份",
+          "changepercent": 5.66
+        }
+      ]
+    },
+    {
+      "l1": "电力设备",
+      "l2": "光伏",
+      "count": 1,
+      "stocks": [
+        {
+          "code": "688503",
+          "name": "聚和材料",
+          "changepercent": 5.221
+        }
+      ]
+    },
+    {
+      "l1": "传媒",
+      "l2": "数字媒体",
+      "count": 1,
+      "stocks": [
+        {
+          "code": "600229",
+          "name": "城市传媒",
+          "changepercent": 5.027
+        }
+      ]
+    },
+    {
+      "l1": "建筑材料",
+      "l2": "复合材料",
+      "count": 1,
+      "stocks": [
+        {
+          "code": "300690",
+          "name": "双一科技",
+          "changepercent": 5.008
+        }
+      ]
+    }
+  ],
+  "top5_industries": [
+    {
+      "l1": "汽车",
+      "l2": "零部件",
+      "count": 25,
+      "stocks": [
+        {
+          "code": "600609",
+          "symbol": "sh600609",
+          "name": "金杯汽车",
+          "changepercent": 10.154,
+          "trade": "3.580",
+          "volume": 825554.0,
+          "amount": 28416.0,
+          "main_business": "设计、生产和销售汽车零部件。",
+          "industry_l1": "汽车",
+          "industry_l2": "零部件",
+          "keyword": "汽车",
+          "price": 3.58,
+          "change_pct": 10.15,
+          "pe": 25.13,
+          "pb": 2.74,
+          "total_mv": 46.7,
+          "float_mv": 46.7,
+          "amplitude": 11.08,
+          "volume_ratio": 1.59,
+          "turnover_rate": 6.33,
+          "consecutive_days": 1,
+          "percentile_60": 100.0,
+          "percentile_250": 23.8
+        },
+        {
+          "code": "603960",
+          "symbol": "sh603960",
+          "name": "克来机电",
+          "changepercent": 10.032,
+          "trade": "17.000",
+          "volume": 179264.0,
+          "amount": 29163.0,
+          "main_business": "智能装备业务和汽车零部件业务两大板块。",
+          "industry_l1": "汽车",
+          "industry_l2": "零部件",
+          "keyword": "汽车",
+          "price": 17.0,
+          "change_pct": 10.03,
+          "pe": -287.33,
+          "pb": 4.01,
+          "total_mv": 44.57,
+          "float_mv": 44.57,
+          "amplitude": 11.33,
+          "volume_ratio": 3.41,
+          "turnover_rate": 6.84,
+          "consecutive_days": 1,
+          "percentile_60": 71.4,
+          "percentile_250": 24.3
+        },
+        {
+          "code": "603626",
+          "symbol": "sh603626",
+          "name": "科森科技",
+          "changepercent": 10.026,
+          "trade": "21.290",
+          "volume": 345517.0,
+          "amount": 72327.0,
+          "main_business": "为苹果、亚马逊、谷歌、Meta、美敦力及北美知名企业等国内外客户提供消费电子（含电子消费品结构件、VR）、医疗器械、汽车（含新能源汽车）等终端产品所需的精密金属及塑胶结构件产品的研发、制造及部分相关组装服务。",
+          "industry_l1": "汽车",
+          "industry_l2": "零部件",
+          "keyword": "汽车",
+          "price": 21.29,
+          "change_pct": 10.03,
+          "pe": 21.73,
+          "pb": 5.48,
+          "total_mv": 118.13,
+          "float_mv": 118.13,
+          "amplitude": 11.21,
+          "volume_ratio": 0.87,
+          "turnover_rate": 6.23,
+          "consecutive_days": 2,
+          "percentile_60": 95.8,
+          "percentile_250": 59.3
+        },
+        {
+          "code": "600699",
+          "symbol": "sh600699",
+          "name": "均胜电子",
+          "changepercent": 10.022,
+          "trade": "19.870",
+          "volume": 548532.0,
+          "amount": 105115.0,
+          "main_business": "研发、生产和销售汽车零配件。",
+          "industry_l1": "汽车",
+          "industry_l2": "零部件",
+          "keyword": "汽车",
+          "price": 19.87,
+          "change_pct": 10.02,
+          "pe": 20.85,
+          "pb": 1.86,
+          "total_mv": 308.14,
+          "float_mv": 277.32,
+          "amplitude": 10.47,
+          "volume_ratio": 2.86,
+          "turnover_rate": 3.93,
+          "consecutive_days": 2,
+          "percentile_60": 34.1,
+          "percentile_250": 9.7
+        },
+        {
+          "code": "600641",
+          "symbol": "sh600641",
+          "name": "先导基电",
+          "changepercent": 10.015,
+          "trade": "36.800",
+          "volume": 847724.0,
+          "amount": 302608.0,
+          "main_business": "铋的深加工及化合物产品业务、集成电路专用设备、相关科学仪器、零部件销售和设备支持服务，以及车位和存量房产销售交付。",
+          "industry_l1": "汽车",
+          "industry_l2": "零部件",
+          "keyword": "零部件",
+          "price": 36.8,
+          "change_pct": 10.01,
+          "pe": 82.91,
+          "pb": 4.14,
+          "total_mv": 348.45,
+          "float_mv": 342.47,
+          "amplitude": 11.66,
+          "volume_ratio": 1.7,
+          "turnover_rate": 9.11,
+          "consecutive_days": 2,
+          "percentile_60": 53.9,
+          "percentile_250": 64.7
+        },
+        {
+          "code": "605088",
+          "symbol": "sh605088",
+          "name": "冠盛股份",
+          "changepercent": 10.014,
+          "trade": "24.170",
+          "volume": 167669.0,
+          "amount": 38675.0,
+          "main_business": "汽车底盘系统零部件的研发、生产和销售。",
+          "industry_l1": "汽车",
+          "industry_l2": "零部件",
+          "keyword": "汽车",
+          "price": 24.17,
+          "change_pct": 10.01,
+          "pe": 19.49,
+          "pb": 1.69,
+          "total_mv": 49.0,
+          "float_mv": 48.63,
+          "amplitude": 10.74,
+          "volume_ratio": 1.17,
+          "turnover_rate": 8.33,
+          "consecutive_days": 2,
+          "percentile_60": 40.0,
+          "percentile_250": 22.6
+        },
+        {
+          "code": "603009",
+          "symbol": "sh603009",
+          "name": "北特科技",
+          "changepercent": 10.009,
+          "trade": "47.370",
+          "volume": 121669.0,
+          "amount": 56548.0,
+          "main_business": "汽车零部件业务。",
+          "industry_l1": "汽车",
+          "industry_l2": "零部件",
+          "keyword": "汽车",
+          "price": 47.37,
+          "change_pct": 10.01,
+          "pe": 129.96,
+          "pb": 8.05,
+          "total_mv": 164.08,
+          "float_mv": 164.08,
+          "amplitude": 10.61,
+          "volume_ratio": 2.08,
+          "turnover_rate": 3.51,
+          "consecutive_days": 2,
+          "percentile_60": 66.5,
+          "percentile_250": 49.5
+        },
+        {
+          "code": "600822",
+          "symbol": "sh600822",
+          "name": "上海物贸",
+          "changepercent": 9.965,
+          "trade": "9.380",
+          "volume": 165950.0,
+          "amount": 15094.0,
+          "main_business": "汽车经销服务、大宗商品供应链。",
+          "industry_l1": "汽车",
+          "industry_l2": "零部件",
+          "keyword": "汽车",
+          "price": 9.38,
+          "change_pct": 9.96,
+          "pe": 223.12,
+          "pb": 3.74,
+          "total_mv": 46.52,
+          "float_mv": 37.16,
+          "amplitude": 11.49,
+          "volume_ratio": 2.96,
+          "turnover_rate": 4.19,
+          "consecutive_days": 1,
+          "percentile_60": 100.0,
+          "percentile_250": 31.7
+        },
+        {
+          "code": "301225",
+          "symbol": "sz301225",
+          "name": "恒勃股份",
+          "changepercent": 9.406,
+          "trade": "60.020",
+          "volume": 64360.0,
+          "amount": 38151.0,
+          "main_business": "ICE＆HEV进气系统、燃油蒸发系统、新能源汽车热管理系统、内饰系统、氢燃料电池阴极过滤系统、摩托车智能仪表、轻量化高性能精密零部件的研发、生产和销售。",
+          "industry_l1": "汽车",
+          "industry_l2": "零部件",
+          "keyword": "汽车",
+          "price": 60.02,
+          "change_pct": 9.41,
+          "pe": 90.41,
+          "pb": 5.41,
+          "total_mv": 86.48,
+          "float_mv": 26.4,
+          "amplitude": 12.6,
+          "volume_ratio": 1.9,
+          "turnover_rate": 14.63,
+          "consecutive_days": 2,
+          "percentile_60": 62.2,
+          "percentile_250": 19.3
+        },
+        {
+          "code": "301550",
+          "symbol": "sz301550",
+          "name": "斯菱智驱",
+          "changepercent": 8.17,
+          "trade": "94.000",
+          "volume": 136593.0,
+          "amount": 127180.0,
+          "main_business": "汽车零部件的研发、制造和销售。",
+          "industry_l1": "汽车",
+          "industry_l2": "零部件",
+          "keyword": "汽车",
+          "price": 94.0,
+          "change_pct": 8.17,
+          "pe": 204.12,
+          "pb": 17.19,
+          "total_mv": 315.23,
+          "float_mv": 193.7,
+          "amplitude": 12.98,
+          "volume_ratio": 1.81,
+          "turnover_rate": 6.63,
+          "consecutive_days": 2,
+          "percentile_60": 66.9,
+          "percentile_250": 47.6
+        },
+        {
+          "code": "000572",
+          "symbol": "sz000572",
+          "name": "海马汽车",
+          "changepercent": 7.921,
+          "trade": "4.360",
+          "volume": 2109367.0,
+          "amount": 88129.0,
+          "main_business": "汽车及汽车动力总成的研发、制造、销售及金融服务。",
+          "industry_l1": "汽车",
+          "industry_l2": "零部件",
+          "keyword": "汽车",
+          "price": 4.36,
+          "change_pct": 7.92,
+          "pe": -36.82,
+          "pb": 4.75,
+          "total_mv": 71.71,
+          "float_mv": 71.6,
+          "amplitude": 14.6,
+          "volume_ratio": 1.8,
+          "turnover_rate": 12.84,
+          "consecutive_days": 1,
+          "percentile_60": 100.0,
+          "percentile_250": 12.1
+        },
+        {
+          "code": "603179",
+          "symbol": "sh603179",
+          "name": "新泉股份",
+          "changepercent": 7.265,
+          "trade": "39.420",
+          "volume": 290537.0,
+          "amount": 112644.0,
+          "main_business": "汽车内、外饰件系统零部件及其模具的设计、制造及销售。",
+          "industry_l1": "汽车",
+          "industry_l2": "零部件",
+          "keyword": "汽车",
+          "price": 39.42,
+          "change_pct": 7.27,
+          "pe": 34.99,
+          "pb": 3.56,
+          "total_mv": 289.8,
+          "float_mv": 281.54,
+          "amplitude": 9.31,
+          "volume_ratio": 2.22,
+          "turnover_rate": 4.07,
+          "consecutive_days": 1,
+          "percentile_60": 23.7,
+          "percentile_250": 11.3
+        },
+        {
+          "code": "603266",
+          "symbol": "sh603266",
+          "name": "天龙股份",
+          "changepercent": 7.259,
+          "trade": "17.880",
+          "volume": 169802.0,
+          "amount": 29842.0,
+          "main_business": "模具、汽车零部件的研发、生产和销售。",
+          "industry_l1": "汽车",
+          "industry_l2": "零部件",
+          "keyword": "汽车",
+          "price": 17.88,
+          "change_pct": 7.26,
+          "pe": 39.27,
+          "pb": 2.18,
+          "total_mv": 35.56,
+          "float_mv": 35.56,
+          "amplitude": 10.92,
+          "volume_ratio": 2.95,
+          "turnover_rate": 8.54,
+          "consecutive_days": 1,
+          "percentile_60": 94.9,
+          "percentile_250": 27.3
+        },
+        {
+          "code": "000700",
+          "symbol": "sz000700",
+          "name": "模塑科技",
+          "changepercent": 6.828,
+          "trade": "11.890",
+          "volume": 1022964.0,
+          "amount": 121470.0,
+          "main_business": "汽车保险杠等汽车外饰系统及轻量化零部件的研发、生产和销售。",
+          "industry_l1": "汽车",
+          "industry_l2": "零部件",
+          "keyword": "汽车",
+          "price": 11.89,
+          "change_pct": 6.83,
+          "pe": 17.33,
+          "pb": 2.63,
+          "total_mv": 109.15,
+          "float_mv": 109.15,
+          "amplitude": 10.78,
+          "volume_ratio": 2.96,
+          "turnover_rate": 11.14,
+          "consecutive_days": 2,
+          "percentile_60": 29.6,
+          "percentile_250": 33.7
+        },
+        {
+          "code": "600933",
+          "symbol": "sh600933",
+          "name": "爱柯迪",
+          "changepercent": 6.769,
+          "trade": "13.250",
+          "volume": 202040.0,
+          "amount": 26150.0,
+          "main_business": "汽车用铝合金、锌合金、镁合金精密压铸件以及微特电机精密零部件的研发、生产及销售。",
+          "industry_l1": "汽车",
+          "industry_l2": "零部件",
+          "keyword": "汽车",
+          "price": 13.25,
+          "change_pct": 6.77,
+          "pe": 14.29,
+          "pb": 1.42,
+          "total_mv": 136.48,
+          "float_mv": 129.98,
+          "amplitude": 7.98,
+          "volume_ratio": 2.63,
+          "turnover_rate": 2.06,
+          "consecutive_days": 1,
+          "percentile_60": 28.2,
+          "percentile_250": 7.6
+        },
+        {
+          "code": "002510",
+          "symbol": "sz002510",
+          "name": "天汽模",
+          "changepercent": 6.643,
+          "trade": "5.940",
+          "volume": 800883.0,
+          "amount": 47824.0,
+          "main_business": "汽车车身覆盖件模具及其配套产品的研发、设计、生产与销售。",
+          "industry_l1": "汽车",
+          "industry_l2": "零部件",
+          "keyword": "汽车",
+          "price": 5.94,
+          "change_pct": 6.64,
+          "pe": 314.53,
+          "pb": 2.38,
+          "total_mv": 60.3,
+          "float_mv": 60.3,
+          "amplitude": 11.13,
+          "volume_ratio": 3.05,
+          "turnover_rate": 7.89,
+          "consecutive_days": 1,
+          "percentile_60": 100.0,
+          "percentile_250": 24.3
+        },
+        {
+          "code": "300695",
+          "symbol": "sz300695",
+          "name": "兆丰股份",
+          "changepercent": 6.473,
+          "trade": "51.810",
+          "volume": 20572.0,
+          "amount": 10375.0,
+          "main_business": "各类汽车轮毂轴承单元、分离轴承等汽车轴承，商用车底盘系统零部件以及汽车电子电气产品的研发、生产和销售。",
+          "industry_l1": "汽车",
+          "industry_l2": "零部件",
+          "keyword": "汽车",
+          "price": 51.81,
+          "change_pct": 6.47,
+          "pe": 184.76,
+          "pb": 1.83,
+          "total_mv": 52.98,
+          "float_mv": 52.98,
+          "amplitude": 9.23,
+          "volume_ratio": 2.28,
+          "turnover_rate": 2.01,
+          "consecutive_days": 4,
+          "percentile_60": 37.0,
+          "percentile_250": 13.1
+        },
+        {
+          "code": "300938",
+          "symbol": "sz300938",
+          "name": "信测标准",
+          "changepercent": 6.201,
+          "trade": "31.170",
+          "volume": 242908.0,
+          "amount": 75072.0,
+          "main_business": "试验设备制造和提供汽车领域检测、电子电气产品检测、日用消费品检测、健康与环保检测等服务。",
+          "industry_l1": "汽车",
+          "industry_l2": "零部件",
+          "keyword": "汽车",
+          "price": 31.17,
+          "change_pct": 6.2,
+          "pe": 49.18,
+          "pb": 5.52,
+          "total_mv": 106.25,
+          "float_mv": 92.22,
+          "amplitude": 8.86,
+          "volume_ratio": 2.89,
+          "turnover_rate": 8.21,
+          "consecutive_days": 4,
+          "percentile_60": 25.2,
+          "percentile_250": 39.0
+        },
+        {
+          "code": "603917",
+          "symbol": "sh603917",
+          "name": "合力科技",
+          "changepercent": 6.002,
+          "trade": "13.600",
+          "volume": 73239.0,
+          "amount": 9821.0,
+          "main_business": "汽车用铸造模具、压铸模具、热冲压模具、铝合金部品和汽车制动系统的研发、设计、制造和销售。",
+          "industry_l1": "汽车",
+          "industry_l2": "零部件",
+          "keyword": "汽车",
+          "price": 13.6,
+          "change_pct": 6.0,
+          "pe": -453.78,
+          "pb": 1.68,
+          "total_mv": 27.72,
+          "float_mv": 27.72,
+          "amplitude": 8.11,
+          "volume_ratio": 2.85,
+          "turnover_rate": 3.59,
+          "consecutive_days": 2,
+          "percentile_60": 95.6,
+          "percentile_250": 51.3
+        },
+        {
+          "code": "301107",
+          "symbol": "sz301107",
+          "name": "瑜欣电子",
+          "changepercent": 5.915,
+          "trade": "22.740",
+          "volume": 57148.0,
+          "amount": 12745.0,
+          "main_business": "通用汽油机及终端核心零部件的研发、生产和销售。",
+          "industry_l1": "汽车",
+          "industry_l2": "零部件",
+          "keyword": "零部件",
+          "price": 22.74,
+          "change_pct": 5.92,
+          "pe": 62.52,
+          "pb": 3.41,
+          "total_mv": 32.33,
+          "float_mv": 18.46,
+          "amplitude": 6.01,
+          "volume_ratio": 3.73,
+          "turnover_rate": 7.04,
+          "consecutive_days": 2,
+          "percentile_60": 85.8,
+          "percentile_250": 65.1
+        }
+      ],
+      "news": [
+        {
+          "title": "USCC公布更新报告：“中国零部件是伊朗战争机器的原料” - 美国之音",
+          "date": "9月14日",
+          "source": "美国之音"
+        },
+        {
+          "title": "275家汽车零部件上市公司上半年增收不增利 - 汽车之家",
+          "date": "9月17日",
+          "source": "汽车之家"
+        },
+        {
+          "title": "汽车零部件ETF广发（512740）涨0.94%，半日成交额531.72万元 - 新浪财经",
+          "date": "9月16日",
+          "source": "新浪财经"
+        },
+        {
+          "title": "汽车零部件板块表现强势，汽车零部件ETF易方达（159565）标的指数上涨1.4% - Sohu",
+          "date": "9月17日",
+          "source": "Sohu"
+        },
+        {
+          "title": "韩国半导体零部件供应严重短缺、交货周期拉长 有设备商或要等40个月 - 手机网易网",
+          "date": "9月17日",
+          "source": "手机网易网"
+        },
+        {
+          "title": "大富科技：2026年上半年汽车零部件业务收入7,587.76万元，同比上升2.78% - 东方财富",
+          "date": "9月17日",
+          "source": "东方财富"
+        },
+        {
+          "title": "零部件企业扎堆出海，上半年出口510.3亿美元 - 汽车之家",
+          "date": "9月17日",
+          "source": "汽车之家"
+        },
+        {
+          "title": "特斯拉10月发布Robotaxi，催化汽零需求释放，汽车零部件ETF华夏涨1.31% - Sohu",
+          "date": "9月17日",
+          "source": "Sohu"
+        },
+        {
+          "title": "华为秋季发布会催化，汽车零部件ETF易方达涨1.21% - Sohu",
+          "date": "9月17日",
+          "source": "Sohu"
+        },
+        {
+          "title": "汽车零部件ETF广发（512740）涨1.25%，半日成交额1034.92万元 - Sohu",
+          "date": "9月17日",
+          "source": "Sohu"
+        }
+      ],
+      "catalyst": [
+        {
+          "theme": "其他动态",
+          "count": 4,
+          "items": [
+            {
+              "title": "汽车零部件ETF广发（512740）涨0.94%，半日成交额531.72万元 - 新浪财经",
+              "date": "9月16日"
+            },
+            {
+              "title": "汽车零部件板块表现强势，汽车零部件ETF易方达（159565）标的指数上涨1.4% - Sohu",
+              "date": "9月17日"
+            },
+            {
+              "title": "大富科技：2026年上半年汽车零部件业务收入7,587.76万元，同比上升2.78% - 东方财富",
+              "date": "9月17日"
+            }
+          ],
+          "summary": "汽车零部件ETF广发（512740）涨0.94%，半日成交额531.72万元 -；汽车零部件板块表现强势，汽车零部件ETF易方达（159565）标的指数上涨1.4"
+        },
+        {
+          "theme": "海外动态",
+          "count": 3,
+          "items": [
+            {
+              "title": "USCC公布更新报告：“中国零部件是伊朗战争机器的原料” - 美国之音",
+              "date": "9月14日"
+            },
+            {
+              "title": "韩国半导体零部件供应严重短缺、交货周期拉长 有设备商或要等40个月 - 手机网易网",
+              "date": "9月17日"
+            },
+            {
+              "title": "零部件企业扎堆出海，上半年出口510.3亿美元 - 汽车之家",
+              "date": "9月17日"
+            }
+          ],
+          "summary": "USCC公布更新报告：“中国零部件是伊朗战争机器的原料” - 美国之音；韩国半导体零部件供应严重短缺、交货周期拉长 有设备商或要等40个月 - 手机网易"
+        },
+        {
+          "theme": "技术突破",
+          "count": 2,
+          "items": [
+            {
+              "title": "特斯拉10月发布Robotaxi，催化汽零需求释放，汽车零部件ETF华夏涨1.31% - Sohu",
+              "date": "9月17日"
+            },
+            {
+              "title": "华为秋季发布会催化，汽车零部件ETF易方达涨1.21% - Sohu",
+              "date": "9月17日"
+            }
+          ],
+          "summary": "特斯拉10月发布Robotaxi，催化汽零需求释放，汽车零部件ETF华夏涨1.3；华为秋季发布会催化，汽车零部件ETF易方达涨1.21% - Sohu"
+        }
+      ],
+      "timeline": [
+        {
+          "date": "9月17日",
+          "events": [
+            {
+              "title": "275家汽车零部件上市公司上半年增收不增利 - 汽车之家",
+              "stocks": []
+            },
+            {
+              "title": "汽车零部件板块表现强势，汽车零部件ETF易方达（159565）标的指数上涨1.4% - Sohu",
+              "stocks": []
+            },
+            {
+              "title": "韩国半导体零部件供应严重短缺、交货周期拉长 有设备商或要等40个月 - 手机网易网",
+              "stocks": []
+            }
+          ],
+          "is_highlight": true
+        },
+        {
+          "date": "9月16日",
+          "events": [
+            {
+              "title": "汽车零部件ETF广发（512740）涨0.94%，半日成交额531.72万元 - 新浪财经",
+              "stocks": []
+            }
+          ],
+          "is_highlight": false
+        },
+        {
+          "date": "9月14日",
+          "events": [
+            {
+              "title": "USCC公布更新报告：“中国零部件是伊朗战争机器的原料” - 美国之音",
+              "stocks": []
+            }
+          ],
+          "is_highlight": false
+        }
+      ],
+      "value_chain": {
+        "tiers": [
+          {
+            "tier": 1,
+            "label": "核心受益",
+            "color": "tier-1",
+            "stocks": [
+              {
+                "code": "603960",
+                "name": "克来机电",
+                "score": 65,
+                "reasons": [
+                  "量比3.4倍",
+                  "60日低位",
+                  "250日低位",
+                  "涨停"
+                ],
+                "changepercent": 10.032,
+                "consecutive_days": 1
+              },
+              {
+                "code": "600699",
+                "name": "均胜电子",
+                "score": 65,
+                "reasons": [
+                  "连涨2天",
+                  "量比2.9倍",
+                  "60日低位",
+                  "250日低位",
+                  "涨停"
+                ],
+                "changepercent": 10.022,
+                "consecutive_days": 2
+              },
+              {
+                "code": "603009",
+                "name": "北特科技",
+                "score": 65,
+                "reasons": [
+                  "连涨2天",
+                  "量比2.1倍",
+                  "60日低位",
+                  "250日低位",
+                  "涨停"
+                ],
+                "changepercent": 10.009,
+                "consecutive_days": 2
+              },
+              {
+                "code": "300695",
+                "name": "兆丰股份",
+                "score": 65,
+                "reasons": [
+                  "连涨4天",
+                  "量比2.3倍",
+                  "60日低位",
+                  "250日低位"
+                ],
+                "changepercent": 6.473,
+                "consecutive_days": 4
+              },
+              {
+                "code": "300938",
+                "name": "信测标准",
+                "score": 65,
+                "reasons": [
+                  "连涨4天",
+                  "量比2.9倍",
+                  "60日低位",
+                  "250日低位"
+                ],
+                "changepercent": 6.201,
+                "consecutive_days": 4
+              }
+            ],
+            "logic": "资金持续流入+趋势确认，短线动能最强"
+          },
+          {
+            "tier": 2,
+            "label": "弹性标的",
+            "color": "tier-2",
+            "stocks": [
+              {
+                "code": "600609",
+                "name": "金杯汽车",
+                "score": 48,
+                "reasons": [
+                  "60日低位",
+                  "250日低位",
+                  "涨停"
+                ],
+                "changepercent": 10.154,
+                "consecutive_days": 1
+              },
+              {
+                "code": "600933",
+                "name": "爱柯迪",
+                "score": 45,
+                "reasons": [
+                  "量比2.6倍",
+                  "60日低位",
+                  "250日低位"
+                ],
+                "changepercent": 6.769,
+                "consecutive_days": 1
+              },
+              {
+                "code": "000572",
+                "name": "海马汽车",
+                "score": 43,
+                "reasons": [
+                  "60日低位",
+                  "250日低位"
+                ],
+                "changepercent": 7.921,
+                "consecutive_days": 1
+              }
+            ],
+            "logic": "放量启动或补涨逻辑，关注确认信号"
+          }
+        ],
+        "watch_direction": "关注智驾渗透率、出口放量节奏；板块整体放量，资金关注度较高；短线涨幅较大，注意追高风险"
+      }
+    },
+    {
+      "l1": "基础化工",
+      "l2": "化工",
+      "count": 5,
+      "stocks": [
+        {
+          "code": "600792",
+          "symbol": "sh600792",
+          "name": "云煤能源",
+          "changepercent": 10.103,
+          "trade": "5.340",
+          "volume": 1579316.0,
+          "amount": 77331.0,
+          "main_business": "焦炭及相关化工产品的生产和销售。",
+          "industry_l1": "基础化工",
+          "industry_l2": "化工",
+          "keyword": "化工",
+          "price": 5.34,
+          "change_pct": 10.1,
+          "pe": -11.92,
+          "pb": 2.59,
+          "total_mv": 59.27,
+          "float_mv": 59.27,
+          "amplitude": 16.7,
+          "volume_ratio": 0.85,
+          "turnover_rate": 14.23,
+          "consecutive_days": 1,
+          "percentile_60": 96.9,
+          "percentile_250": 85.4
+        },
+        {
+          "code": "600929",
+          "symbol": "sh600929",
+          "name": "雪天盐业",
+          "changepercent": 10,
+          "trade": "5.940",
+          "volume": 1013441.0,
+          "amount": 56898.0,
+          "main_business": "盐及盐化工产品的生产、销售。",
+          "industry_l1": "基础化工",
+          "industry_l2": "化工",
+          "keyword": "化工",
+          "price": 5.94,
+          "change_pct": 10.0,
+          "pe": 61.52,
+          "pb": 1.27,
+          "total_mv": 97.42,
+          "float_mv": 97.42,
+          "amplitude": 13.52,
+          "volume_ratio": 1.67,
+          "turnover_rate": 6.18,
+          "consecutive_days": 1,
+          "percentile_60": 77.3,
+          "percentile_250": 52.1
+        },
+        {
+          "code": "002453",
+          "symbol": "sz002453",
+          "name": "华软科技",
+          "changepercent": 9.977,
+          "trade": "4.850",
+          "volume": 162116.0,
+          "amount": 7506.0,
+          "main_business": "精细化工产品以及工业安全防护传感器及安全控制产品的研发、生产与销售。",
+          "industry_l1": "基础化工",
+          "industry_l2": "化工",
+          "keyword": "化工",
+          "price": 4.85,
+          "change_pct": 9.98,
+          "pe": -25.87,
+          "pb": 5.56,
+          "total_mv": 39.4,
+          "float_mv": 31.19,
+          "amplitude": 11.79,
+          "volume_ratio": 1.96,
+          "turnover_rate": 2.52,
+          "consecutive_days": 2,
+          "percentile_60": 100.0,
+          "percentile_250": 18.6
+        },
+        {
+          "code": "300243",
+          "symbol": "sz300243",
+          "name": "瑞丰高材",
+          "changepercent": 6.902,
+          "trade": "21.220",
+          "volume": 762551.0,
+          "amount": 162735.0,
+          "main_business": "PVC塑料助剂、工程塑料助剂、生物可降解材料及聚酯材料、合成生物材料、新能源电池专用材料等化工新材料的研发、生产和销售。",
+          "industry_l1": "基础化工",
+          "industry_l2": "化工",
+          "keyword": "化工",
+          "price": 21.22,
+          "change_pct": 6.9,
+          "pe": 50.33,
+          "pb": 3.83,
+          "total_mv": 59.32,
+          "float_mv": 47.46,
+          "amplitude": 15.21,
+          "volume_ratio": 3.46,
+          "turnover_rate": 34.1,
+          "consecutive_days": 4,
+          "percentile_60": 85.3,
+          "percentile_250": 83.5
+        },
+        {
+          "code": "002789",
+          "symbol": "sz002789",
+          "name": "*ST建艺",
+          "changepercent": 6.375,
+          "trade": "13.850",
+          "volume": 41751.0,
+          "amount": 5690.0,
+          "main_business": "室内外装饰工程设计与施工；建筑幕墙工程设计与施工；智能化工程施工；机电安装工程施工；防腐保温工程施工；钢结构工程施工；建筑材料、灯具、卫生洁具、家私的购销；园林技术开发；园林设计、园林绿化（凭资质证书经营）；自有房屋租赁；商务服务等。",
+          "industry_l1": "基础化工",
+          "industry_l2": "化工",
+          "keyword": "化工",
+          "price": 13.85,
+          "change_pct": 6.37,
+          "pe": -7.7,
+          "pb": 35.94,
+          "total_mv": 22.11,
+          "float_mv": 21.67,
+          "amplitude": 6.84,
+          "volume_ratio": 1.21,
+          "turnover_rate": 2.67,
+          "consecutive_days": 2,
+          "percentile_60": 97.8,
+          "percentile_250": 85.2
+        }
+      ],
+      "news": [
+        {
+          "title": "石化化工数智化及AI+场景对接交流会在上海成功举办 - 新浪财经",
+          "date": "9月17日",
+          "source": "新浪财经"
+        },
+        {
+          "title": "海湾集团亮相2026中国国际化工展 - 新浪财经",
+          "date": "9月17日",
+          "source": "新浪财经"
+        },
+        {
+          "title": "从化工展看特种具身智能的落地价值 - 中国日报网",
+          "date": "9月16日",
+          "source": "中国日报网"
+        },
+        {
+          "title": "化工“黑窝点”藏玉米地，一条“破绽”牵出跨省暗流 - thepaper.cn",
+          "date": "9月16日",
+          "source": "thepaper.cn"
+        },
+        {
+          "title": "“红色沃土”育新人——延安大学化学与化工学院创新办学模式纪实 - Sohu",
+          "date": "9月16日",
+          "source": "Sohu"
+        },
+        {
+          "title": "智护安全｜量子智能深耕化工特种场景，重构高危现场作业逻辑 - 中国网",
+          "date": "9月16日",
+          "source": "中国网"
+        },
+        {
+          "title": "化工新材料加快高端布局 产业链协同拓展应用空间 - 第一财经",
+          "date": "9月16日",
+          "source": "第一财经"
+        },
+        {
+          "title": "华鲁恒升、鲁西化工、兖矿能源等差异化布局新材料赛道 - 东方财富",
+          "date": "9月16日",
+          "source": "东方财富"
+        },
+        {
+          "title": "化工ETF万家（159087）跌0.81%，半日成交额262.02万元 - 新浪财经",
+          "date": "9月16日",
+          "source": "新浪财经"
+        },
+        {
+          "title": "苦熬五年后化工价格大涨，东方盛虹扣非后净利润增长超14倍 - 新浪财经",
+          "date": "9月17日",
+          "source": "新浪财经"
+        }
+      ],
+      "catalyst": [
+        {
+          "theme": "其他动态",
+          "count": 6,
+          "items": [
+            {
+              "title": "石化化工数智化及AI+场景对接交流会在上海成功举办 - 新浪财经",
+              "date": "9月17日"
+            },
+            {
+              "title": "化工“黑窝点”藏玉米地，一条“破绽”牵出跨省暗流 - thepaper.cn",
+              "date": "9月16日"
+            },
+            {
+              "title": "智护安全｜量子智能深耕化工特种场景，重构高危现场作业逻辑 - 中国网",
+              "date": "9月16日"
+            }
+          ],
+          "summary": "石化化工数智化及AI+场景对接交流会在上海成功举办 - 新浪财经；化工“黑窝点”藏玉米地，一条“破绽”牵出跨省暗流 - thepaper.cn"
+        },
+        {
+          "theme": "技术突破",
+          "count": 2,
+          "items": [
+            {
+              "title": "从化工展看特种具身智能的落地价值 - 中国日报网",
+              "date": "9月16日"
+            },
+            {
+              "title": "“红色沃土”育新人——延安大学化学与化工学院创新办学模式纪实 - Sohu",
+              "date": "9月16日"
+            }
+          ],
+          "summary": "从化工展看特种具身智能的落地价值 - 中国日报网；“红色沃土”育新人——延安大学化学与化工学院创新办学模式纪实 - Sohu"
+        },
+        {
+          "theme": "海外动态",
+          "count": 1,
+          "items": [
+            {
+              "title": "海湾集团亮相2026中国国际化工展 - 新浪财经",
+              "date": "9月17日"
+            }
+          ],
+          "summary": "海湾集团亮相2026中国国际化工展 - 新浪财经"
+        }
+      ],
+      "timeline": [
+        {
+          "date": "9月17日",
+          "events": [
+            {
+              "title": "石化化工数智化及AI+场景对接交流会在上海成功举办 - 新浪财经",
+              "stocks": []
+            },
+            {
+              "title": "海湾集团亮相2026中国国际化工展 - 新浪财经",
+              "stocks": []
+            },
+            {
+              "title": "苦熬五年后化工价格大涨，东方盛虹扣非后净利润增长超14倍 - 新浪财经",
+              "stocks": []
+            }
+          ],
+          "is_highlight": true
+        },
+        {
+          "date": "9月16日",
+          "events": [
+            {
+              "title": "从化工展看特种具身智能的落地价值 - 中国日报网",
+              "stocks": []
+            },
+            {
+              "title": "化工“黑窝点”藏玉米地，一条“破绽”牵出跨省暗流 - thepaper.cn",
+              "stocks": []
+            },
+            {
+              "title": "“红色沃土”育新人——延安大学化学与化工学院创新办学模式纪实 - Sohu",
+              "stocks": []
+            }
+          ],
+          "is_highlight": true
+        }
+      ],
+      "value_chain": {
+        "tiers": [
+          {
+            "tier": 1,
+            "label": "核心受益",
+            "color": "tier-1",
+            "stocks": [
+              {
+                "code": "300243",
+                "name": "瑞丰高材",
+                "score": 75,
+                "reasons": [
+                  "连涨4天",
+                  "量比3.5倍",
+                  "60日低位",
+                  "250日低位"
+                ],
+                "changepercent": 6.902,
+                "consecutive_days": 4
+              },
+              {
+                "code": "002453",
+                "name": "华软科技",
+                "score": 58,
+                "reasons": [
+                  "连涨2天",
+                  "60日低位",
+                  "250日低位",
+                  "涨停"
+                ],
+                "changepercent": 9.977,
+                "consecutive_days": 2
+              }
+            ],
+            "logic": "资金持续流入+趋势确认，短线动能最强"
+          },
+          {
+            "tier": 2,
+            "label": "弹性标的",
+            "color": "tier-2",
+            "stocks": [
+              {
+                "code": "600929",
+                "name": "雪天盐业",
+                "score": 48,
+                "reasons": [
+                  "60日低位",
+                  "250日低位",
+                  "涨停"
+                ],
+                "changepercent": 10,
+                "consecutive_days": 1
+              },
+              {
+                "code": "600792",
+                "name": "云煤能源",
+                "score": 40,
+                "reasons": [
+                  "60日低位",
+                  "250日低位",
+                  "涨停"
+                ],
+                "changepercent": 10.103,
+                "consecutive_days": 1
+              },
+              {
+                "code": "002789",
+                "name": "*ST建艺",
+                "score": 40,
+                "reasons": [
+                  "连涨2天",
+                  "60日低位",
+                  "250日低位"
+                ],
+                "changepercent": 6.375,
+                "consecutive_days": 2
+              }
+            ],
+            "logic": "放量启动或补涨逻辑，关注确认信号"
+          }
+        ],
+        "watch_direction": "关注原油价格传导、下游需求复苏节奏；短线涨幅较大，注意追高风险"
+      }
+    },
+    {
+      "l1": "公用事业",
+      "l2": "固废处理",
+      "count": 5,
+      "stocks": [
+        {
+          "code": "601872",
+          "symbol": "sh601872",
+          "name": "招商轮船",
+          "changepercent": 10.02,
+          "trade": "21.850",
+          "volume": 1679915.0,
+          "amount": 352374.0,
+          "main_business": "海上运输业务。",
+          "industry_l1": "公用事业",
+          "industry_l2": "固废处理",
+          "keyword": "运输",
+          "price": 21.85,
+          "change_pct": 10.02,
+          "pe": 12.68,
+          "pb": 3.77,
+          "total_mv": 1764.29,
+          "float_mv": 1764.29,
+          "amplitude": 9.82,
+          "volume_ratio": 0.92,
+          "turnover_rate": 2.08,
+          "consecutive_days": 1,
+          "percentile_60": 100.0,
+          "percentile_250": 100.0
+        },
+        {
+          "code": "600026",
+          "symbol": "sh600026",
+          "name": "中远海能",
+          "changepercent": 6.612,
+          "trade": "22.090",
+          "volume": 1004161.0,
+          "amount": 217608.0,
+          "main_business": "原油、成品油、液化天然气、液化石油气、化学品等散装液体危险货物的海上运输。",
+          "industry_l1": "公用事业",
+          "industry_l2": "固废处理",
+          "keyword": "运输",
+          "price": 22.09,
+          "change_pct": 6.61,
+          "pe": 13.3,
+          "pb": 2.51,
+          "total_mv": 1208.59,
+          "float_mv": 845.6,
+          "amplitude": 7.29,
+          "volume_ratio": 1.36,
+          "turnover_rate": 2.62,
+          "consecutive_days": 1,
+          "percentile_60": 100.0,
+          "percentile_250": 75.7
+        },
+        {
+          "code": "603162",
+          "symbol": "sh603162",
+          "name": "海通发展",
+          "changepercent": 6.505,
+          "trade": "14.080",
+          "volume": 859889.0,
+          "amount": 116929.0,
+          "main_business": "国内沿海以及国际远洋的干散货运输业务。",
+          "industry_l1": "公用事业",
+          "industry_l2": "固废处理",
+          "keyword": "运输",
+          "price": 14.08,
+          "change_pct": 6.51,
+          "pe": 18.49,
+          "pb": 3.98,
+          "total_mv": 193.62,
+          "float_mv": 59.5,
+          "amplitude": 11.42,
+          "volume_ratio": 0.89,
+          "turnover_rate": 20.35,
+          "consecutive_days": 1,
+          "percentile_60": 78.0,
+          "percentile_250": 85.0
+        },
+        {
+          "code": "300816",
+          "symbol": "sz300816",
+          "name": "艾可蓝",
+          "changepercent": 6.254,
+          "trade": "63.880",
+          "volume": 41089.0,
+          "amount": 25869.0,
+          "main_business": "发动机尾气后处理产品及与大气环保相关产品的研发、生产和销售。",
+          "industry_l1": "公用事业",
+          "industry_l2": "固废处理",
+          "keyword": "处理",
+          "price": 63.88,
+          "change_pct": 6.25,
+          "pe": 65.23,
+          "pb": 5.23,
+          "total_mv": 51.1,
+          "float_mv": 37.28,
+          "amplitude": 8.12,
+          "volume_ratio": 1.15,
+          "turnover_rate": 7.04,
+          "consecutive_days": 2,
+          "percentile_60": 69.3,
+          "percentile_250": 44.4
+        },
+        {
+          "code": "002827",
+          "symbol": "sz002827",
+          "name": "高争民爆",
+          "changepercent": 5.502,
+          "trade": "67.880",
+          "volume": 87574.0,
+          "amount": 58560.0,
+          "main_business": "民爆器材生产销售运输和爆破服务业务。",
+          "industry_l1": "公用事业",
+          "industry_l2": "固废处理",
+          "keyword": "运输",
+          "price": 67.88,
+          "change_pct": 5.5,
+          "pe": 289.76,
+          "pb": 17.64,
+          "total_mv": 188.06,
+          "float_mv": 187.35,
+          "amplitude": 4.66,
+          "volume_ratio": 0.99,
+          "turnover_rate": 3.17,
+          "consecutive_days": 1,
+          "percentile_60": 93.5,
+          "percentile_250": 93.5
+        }
+      ],
+      "news": [
+        {
+          "title": "瀚蓝惠安固废处理有限公司获20年发电类电力业务许可证，电力业务运营资质落定 - 新浪财经",
+          "date": "9月17日",
+          "source": "新浪财经"
+        },
+        {
+          "title": "成都环博会开幕 AI技术助力污水处理、固废资源化升级 - Sohu",
+          "date": "9月16日",
+          "source": "Sohu"
+        },
+        {
+          "title": "垃圾处理厂“藏”在公园下 - 人民雄安网",
+          "date": "9月2日",
+          "source": "人民雄安网"
+        },
+        {
+          "title": "武汉天源集团岷县生活垃圾焚烧发电项目成功并网发电-公司动态 - 证券市场周刊",
+          "date": "9月12日",
+          "source": "证券市场周刊"
+        },
+        {
+          "title": "去年青岛全市固废产生量6100多万吨，回收新能源汽车4645辆 - 青岛日报",
+          "date": "9月7日",
+          "source": "青岛日报"
+        },
+        {
+          "title": "“零固园区”重塑工业代谢？苏盐井绳乃“深地经济”？｜文汇讲堂 - shobserver.com",
+          "date": "9月1日",
+          "source": "shobserver.com"
+        },
+        {
+          "title": "数百万吨镍渣“黑山”压顶 镍铁龙头固废处置难题(含视频) - china.caixin.com",
+          "date": "8月31日",
+          "source": "china.caixin.com"
+        },
+        {
+          "title": "陈德珍：“以废代能”，让建筑垃圾可燃物变身高品质能源|文汇讲堂 - 上观新闻",
+          "date": "8月26日",
+          "source": "上观新闻"
+        },
+        {
+          "title": "Marquise Ambiental接管Guaiúba固废处置 日处理能力约30吨 - 维度网",
+          "date": "9月4日",
+          "source": "维度网"
+        },
+        {
+          "title": "军信股份通过港交所聆讯，A+H在即，中亚固废项目规划规模达9000吨/日 - 新浪财经",
+          "date": "9月15日",
+          "source": "新浪财经"
+        }
+      ],
+      "catalyst": [
+        {
+          "theme": "其他动态",
+          "count": 9,
+          "items": [
+            {
+              "title": "瀚蓝惠安固废处理有限公司获20年发电类电力业务许可证，电力业务运营资质落定 - 新浪财经",
+              "date": "9月17日"
+            },
+            {
+              "title": "成都环博会开幕 AI技术助力污水处理、固废资源化升级 - Sohu",
+              "date": "9月16日"
+            },
+            {
+              "title": "垃圾处理厂“藏”在公园下 - 人民雄安网",
+              "date": "9月2日"
+            }
+          ],
+          "summary": "瀚蓝惠安固废处理有限公司获20年发电类电力业务许可证，电力业务运营资质落定 - ；成都环博会开幕 AI技术助力污水处理、固废资源化升级 - Sohu"
+        },
+        {
+          "theme": "政策",
+          "count": 1,
+          "items": [
+            {
+              "title": "军信股份通过港交所聆讯，A+H在即，中亚固废项目规划规模达9000吨/日 - 新浪财经",
+              "date": "9月15日"
+            }
+          ],
+          "summary": "军信股份通过港交所聆讯，A+H在即，中亚固废项目规划规模达9000吨/日 - 新"
+        }
+      ],
+      "timeline": [
+        {
+          "date": "9月7日",
+          "events": [
+            {
+              "title": "去年青岛全市固废产生量6100多万吨，回收新能源汽车4645辆 - 青岛日报",
+              "stocks": []
+            }
+          ],
+          "is_highlight": false
+        },
+        {
+          "date": "9月4日",
+          "events": [
+            {
+              "title": "Marquise Ambiental接管Guaiúba固废处置 日处理能力约30吨 - 维度网",
+              "stocks": []
+            }
+          ],
+          "is_highlight": false
+        },
+        {
+          "date": "9月2日",
+          "events": [
+            {
+              "title": "垃圾处理厂“藏”在公园下 - 人民雄安网",
+              "stocks": []
+            }
+          ],
+          "is_highlight": false
+        },
+        {
+          "date": "9月1日",
+          "events": [
+            {
+              "title": "“零固园区”重塑工业代谢？苏盐井绳乃“深地经济”？｜文汇讲堂 - shobserver.com",
+              "stocks": []
+            }
+          ],
+          "is_highlight": false
+        },
+        {
+          "date": "9月17日",
+          "events": [
+            {
+              "title": "瀚蓝惠安固废处理有限公司获20年发电类电力业务许可证，电力业务运营资质落定 - 新浪财经",
+              "stocks": []
+            }
+          ],
+          "is_highlight": false
+        },
+        {
+          "date": "9月16日",
+          "events": [
+            {
+              "title": "成都环博会开幕 AI技术助力污水处理、固废资源化升级 - Sohu",
+              "stocks": []
+            }
+          ],
+          "is_highlight": false
+        },
+        {
+          "date": "9月15日",
+          "events": [
+            {
+              "title": "军信股份通过港交所聆讯，A+H在即，中亚固废项目规划规模达9000吨/日 - 新浪财经",
+              "stocks": []
+            }
+          ],
+          "is_highlight": false
+        }
+      ],
+      "value_chain": {
+        "tiers": [
+          {
+            "tier": 2,
+            "label": "弹性标的",
+            "color": "tier-2",
+            "stocks": [
+              {
+                "code": "601872",
+                "name": "招商轮船",
+                "score": 40,
+                "reasons": [
+                  "60日低位",
+                  "250日低位",
+                  "涨停"
+                ],
+                "changepercent": 10.02,
+                "consecutive_days": 1
+              },
+              {
+                "code": "300816",
+                "name": "艾可蓝",
+                "score": 40,
+                "reasons": [
+                  "连涨2天",
+                  "60日低位",
+                  "250日低位"
+                ],
+                "changepercent": 6.254,
+                "consecutive_days": 2
+              },
+              {
+                "code": "600026",
+                "name": "中远海能",
+                "score": 30,
+                "reasons": [
+                  "60日低位",
+                  "250日低位"
+                ],
+                "changepercent": 6.612,
+                "consecutive_days": 1
+              },
+              {
+                "code": "603162",
+                "name": "海通发展",
+                "score": 30,
+                "reasons": [
+                  "60日低位",
+                  "250日低位"
+                ],
+                "changepercent": 6.505,
+                "consecutive_days": 1
+              },
+              {
+                "code": "002827",
+                "name": "高争民爆",
+                "score": 30,
+                "reasons": [
+                  "60日低位",
+                  "250日低位"
+                ],
+                "changepercent": 5.502,
+                "consecutive_days": 1
+              }
+            ],
+            "logic": "放量启动或补涨逻辑，关注确认信号"
+          }
+        ],
+        "watch_direction": "关注固废处理板块龙头的业绩兑现与估值切换"
+      }
+    },
+    {
+      "l1": "建筑装饰",
+      "l2": "建筑工程",
+      "count": 5,
+      "stocks": [
+        {
+          "code": "003001",
+          "symbol": "sz003001",
+          "name": "中岩大地",
+          "changepercent": 10.016,
+          "trade": "20.320",
+          "volume": 363502.0,
+          "amount": 71455.0,
+          "main_business": "岩土工程服务。",
+          "industry_l1": "建筑装饰",
+          "industry_l2": "建筑工程",
+          "keyword": "工程",
+          "price": 20.32,
+          "change_pct": 10.02,
+          "pe": -89.1,
+          "pb": 3.06,
+          "total_mv": 35.47,
+          "float_mv": 23.24,
+          "amplitude": 12.99,
+          "volume_ratio": 6.33,
+          "turnover_rate": 31.79,
+          "consecutive_days": 4,
+          "percentile_60": 89.9,
+          "percentile_250": 57.4
+        },
+        {
+          "code": "000011",
+          "symbol": "sz000011",
+          "name": "深物业A",
+          "changepercent": 6.436,
+          "trade": "8.930",
+          "volume": 177337.0,
+          "amount": 15459.0,
+          "main_business": "房地产开发、物业管理服务、资产运营、餐饮业务、工程监理业务。",
+          "industry_l1": "建筑装饰",
+          "industry_l2": "建筑工程",
+          "keyword": "工程",
+          "price": 8.93,
+          "change_pct": 6.44,
+          "pe": -39.03,
+          "pb": 1.61,
+          "total_mv": 53.22,
+          "float_mv": 47.01,
+          "amplitude": 8.94,
+          "volume_ratio": 1.24,
+          "turnover_rate": 3.37,
+          "consecutive_days": 2,
+          "percentile_60": 70.3,
+          "percentile_250": 53.5
+        },
+        {
+          "code": "300517",
+          "symbol": "sz300517",
+          "name": "海波重科",
+          "changepercent": 6.2,
+          "trade": "11.990",
+          "volume": 115362.0,
+          "amount": 13606.0,
+          "main_business": "桥梁钢结构工程。",
+          "industry_l1": "建筑装饰",
+          "industry_l2": "建筑工程",
+          "keyword": "工程",
+          "price": 11.99,
+          "change_pct": 6.2,
+          "pe": -154.57,
+          "pb": 2.37,
+          "total_mv": 24.03,
+          "float_mv": 15.14,
+          "amplitude": 10.63,
+          "volume_ratio": 1.17,
+          "turnover_rate": 9.14,
+          "consecutive_days": 3,
+          "percentile_60": 94.4,
+          "percentile_250": 74.8
+        },
+        {
+          "code": "300137",
+          "symbol": "sz300137",
+          "name": "先河环保",
+          "changepercent": 5.711,
+          "trade": "10.550",
+          "volume": 401726.0,
+          "amount": 41573.0,
+          "main_business": "环境监测设备的生产与销售、运营和咨询服务、建筑工程施工业务。",
+          "industry_l1": "建筑装饰",
+          "industry_l2": "建筑工程",
+          "keyword": "工程",
+          "price": 10.55,
+          "change_pct": 5.71,
+          "pe": -133.19,
+          "pb": 3.54,
+          "total_mv": 56.61,
+          "float_mv": 55.69,
+          "amplitude": 7.62,
+          "volume_ratio": 2.1,
+          "turnover_rate": 7.61,
+          "consecutive_days": 2,
+          "percentile_60": 14.4,
+          "percentile_250": 29.3
+        },
+        {
+          "code": "300649",
+          "symbol": "sz300649",
+          "name": "杭州园林",
+          "changepercent": 5.063,
+          "trade": "27.390",
+          "volume": 48017.0,
+          "amount": 13018.0,
+          "main_business": "提供以整体性解决方案为核心的风景园林设计服务和工程总承包服务。",
+          "industry_l1": "建筑装饰",
+          "industry_l2": "建筑工程",
+          "keyword": "工程",
+          "price": 27.39,
+          "change_pct": 5.06,
+          "pe": -85.43,
+          "pb": 8.57,
+          "total_mv": 36.27,
+          "float_mv": 27.88,
+          "amplitude": 6.52,
+          "volume_ratio": 0.97,
+          "turnover_rate": 4.72,
+          "consecutive_days": 2,
+          "percentile_60": 79.3,
+          "percentile_250": 84.3
+        }
+      ],
+      "news": [
+        {
+          "title": "工程数字化大会2026在北京成功举办 - 中国能源新闻网",
+          "date": "9月17日",
+          "source": "中国能源新闻网"
+        },
+        {
+          "title": "双展联动感受绿色低碳与工程建设新图景 - 光明网",
+          "date": "9月17日",
+          "source": "光明网"
+        },
+        {
+          "title": "裕廊集团首测无人重型建筑机械 最快后年启用缓解人力提升安全 - 联合早报",
+          "date": "9月17日",
+          "source": "联合早报"
+        },
+        {
+          "title": "建筑工程学院召开2027届毕业生就业动员大会 - 黑龙江科技大学",
+          "date": "9月16日",
+          "source": "黑龙江科技大学"
+        },
+        {
+          "title": "甘肃建筑职业技术学院建筑工程学院党总支：建红色根基 筑匠心华章 以特色党建赋能高质量发展 - 每日甘肃网",
+          "date": "9月16日",
+          "source": "每日甘肃网"
+        },
+        {
+          "title": "严把验槽质量关 筑牢工程建设根基 - 新浪财经",
+          "date": "9月17日",
+          "source": "新浪财经"
+        },
+        {
+          "title": "“建工逐光”系列报道丨重庆建筑工程职业学院以“教学关键要素改革”筑牢育人根基 - 华龙网",
+          "date": "9月16日",
+          "source": "华龙网"
+        },
+        {
+          "title": "2026年湖南省建筑工程“质量月”活动启动- 经济要闻 - 新湖南",
+          "date": "9月16日",
+          "source": "新湖南"
+        },
+        {
+          "title": "2026年湖南省建筑工程“质量月”活动启动仪式暨现场观摩交流会在长沙举行 - 湖南红网",
+          "date": "9月16日",
+          "source": "湖南红网"
+        },
+        {
+          "title": "关于曹路镇盐支港（启迅河-东川公路）河道建设工程可行性研究报告的批复_项目审批 - pudong.gov.cn",
+          "date": "9月16日",
+          "source": "pudong.gov.cn"
+        }
+      ],
+      "catalyst": [
+        {
+          "theme": "其他动态",
+          "count": 8,
+          "items": [
+            {
+              "title": "双展联动感受绿色低碳与工程建设新图景 - 光明网",
+              "date": "9月17日"
+            },
+            {
+              "title": "裕廊集团首测无人重型建筑机械 最快后年启用缓解人力提升安全 - 联合早报",
+              "date": "9月17日"
+            },
+            {
+              "title": "甘肃建筑职业技术学院建筑工程学院党总支：建红色根基 筑匠心华章 以特色党建赋能高质量发展 - 每日甘肃网",
+              "date": "9月16日"
+            }
+          ],
+          "summary": "双展联动感受绿色低碳与工程建设新图景 - 光明网；裕廊集团首测无人重型建筑机械 最快后年启用缓解人力提升安全 - 联合早报"
+        },
+        {
+          "theme": "行业事件",
+          "count": 2,
+          "items": [
+            {
+              "title": "工程数字化大会2026在北京成功举办 - 中国能源新闻网",
+              "date": "9月17日"
+            },
+            {
+              "title": "建筑工程学院召开2027届毕业生就业动员大会 - 黑龙江科技大学",
+              "date": "9月16日"
+            }
+          ],
+          "summary": "工程数字化大会2026在北京成功举办 - 中国能源新闻网；建筑工程学院召开2027届毕业生就业动员大会 - 黑龙江科技大学"
+        }
+      ],
+      "timeline": [
+        {
+          "date": "9月17日",
+          "events": [
+            {
+              "title": "工程数字化大会2026在北京成功举办 - 中国能源新闻网",
+              "stocks": []
+            },
+            {
+              "title": "双展联动感受绿色低碳与工程建设新图景 - 光明网",
+              "stocks": []
+            },
+            {
+              "title": "裕廊集团首测无人重型建筑机械 最快后年启用缓解人力提升安全 - 联合早报",
+              "stocks": []
+            }
+          ],
+          "is_highlight": true
+        },
+        {
+          "date": "9月16日",
+          "events": [
+            {
+              "title": "建筑工程学院召开2027届毕业生就业动员大会 - 黑龙江科技大学",
+              "stocks": []
+            },
+            {
+              "title": "甘肃建筑职业技术学院建筑工程学院党总支：建红色根基 筑匠心华章 以特色党建赋能高质量发展 - 每日甘肃网",
+              "stocks": []
+            },
+            {
+              "title": "“建工逐光”系列报道丨重庆建筑工程职业学院以“教学关键要素改革”筑牢育人根基 - 华龙网",
+              "stocks": []
+            }
+          ],
+          "is_highlight": true
+        }
+      ],
+      "value_chain": {
+        "tiers": [
+          {
+            "tier": 1,
+            "label": "核心受益",
+            "color": "tier-1",
+            "stocks": [
+              {
+                "code": "003001",
+                "name": "中岩大地",
+                "score": 85,
+                "reasons": [
+                  "连涨4天",
+                  "量比6.3倍",
+                  "60日低位",
+                  "250日低位",
+                  "涨停"
+                ],
+                "changepercent": 10.016,
+                "consecutive_days": 4
+              },
+              {
+                "code": "300137",
+                "name": "先河环保",
+                "score": 55,
+                "reasons": [
+                  "连涨2天",
+                  "量比2.1倍",
+                  "60日低位",
+                  "250日低位"
+                ],
+                "changepercent": 5.711,
+                "consecutive_days": 2
+              },
+              {
+                "code": "300517",
+                "name": "海波重科",
+                "score": 50,
+                "reasons": [
+                  "连涨3天",
+                  "60日低位",
+                  "250日低位"
+                ],
+                "changepercent": 6.2,
+                "consecutive_days": 3
+              }
+            ],
+            "logic": "资金持续流入+趋势确认，短线动能最强"
+          },
+          {
+            "tier": 2,
+            "label": "弹性标的",
+            "color": "tier-2",
+            "stocks": [
+              {
+                "code": "000011",
+                "name": "深物业A",
+                "score": 40,
+                "reasons": [
+                  "连涨2天",
+                  "60日低位",
+                  "250日低位"
+                ],
+                "changepercent": 6.436,
+                "consecutive_days": 2
+              },
+              {
+                "code": "300649",
+                "name": "杭州园林",
+                "score": 40,
+                "reasons": [
+                  "连涨2天",
+                  "60日低位",
+                  "250日低位"
+                ],
+                "changepercent": 5.063,
+                "consecutive_days": 2
+              }
+            ],
+            "logic": "放量启动或补涨逻辑，关注确认信号"
+          }
+        ],
+        "watch_direction": "关注建筑工程板块龙头的业绩兑现与估值切换"
+      }
+    },
+    {
+      "l1": "医药生物",
+      "l2": "化学制药",
+      "count": 4,
+      "stocks": [
+        {
+          "code": "300434",
+          "symbol": "sz300434",
+          "name": "金石亚药",
+          "changepercent": 19.981,
+          "trade": "12.490",
+          "volume": 451186.0,
+          "amount": 55238.0,
+          "main_business": "药品及保健食品研发、生产以及销售。",
+          "industry_l1": "医药生物",
+          "industry_l2": "化学制药",
+          "keyword": "药品",
+          "price": 12.49,
+          "change_pct": 19.98,
+          "pe": 26.28,
+          "pb": 1.92,
+          "total_mv": 50.18,
+          "float_mv": 42.89,
+          "amplitude": 19.6,
+          "volume_ratio": 4.43,
+          "turnover_rate": 13.14,
+          "consecutive_days": 2,
+          "percentile_60": 90.4,
+          "percentile_250": 89.5
+        },
+        {
+          "code": "300401",
+          "symbol": "sz300401",
+          "name": "花园生物",
+          "changepercent": 7.114,
+          "trade": "16.110",
+          "volume": 481129.0,
+          "amount": 75464.0,
+          "main_business": "维生素系列产品及药品的研发、生产和销售。",
+          "industry_l1": "医药生物",
+          "industry_l2": "化学制药",
+          "keyword": "药品",
+          "price": 16.11,
+          "change_pct": 7.11,
+          "pe": 33.27,
+          "pb": 2.64,
+          "total_mv": 87.77,
+          "float_mv": 86.35,
+          "amplitude": 10.44,
+          "volume_ratio": 2.43,
+          "turnover_rate": 8.98,
+          "consecutive_days": 2,
+          "percentile_60": 39.7,
+          "percentile_250": 45.0
+        },
+        {
+          "code": "300683",
+          "symbol": "sz300683",
+          "name": "海特生物",
+          "changepercent": 6.539,
+          "trade": "24.440",
+          "volume": 74576.0,
+          "amount": 17778.0,
+          "main_business": "大分子生物药、小分子化学药、原料药与医药中间体的生产销售，同时也为国内外的制药企业提供制剂和原料药的CRO、CMO和CDMO技术服务。",
+          "industry_l1": "医药生物",
+          "industry_l2": "化学制药",
+          "keyword": "制药",
+          "price": 24.44,
+          "change_pct": 6.54,
+          "pe": -20.32,
+          "pb": 1.54,
+          "total_mv": 31.99,
+          "float_mv": 29.87,
+          "amplitude": 8.54,
+          "volume_ratio": 2.5,
+          "turnover_rate": 6.1,
+          "consecutive_days": 2,
+          "percentile_60": 20.9,
+          "percentile_250": 6.5
+        },
+        {
+          "code": "301075",
+          "symbol": "sz301075",
+          "name": "多瑞医药",
+          "changepercent": 6.087,
+          "trade": "64.310",
+          "volume": 17869.0,
+          "amount": 11123.0,
+          "main_business": "药品制剂及化学中间体、多肽原料药的研发、生产和销售。",
+          "industry_l1": "医药生物",
+          "industry_l2": "化学制药",
+          "keyword": "药品",
+          "price": 64.31,
+          "change_pct": 6.09,
+          "pe": 223.12,
+          "pb": 7.8,
+          "total_mv": 51.45,
+          "float_mv": 36.4,
+          "amplitude": 8.38,
+          "volume_ratio": 2.33,
+          "turnover_rate": 3.16,
+          "consecutive_days": 4,
+          "percentile_60": 100.0,
+          "percentile_250": 46.6
+        }
+      ],
+      "news": [
+        {
+          "title": "科创板形成明显底背驰，生物制药化学制药回到中枢下沿 - 新浪网",
+          "date": "9月16日",
+          "source": "新浪网"
+        },
+        {
+          "title": "海正药业出席 BIOHK2026：转型生物制造，布局大健康 - 新浪财经",
+          "date": "9月14日",
+          "source": "新浪财经"
+        },
+        {
+          "title": "大盘创业板盯住结构强弱关键位，化学制药生物制药中成药医疗走势如何？ - 财富号",
+          "date": "9月8日",
+          "source": "财富号"
+        },
+        {
+          "title": "杠杆资金大调仓！融资客净买入半导体、元件、风电设备，净卖出航海装备、通用设备、化学制药 - Sohu",
+          "date": "9月16日",
+          "source": "Sohu"
+        },
+        {
+          "title": "化学与分子工程学院组织师生赴齐鲁制药集团参访 - 北京大学新闻网",
+          "date": "6月4日",
+          "source": "北京大学新闻网"
+        },
+        {
+          "title": "2026-2034年化学工艺设备市场预测 - Fortune Business Insights",
+          "date": "8月24日",
+          "source": "Fortune Business Insights"
+        },
+        {
+          "title": "汇聚职工创新动能 甘肃能源化学医药行业职工创新成果推介交流活动在玉门油田启幕 - 每日甘肃网",
+          "date": "8月29日",
+          "source": "每日甘肃网"
+        },
+        {
+          "title": "知道了仿制药的来龙去脉，你还会选它吗？ - 科学网—新闻",
+          "date": "6月26日",
+          "source": "科学网—新闻"
+        },
+        {
+          "title": "Pharma.AI 2026 年第二季度夏季网络研讨会：深入解读英矽智能最新平台升级 - Insilico Medicine",
+          "date": "7月3日",
+          "source": "Insilico Medicine"
+        },
+        {
+          "title": "【投资笔记】A股生物医药企业之“化学制药” - 雪球",
+          "date": "12月27日",
+          "source": "雪球"
+        }
+      ],
+      "catalyst": [
+        {
+          "theme": "其他动态",
+          "count": 7,
+          "items": [
+            {
+              "title": "科创板形成明显底背驰，生物制药化学制药回到中枢下沿 - 新浪网",
+              "date": "9月16日"
+            },
+            {
+              "title": "海正药业出席 BIOHK2026：转型生物制造，布局大健康 - 新浪财经",
+              "date": "9月14日"
+            },
+            {
+              "title": "大盘创业板盯住结构强弱关键位，化学制药生物制药中成药医疗走势如何？ - 财富号",
+              "date": "9月8日"
+            }
+          ],
+          "summary": "科创板形成明显底背驰，生物制药化学制药回到中枢下沿 - 新浪网；海正药业出席 BIOHK2026：转型生物制造，布局大健康 - 新浪财经"
+        },
+        {
+          "theme": "资本动作",
+          "count": 2,
+          "items": [
+            {
+              "title": "杠杆资金大调仓！融资客净买入半导体、元件、风电设备，净卖出航海装备、通用设备、化学制药 - Sohu",
+              "date": "9月16日"
+            },
+            {
+              "title": "【投资笔记】A股生物医药企业之“化学制药” - 雪球",
+              "date": "12月27日"
+            }
+          ],
+          "summary": "杠杆资金大调仓！融资客净买入半导体、元件、风电设备，净卖出航海装备、通用设备、化；【投资笔记】A股生物医药企业之“化学制药” - 雪球"
+        },
+        {
+          "theme": "技术突破",
+          "count": 1,
+          "items": [
+            {
+              "title": "汇聚职工创新动能 甘肃能源化学医药行业职工创新成果推介交流活动在玉门油田启幕 - 每日甘肃网",
+              "date": "8月29日"
+            }
+          ],
+          "summary": "汇聚职工创新动能 甘肃能源化学医药行业职工创新成果推介交流活动在玉门油田启幕 -"
+        }
+      ],
+      "timeline": [
+        {
+          "date": "9月8日",
+          "events": [
+            {
+              "title": "大盘创业板盯住结构强弱关键位，化学制药生物制药中成药医疗走势如何？ - 财富号",
+              "stocks": []
+            }
+          ],
+          "is_highlight": false
+        },
+        {
+          "date": "9月16日",
+          "events": [
+            {
+              "title": "科创板形成明显底背驰，生物制药化学制药回到中枢下沿 - 新浪网",
+              "stocks": []
+            },
+            {
+              "title": "杠杆资金大调仓！融资客净买入半导体、元件、风电设备，净卖出航海装备、通用设备、化学制药 - Sohu",
+              "stocks": []
+            }
+          ],
+          "is_highlight": true
+        },
+        {
+          "date": "9月14日",
+          "events": [
+            {
+              "title": "海正药业出席 BIOHK2026：转型生物制造，布局大健康 - 新浪财经",
+              "stocks": []
+            }
+          ],
+          "is_highlight": false
+        },
+        {
+          "date": "8月29日",
+          "events": [
+            {
+              "title": "汇聚职工创新动能 甘肃能源化学医药行业职工创新成果推介交流活动在玉门油田启幕 - 每日甘肃网",
+              "stocks": []
+            }
+          ],
+          "is_highlight": false
+        },
+        {
+          "date": "8月24日",
+          "events": [
+            {
+              "title": "2026-2034年化学工艺设备市场预测 - Fortune Business Insights",
+              "stocks": []
+            }
+          ],
+          "is_highlight": false
+        },
+        {
+          "date": "7月3日",
+          "events": [
+            {
+              "title": "Pharma.AI 2026 年第二季度夏季网络研讨会：深入解读英矽智能最新平台升级 - Insilico Medicine",
+              "stocks": []
+            }
+          ],
+          "is_highlight": false
+        },
+        {
+          "date": "6月4日",
+          "events": [
+            {
+              "title": "化学与分子工程学院组织师生赴齐鲁制药集团参访 - 北京大学新闻网",
+              "stocks": []
+            }
+          ],
+          "is_highlight": false
+        }
+      ],
+      "value_chain": {
+        "tiers": [
+          {
+            "tier": 1,
+            "label": "核心受益",
+            "color": "tier-1",
+            "stocks": [
+              {
+                "code": "300434",
+                "name": "金石亚药",
+                "score": 75,
+                "reasons": [
+                  "连涨2天",
+                  "量比4.4倍",
+                  "60日低位",
+                  "250日低位",
+                  "涨停"
+                ],
+                "changepercent": 19.981,
+                "consecutive_days": 2
+              },
+              {
+                "code": "301075",
+                "name": "多瑞医药",
+                "score": 65,
+                "reasons": [
+                  "连涨4天",
+                  "量比2.3倍",
+                  "60日低位",
+                  "250日低位"
+                ],
+                "changepercent": 6.087,
+                "consecutive_days": 4
+              },
+              {
+                "code": "300401",
+                "name": "花园生物",
+                "score": 60,
+                "reasons": [
+                  "连涨2天",
+                  "量比2.4倍",
+                  "60日低位",
+                  "250日低位"
+                ],
+                "changepercent": 7.114,
+                "consecutive_days": 2
+              },
+              {
+                "code": "300683",
+                "name": "海特生物",
+                "score": 55,
+                "reasons": [
+                  "连涨2天",
+                  "量比2.5倍",
+                  "60日低位",
+                  "250日低位"
+                ],
+                "changepercent": 6.539,
+                "consecutive_days": 2
+              }
+            ],
+            "logic": "资金持续流入+趋势确认，短线动能最强"
+          }
+        ],
+        "watch_direction": "关注化学制药板块龙头的业绩兑现与估值切换；板块整体放量，资金关注度较高；短线涨幅较大，注意追高风险"
+      }
+    }
+  ],
+  "unclassified": [
+    {
+      "code": "300741",
+      "name": "华宝股份",
+      "changepercent": 20.009,
+      "main_business": "香精与配料的研发、生产、销售及服务，致力于为下游行业提供风味综合解决方案。"
+    },
+    {
+      "code": "688137",
+      "name": "近岸蛋白",
+      "changepercent": 18.75,
+      "main_business": "靶点及因子类蛋白、重组抗体、酶及试剂的研发、生产、销售并提供相关技术服务。"
+    },
+    {
+      "code": "300939",
+      "name": "秋田微",
+      "changepercent": 17.633,
+      "main_business": "液晶显示及触控产品研发、设计、生产和销售。"
+    },
+    {
+      "code": "300808",
+      "name": "久量股份",
+      "changepercent": 14.869,
+      "main_business": "LED照明产品的设计、研发、生产和销售。"
+    },
+    {
+      "code": "300829",
+      "name": "金丹科技",
+      "changepercent": 14.099,
+      "main_business": "研发、生产、销售乳酸及其系列产品。"
+    },
+    {
+      "code": "300461",
+      "name": "田中精机",
+      "changepercent": 12.868,
+      "main_business": "提供从单台智能装备到个性化定制开发智能制造综合解决方案。"
+    },
+    {
+      "code": "300234",
+      "name": "开尔新材",
+      "changepercent": 11.078,
+      "main_business": "新型功能性搪瓷（珐琅）材料的研发、设计、推广、制造与销售。"
+    },
+    {
+      "code": "002321",
+      "name": "华英农业",
+      "changepercent": 10.101,
+      "main_business": "种鸭养殖、孵化、商品鸭饲养、禽苗销售、饲料生产、屠宰加工、冻品销售、熟食及预制菜、羽绒加工与销售。"
+    },
+    {
+      "code": "600630",
+      "name": "龙头股份",
+      "changepercent": 10.073,
+      "main_business": "品牌经营和国际贸易。"
+    },
+    {
+      "code": "002836",
+      "name": "新宏泽",
+      "changepercent": 10.051,
+      "main_business": "烟标的设计、生产及销售。"
+    },
+    {
+      "code": "600356",
+      "name": "恒丰纸业",
+      "changepercent": 10.043,
+      "main_business": "特种纸、纸浆的生产和销售。"
+    },
+    {
+      "code": "002285",
+      "name": "世联行",
+      "changepercent": 10.042,
+      "main_business": "大交易业务、“大资管”业务。"
+    },
+    {
+      "code": "000504",
+      "name": "南华生物",
+      "changepercent": 10.036,
+      "main_business": "人源细胞等检测、存储保管等服务；美妆净化器销售以及碳酸锂生产与销售、废钢加工与销售业务。"
+    },
+    {
+      "code": "600721",
+      "name": "百花医药",
+      "changepercent": 10.009,
+      "main_business": "新药早期发现与筛选、药物CMC开发、临床试验、注册申报、BE/PK生物样品分析及药学检测服务、临床SMO及数据服务、MAH服务、API及中间体技术服务。"
+    },
+    {
+      "code": "603838",
+      "name": "*ST四通",
+      "changepercent": 10,
+      "main_business": "陶瓷制品、卫生洁具、瓷泥、瓷釉的设计、生产、销售，以及锆钛矿产品精炼业务。"
+    },
+    {
+      "code": "301520",
+      "name": "万邦医药",
+      "changepercent": 9.999,
+      "main_business": "临床研究服务、药学研究服务以及技术成果转化与合作开发。"
+    },
+    {
+      "code": "603248",
+      "name": "锡华科技",
+      "changepercent": 9.995,
+      "main_business": "大型高端装备专用部件的研发、制造与销售。"
+    },
+    {
+      "code": "605288",
+      "name": "凯迪股份",
+      "changepercent": 9.993,
+      "main_business": "线性驱动系统的研发、生产和销售。"
+    },
+    {
+      "code": "003026",
+      "name": "中晶科技",
+      "changepercent": 9.988,
+      "main_business": "半导体单晶硅材料及其制品的研发、生产和销售。"
+    },
+    {
+      "code": "600371",
+      "name": "万向德农",
+      "changepercent": 9.986,
+      "main_business": "玉米杂交种子研发、生产、销售。"
+    },
+    {
+      "code": "605577",
+      "name": "龙版传媒",
+      "changepercent": 9.971,
+      "main_business": "图书、期刊及电子出版物的出版、发行及印刷服务等业务。"
+    },
+    {
+      "code": "600127",
+      "name": "金健米业",
+      "changepercent": 9.966,
+      "main_business": "优质粮油、新型健康食品开发、生产、销售。"
+    },
+    {
+      "code": "002569",
+      "name": "*ST步森",
+      "changepercent": 9.96,
+      "main_business": "品牌服装的设计、生产和销售。"
+    },
+    {
+      "code": "002528",
+      "name": "*ST英飞",
+      "changepercent": 9.954,
+      "main_business": "软件和信息技术服务业。"
+    },
+    {
+      "code": "002640",
+      "name": "跨境通",
+      "changepercent": 9.913,
+      "main_business": "跨境进口电商业务和跨境出口电商业务。"
+    },
+    {
+      "code": "688279",
+      "name": "峰岹科技",
+      "changepercent": 9.645,
+      "main_business": "电机驱动控制专用芯片的研发、设计与销售业务。"
+    },
+    {
+      "code": "300345",
+      "name": "华民股份",
+      "changepercent": 9.431,
+      "main_business": "硅棒、硅片的研发、生产和销售；半导体级高纯硅材料的研发、生产和销售；高效球磨综合节能技术的应用与推广。"
+    },
+    {
+      "code": "688795",
+      "name": "摩尔线程",
+      "changepercent": 8.676,
+      "main_business": "GPU及相关产品的研发、设计和销售。"
+    },
+    {
+      "code": "300189",
+      "name": "神农种业",
+      "changepercent": 8.618,
+      "main_business": "优质杂交水稻种子和其他农作物良种的选育、推广、销售。"
+    },
+    {
+      "code": "001326",
+      "name": "联域股份",
+      "changepercent": 8.372,
+      "main_business": "中、大功率LED照明产品研发、生产与销售。"
+    },
+    {
+      "code": "301080",
+      "name": "百普赛斯",
+      "changepercent": 8.019,
+      "main_business": "提供重组蛋白、抗体等关键生物试剂产品及技术服务。"
+    },
+    {
+      "code": "688079",
+      "name": "美迪凯",
+      "changepercent": 7.982,
+      "main_business": "半导体声光学、半导体微纳电路（主要为MEMS）、半导体封测、精密光学、微纳光学及智慧终端等的研发、制造和销售。"
+    },
+    {
+      "code": "300061",
+      "name": "旗天科技",
+      "changepercent": 7.911,
+      "main_business": "为客户提供专业、领先、高效的全流程、一站式数字化营销解决方案。"
+    },
+    {
+      "code": "000713",
+      "name": "国投丰乐",
+      "changepercent": 7.878,
+      "main_business": "种子、农化和香料产业。"
+    },
+    {
+      "code": "301595",
+      "name": "太力科技",
+      "changepercent": 7.87,
+      "main_business": "以高性能纳米材料创新为驱动力，集材料研发、技术验证到材料制造、场景应用、全球化运营于一体。"
+    },
+    {
+      "code": "688781",
+      "name": "视涯科技",
+      "changepercent": 7.328,
+      "main_business": "微显示整体解决方案，并为客户提供包括战略产品开发、光学系统和AI眼镜整体解决方案等增值服务。"
+    },
+    {
+      "code": "300990",
+      "name": "同飞股份",
+      "changepercent": 7.219,
+      "main_business": "工业温控设备研发、生产和销售。"
+    },
+    {
+      "code": "688356",
+      "name": "键凯科技",
+      "changepercent": 7.212,
+      "main_business": "医用药用聚乙二醇及其活性衍生物的研发、生产和销售。"
+    },
+    {
+      "code": "301335",
+      "name": "天元宠物",
+      "changepercent": 7.192,
+      "main_business": "以宠物用品的设计开发、生产和销售业务为基础，积极拓展宠物食品销售业务。"
+    },
+    {
+      "code": "300575",
+      "name": "中旗股份",
+      "changepercent": 7.083,
+      "main_business": "新型高效低毒农药的研发、生产和销售。"
+    },
+    {
+      "code": "002734",
+      "name": "利民股份",
+      "changepercent": 6.939,
+      "main_business": "高效、低毒、低残留的农药（兽药）原药、制剂的研发、生产和销售。"
+    },
+    {
+      "code": "603061",
+      "name": "金海通",
+      "changepercent": 6.691,
+      "main_business": "集成电路测试分选机的研发、生产及销售。"
+    },
+    {
+      "code": "002774",
+      "name": "快意电梯",
+      "changepercent": 6.613,
+      "main_business": "电梯、自动扶梯和自动人行道的研发设计、制造、销售及相关产品的安装、改造、修理和维保服务。"
+    },
+    {
+      "code": "300413",
+      "name": "芒果超媒",
+      "changepercent": 6.58,
+      "main_business": "芒果TV互联网视频、新媒体互动娱乐内容制作及内容电商。"
+    },
+    {
+      "code": "300115",
+      "name": "长盈精密",
+      "changepercent": 6.471,
+      "main_business": "开发、生产、销售智能终端及电子产品精密零组件、新能源关键结构件及连接组件、具身智能与新兴科技硬件。"
+    },
+    {
+      "code": "000560",
+      "name": "我爱我家",
+      "changepercent": 6.415,
+      "main_business": "提供数字化产业解决方案和一体化的运营服务。"
+    },
+    {
+      "code": "002903",
+      "name": "宇环数控",
+      "changepercent": 6.287,
+      "main_business": "数控磨削设备、拉削设备及智能装备的研发、生产、销售与服务。"
+    },
+    {
+      "code": "603221",
+      "name": "爱丽家居",
+      "changepercent": 6.284,
+      "main_business": "PVC弹性地板的研发、生产和销售。"
+    },
+    {
+      "code": "603183",
+      "name": "建研院",
+      "changepercent": 6.263,
+      "main_business": "建筑专业技术服务和检验检测。"
+    },
+    {
+      "code": "301187",
+      "name": "欧圣电气",
+      "changepercent": 6.166,
+      "main_business": "空气动力设备和清洁设备的研发、生产和销售。"
+    },
+    {
+      "code": "301047",
+      "name": "义翘神州",
+      "changepercent": 6.154,
+      "main_business": "生物试剂研发、生产、销售并提供技术服务。"
+    },
+    {
+      "code": "688361",
+      "name": "中科飞测",
+      "changepercent": 6.127,
+      "main_business": "为半导体行业客户提供涵盖设备产品、智能软件产品和相关服务的全流程良率管理解决方案。"
+    },
+    {
+      "code": "688836",
+      "name": "宇树科技",
+      "changepercent": 6.11,
+      "main_business": "高性能通用人形机器人、四足机器人、机器人组件及具身智能模型的研发、生产和销售。"
+    },
+    {
+      "code": "603613",
+      "name": "国联股份",
+      "changepercent": 6.109,
+      "main_business": "B2B电子商务和产业互联网平台。"
+    },
+    {
+      "code": "688215",
+      "name": "瑞晟智能",
+      "changepercent": 6.098,
+      "main_business": "智能物流系统产品、智能消防排烟及通风系统产品的生产、销售及研发。"
+    },
+    {
+      "code": "002468",
+      "name": "申通快递",
+      "changepercent": 6.067,
+      "main_business": "快递服务业。"
+    },
+    {
+      "code": "300931",
+      "name": "通用电梯",
+      "changepercent": 6.03,
+      "main_business": "电梯、自动扶梯、自动人行道的产品研发、设计、制造、销售、安装、改造及维保业务。"
+    },
+    {
+      "code": "002106",
+      "name": "莱宝高科",
+      "changepercent": 6.026,
+      "main_business": "研发和生产平板显示材料及器件、触控器件。"
+    },
+    {
+      "code": "002041",
+      "name": "登海种业",
+      "changepercent": 6.008,
+      "main_business": "农作物新品种选育、许可证规定经营范围内的农作物种子生产、分装、销售。"
+    },
+    {
+      "code": "301286",
+      "name": "侨源股份",
+      "changepercent": 5.998,
+      "main_business": "工业气体的生产和销售。"
+    },
+    {
+      "code": "002217",
+      "name": "ST合力泰",
+      "changepercent": 5.96,
+      "main_business": "中高端显示技术的研究与开发。"
+    },
+    {
+      "code": "301303",
+      "name": "真兰仪表",
+      "changepercent": 5.914,
+      "main_business": "燃气和水计量仪表及配套产品的研发、制造与销售，同时提供基于云计算的数字化能源管理综合解决方案。"
+    },
+    {
+      "code": "300983",
+      "name": "尤安设计",
+      "changepercent": 5.688,
+      "main_business": "建筑设计业务的研发、咨询与技术服务。"
+    },
+    {
+      "code": "688248",
+      "name": "南网科技",
+      "changepercent": 5.682,
+      "main_business": "高端智能设备的研发、生产和销售，以及高技术服务的提供。"
+    },
+    {
+      "code": "600313",
+      "name": "农发种业",
+      "changepercent": 5.621,
+      "main_business": "农作物种子的研发、生产和销售，农药产品的生产与销售，化肥贸易业务以及专用粮业务。"
+    },
+    {
+      "code": "600847",
+      "name": "万里股份",
+      "changepercent": 5.593,
+      "main_business": "铅酸蓄电池的研发、生产和销售。"
+    },
+    {
+      "code": "002762",
+      "name": "金发拉比",
+      "changepercent": 5.561,
+      "main_business": "中高端母婴消费品的设计、研发、生产及销售。"
+    },
+    {
+      "code": "688112",
+      "name": "鼎阳科技",
+      "changepercent": 5.544,
+      "main_business": "通用电子测试测量仪器的研发、生产和销售。"
+    },
+    {
+      "code": "603344",
+      "name": "星德胜",
+      "changepercent": 5.472,
+      "main_business": "微特电机及相关产品的研发、生产及销售。"
+    },
+    {
+      "code": "688799",
+      "name": "华纳药厂",
+      "changepercent": 5.442,
+      "main_business": "化学药制剂、化学原料药和中药制剂的研发、生产与销售。"
+    },
+    {
+      "code": "688310",
+      "name": "迈得医疗",
+      "changepercent": 5.419,
+      "main_business": "医用耗材智能装备的研发、生产、销售和服务。"
+    },
+    {
+      "code": "300623",
+      "name": "捷捷微电",
+      "changepercent": 5.413,
+      "main_business": "功率半导体芯片和器件的研发、设计、生产和销售。"
+    },
+    {
+      "code": "000911",
+      "name": "*ST广糖",
+      "changepercent": 5.368,
+      "main_business": "机制糖的生产与销售。"
+    },
+    {
+      "code": "601579",
+      "name": "会稽山",
+      "changepercent": 5.365,
+      "main_business": "黄酒的生产、销售和研发等业务。"
+    },
+    {
+      "code": "002870",
+      "name": "香山股份",
+      "changepercent": 5.334,
+      "main_business": "智能座舱部件和新能源充配电系统的设计、开发、制造和销售。"
+    },
+    {
+      "code": "002036",
+      "name": "联创电子",
+      "changepercent": 5.323,
+      "main_business": "智能手机、平板电脑、智能驾驶、智能座舱、运动相机、机器视觉等领域和场景配套的光学镜头、影像及触控显示一体化模组等关键光学、光电子产品及智能终端产品的研发、生产与销售。"
+    },
+    {
+      "code": "300886",
+      "name": "华业香料",
+      "changepercent": 5.303,
+      "main_business": "内酯系列香料的研发、生产和销售。"
+    },
+    {
+      "code": "603669",
+      "name": "灵康药业",
+      "changepercent": 5.292,
+      "main_business": "化药处方药的研发、生产和销售。"
+    },
+    {
+      "code": "002248",
+      "name": "华东数控",
+      "changepercent": 5.2,
+      "main_business": "研发、生产和销售数控机床、普通机床及其关键功能部件。"
+    },
+    {
+      "code": "603868",
+      "name": "飞科电器",
+      "changepercent": 5.171,
+      "main_business": "剃须刀等个人护理电器、生活电器及厨房电器等智能时尚电器的研发、制造、销售。"
+    },
+    {
+      "code": "301381",
+      "name": "赛维时代",
+      "changepercent": 5.123,
+      "main_business": "跨境出口电商业务。"
+    },
+    {
+      "code": "001225",
+      "name": "和泰机电",
+      "changepercent": 5.122,
+      "main_business": "物料输送设备的研发、设计、制造和销售。"
+    },
+    {
+      "code": "002981",
+      "name": "朝阳科技",
+      "changepercent": 5.063,
+      "main_business": "声学产品（耳机、音响）业务、精密零组件业务等。"
+    }
+  ]
+}

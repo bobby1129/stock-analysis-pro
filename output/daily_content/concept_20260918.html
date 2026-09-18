@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    width: 1080px;
+    height: 1920px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #fff;
+    padding: 120px 50px 120px;
+    overflow: hidden;
+}
+.header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+.date {
+    font-size: 28px;
+    color: #888;
+    margin-bottom: 5px;
+}
+.title {
+    font-size: 56px;
+    font-weight: bold;
+    background: linear-gradient(90deg, #ffd700, #ffb700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.section {
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    padding: 25px 30px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,215,0,0.2);
+}
+.section-title {
+    font-size: 34px;
+    color: #ffd700;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(255,215,0,0.3);
+}
+.concept-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+.rank {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffd700;
+    width: 40px;
+}
+.concept-name {
+    font-size: 26px;
+    flex: 1;
+}
+.concept-change {
+    font-size: 28px;
+    font-weight: bold;
+    width: 100px;
+    text-align: right;
+}
+.concept-leader {
+    font-size: 22px;
+    color: #888;
+    width: 200px;
+    text-align: right;
+}
+.flow-row {
+    display: flex;
+    align-items: center;
+    padding: 14px 15px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+.flow-rank {
+    font-size: 26px;
+    font-weight: bold;
+    color: #ffd700;
+    width: 40px;
+}
+.flow-name {
+    font-size: 26px;
+    flex: 1;
+}
+.flow-value {
+    font-size: 28px;
+    font-weight: bold;
+    width: 120px;
+    text-align: right;
+}
+.footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 22px;
+    color: #666;
+}
+</style>
+</head>
+<body>
+    <div class="header">
+        <div class="date">2026年09月18日</div>
+        <div class="title">概念板块资金流向</div>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">今日涨幅排行</div>
+        
+        <div class="concept-row">
+            <div class="rank">1</div>
+            <div class="concept-name">注册制次新股</div>
+            <div class="concept-change" style="color:#ff4757">+7.30%</div>
+            <div class="concept-leader">沈鼓集团 +177.7%</div>
+        </div>
+        
+        <div class="concept-row">
+            <div class="rank">2</div>
+            <div class="concept-name">新股与次新股</div>
+            <div class="concept-change" style="color:#ff4757">+5.91%</div>
+            <div class="concept-leader">沈鼓集团 +177.7%</div>
+        </div>
+        
+        <div class="concept-row">
+            <div class="rank">3</div>
+            <div class="concept-name">科创次新股</div>
+            <div class="concept-change" style="color:#ff4757">+5.75%</div>
+            <div class="concept-leader">信诺维 +34.5%</div>
+        </div>
+        
+        <div class="concept-row">
+            <div class="rank">4</div>
+            <div class="concept-name">国家大基金持股</div>
+            <div class="concept-change" style="color:#ff4757">+4.03%</div>
+            <div class="concept-leader">华天科技 +10.0%</div>
+        </div>
+        
+        <div class="concept-row">
+            <div class="rank">5</div>
+            <div class="concept-name">汽车芯片</div>
+            <div class="concept-change" style="color:#ff4757">+3.83%</div>
+            <div class="concept-leader">昂瑞微 +14.4%</div>
+        </div>
+        
+        <div class="concept-row">
+            <div class="rank">6</div>
+            <div class="concept-name">存储芯片</div>
+            <div class="concept-change" style="color:#ff4757">+3.43%</div>
+            <div class="concept-leader">托伦斯 +20.0%</div>
+        </div>
+        
+        <div class="concept-row">
+            <div class="rank">7</div>
+            <div class="concept-name">中芯国际概念</div>
+            <div class="concept-change" style="color:#ff4757">+3.29%</div>
+            <div class="concept-leader">恒运昌 +10.6%</div>
+        </div>
+        
+        <div class="concept-row">
+            <div class="rank">8</div>
+            <div class="concept-name">MCU芯片</div>
+            <div class="concept-change" style="color:#ff4757">+3.29%</div>
+            <div class="concept-leader">国民技术 +10.9%</div>
+        </div>
+        
+    </div>
+    
+    <div class="section">
+        <div class="section-title">💰 净流入排行（亿元）</div>
+        
+        <div class="flow-row">
+            <div class="flow-rank">1</div>
+            <div class="flow-name">芯片概念</div>
+            <div class="flow-value" style="color:#ff4757">432.5亿</div>
+        </div>
+        
+        <div class="flow-row">
+            <div class="flow-rank">2</div>
+            <div class="flow-name">存储芯片</div>
+            <div class="flow-value" style="color:#ff4757">228.1亿</div>
+        </div>
+        
+        <div class="flow-row">
+            <div class="flow-rank">3</div>
+            <div class="flow-name">专精特新</div>
+            <div class="flow-value" style="color:#ff4757">167.6亿</div>
+        </div>
+        
+        <div class="flow-row">
+            <div class="flow-rank">4</div>
+            <div class="flow-name">共封装光学(CPO)</div>
+            <div class="flow-value" style="color:#ff4757">164.2亿</div>
+        </div>
+        
+        <div class="flow-row">
+            <div class="flow-rank">5</div>
+            <div class="flow-name">消费电子概念</div>
+            <div class="flow-value" style="color:#ff4757">153.7亿</div>
+        </div>
+        
+        <div class="flow-row">
+            <div class="flow-rank">6</div>
+            <div class="flow-name">汽车芯片</div>
+            <div class="flow-value" style="color:#ff4757">134.2亿</div>
+        </div>
+        
+    </div>
+    
+    <div class="footer">
+        数据来源：同花顺概念板块 | 仅供参考，不构成投资建议
+    </div>
+</body>
+</html>
