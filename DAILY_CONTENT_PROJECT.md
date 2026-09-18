@@ -18,16 +18,18 @@
 - **数据源**：新浪行情接口（全市场数据）
 - **接口**：`https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeData`
 - **参数**：`sort=amount`（按成交额排序）
-- **显示字段**：排名、股票、现价、涨幅、成交额
+- **显示字段**：排名、股票、现价、涨幅、成交额、环比
+- **环比机制**：每日运行后缓存成交额到 `cache/daily_content/stock_amount_cache_YYYYMMDD.json`，次日读取计算环比增减
 - **输出文件**：`output/daily_content/stock_amount_top10_YYYYMMDD.html` → `.png`
 
-#### 2. 概念板块排行
+#### 2. 概念板块表现
 - **状态**：已完成
 - **数据源**：同花顺概念板块资金流向
 - **接口**：`https://data.10jqka.com.cn/funds/gnzjl/`
 - **显示内容**：
-  - 涨幅排行TOP10
-  - 净流入排行TOP10
+  - 涨幅排行TOP8：排名、概念名称、涨跌幅、领涨股
+  - 净流入排行TOP6：排名、概念名称、涨跌幅、净流入
+  - 两个区域均带金色表头行
 - **字段映射**：
   - `cols[1]`：概念名称
   - `cols[3]`：涨跌幅

@@ -40,8 +40,15 @@ def generate_html(data):
     # 流入排行
     flow_concepts = sorted(data, key=lambda x: x['flow_in'], reverse=True)[:8]
     
-    # 涨幅排行HTML
-    hot_html = ""
+    # 涨幅排行HTML - 表头
+    hot_html = '''
+    <div class="concept-header">
+        <div class="rank">排名</div>
+        <div class="concept-name">概念名称</div>
+        <div class="concept-change">涨跌幅</div>
+        <div class="concept-leader">领涨股</div>
+    </div>
+    '''
     for i, c in enumerate(hot_concepts[:8], 1):
         color = "#ff4757" if c['change_today'] > 0 else "#2ed573"
         hot_html += f'''
@@ -53,14 +60,23 @@ def generate_html(data):
         </div>
         '''
     
-    # 流入排行HTML
-    flow_html = ""
+    # 流入排行HTML - 表头
+    flow_html = '''
+    <div class="flow-header">
+        <div class="flow-rank">排名</div>
+        <div class="flow-name">概念名称</div>
+        <div class="flow-change">涨跌幅</div>
+        <div class="flow-value">净流入</div>
+    </div>
+    '''
     for i, c in enumerate(flow_concepts[:6], 1):
         flow_color = "#ff4757" if c['flow_in'] > 0 else "#2ed573"
+        change_color = "#ff4757" if c['change_today'] > 0 else "#2ed573"
         flow_html += f'''
         <div class="flow-row">
             <div class="flow-rank">{i}</div>
             <div class="flow-name">{c['name']}</div>
+            <div class="flow-change" style="color:{change_color}">{c['change_today']:+.2f}%</div>
             <div class="flow-value" style="color:{flow_color}">{c['flow_in']:.1f}亿</div>
         </div>
         '''
@@ -110,6 +126,23 @@ body {{
     padding-bottom: 10px;
     border-bottom: 2px solid rgba(255,215,0,0.3);
 }}
+.concept-header {{
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    background: rgba(255, 215, 0, 0.15);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}}
+.concept-header .rank,
+.concept-header .concept-name,
+.concept-header .concept-change,
+.concept-header .concept-leader {{
+    font-size: 22px;
+    color: #ffd700;
+    font-weight: 500;
+}}
 .concept-row {{
     display: flex;
     align-items: center;
@@ -140,6 +173,23 @@ body {{
     width: 200px;
     text-align: right;
 }}
+.flow-header {{
+    display: flex;
+    align-items: center;
+    padding: 14px 15px;
+    background: rgba(255, 215, 0, 0.15);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}}
+.flow-header .flow-rank,
+.flow-header .flow-name,
+.flow-header .flow-change,
+.flow-header .flow-value {{
+    font-size: 22px;
+    color: #ffd700;
+    font-weight: 500;
+}}
 .flow-row {{
     display: flex;
     align-items: center;
@@ -158,6 +208,12 @@ body {{
     font-size: 26px;
     flex: 1;
 }}
+.flow-change {{
+    font-size: 26px;
+    font-weight: bold;
+    width: 100px;
+    text-align: right;
+}}
 .flow-value {{
     font-size: 28px;
     font-weight: bold;
@@ -175,7 +231,7 @@ body {{
 <body>
     <div class="header">
         <div class="date">{datetime.now().strftime("%Y年%m月%d日")}</div>
-        <div class="title">概念板块资金流向</div>
+        <div class="title">概念板块表现</div>
     </div>
     
     <div class="section">
