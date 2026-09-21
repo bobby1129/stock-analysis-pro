@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""生成概念生命周期日报HTML - 同花顺源"""
+"""生成概念板块日报HTML - 同花顺源（拆分为2张：涨幅TOP10 + 净流入TOP10）"""
 
 import sys, os, json, time
 sys.path.insert(0, os.path.expanduser('~/stock-analysis-pro'))
@@ -31,27 +31,15 @@ def analyze_concepts():
     return results
 
 
-def generate_html(data):
-    """生成HTML - 拆分为两个独立页面"""
+def generate_hot_html(data):
+    """生成涨幅排行HTML（10条）"""
     
-    # 涨幅排行（10条）
     hot_concepts = data[:10]
     
-    # 流入排行（10条）
-    flow_concepts = sorted(data, key=lambda x: x['flow_in'], reverse=True)[:10]
-    
-    # 涨幅排行HTML - 表头
-    hot_html = '''
-    <div class="concept-header">
-        <div class="rank">排名</div>
-        <div class="concept-name">概念名称</div>
-        <div class="concept-change">涨跌幅</div>
-        <div class="concept-leader">领涨股</div>
-    </div>
-    '''
+    rows_html = ''
     for i, c in enumerate(hot_concepts, 1):
-        color = "#ff4757" if c['change_today'] > 0 else "#2ed573"
-        hot_html += f'''
+        color = "#dc143c" if c['change_today'] > 0 else "#228b22"
+        rows_html += f'''
         <div class="concept-row">
             <div class="rank">{i}</div>
             <div class="concept-name">{c['name']}</div>
@@ -60,316 +48,61 @@ def generate_html(data):
         </div>
         '''
     
-    # 流入排行HTML - 表头
-    flow_html = '''
-    <div class="flow-header">
-        <div class="flow-rank">排名</div>
-        <div class="flow-name">概念名称</div>
-        <div class="flow-change">涨跌幅</div>
-        <div class="flow-value">净流入</div>
-    </div>
-    '''
-    for i, c in enumerate(flow_concepts, 1):
-        flow_color = "#ff4757" if c['flow_in'] > 0 else "#2ed573"
-        change_color = "#ff4757" if c['change_today'] > 0 else "#2ed573"
-        flow_html += f'''
-        <div class="flow-row">
-            <div class="flow-rank">{i}</div>
-            <div class="flow-name">{c['name']}</div>
-            <div class="flow-change" style="color:{change_color}">{c['change_today']:+.2f}%</div>
-            <div class="flow-value" style="color:{flow_color}">{c['flow_in']:.1f}亿</div>
-        </div>
-        '''
-    
-    html = f'''<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<style>
-* {{ margin: 0; padding: 0; box-sizing: border-box; }}
-body {{
-    width: 1080px;
-    height: 1920px;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-    color: #fff;
-    padding: 120px 50px 120px;
-    overflow: hidden;
-}}
-.header {{
-    text-align: center;
-    margin-bottom: 25px;
-}}
-.date {{
-    font-size: 28px;
-    color: #888;
-    margin-bottom: 5px;
-}}
-.title {{
-    font-size: 56px;
-    font-weight: bold;
-    background: linear-gradient(90deg, #ffd700, #ffb700);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}}
-.section {{
-    background: rgba(255,255,255,0.05);
-    border-radius: 15px;
-    padding: 25px 30px;
-    margin-bottom: 20px;
-    border: 1px solid rgba(255,215,0,0.2);
-}}
-.section-title {{
-    font-size: 34px;
-    color: #ffd700;
-    margin-bottom: 15px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid rgba(255,215,0,0.3);
-}}
-.concept-header {{
-    display: flex;
-    align-items: center;
-    padding: 12px 15px;
-    background: rgba(255, 215, 0, 0.15);
-    border-radius: 8px;
-    margin-bottom: 8px;
-    border: 1px solid rgba(255, 215, 0, 0.3);
-}}
-.concept-header .rank,
-.concept-header .concept-name,
-.concept-header .concept-change,
-.concept-header .concept-leader {{
-    font-size: 22px;
-    color: #ffd700;
-    font-weight: 500;
-}}
-.concept-row {{
-    display: flex;
-    align-items: center;
-    padding: 12px 15px;
-    background: rgba(0,0,0,0.2);
-    border-radius: 8px;
-    margin-bottom: 8px;
-}}
-.rank {{
-    font-size: 28px;
-    font-weight: bold;
-    color: #ffd700;
-    width: 40px;
-}}
-.concept-name {{
-    font-size: 26px;
-    flex: 1;
-}}
-.concept-change {{
-    font-size: 28px;
-    font-weight: bold;
-    width: 100px;
-    text-align: right;
-}}
-.concept-leader {{
-    font-size: 22px;
-    color: #888;
-    width: 200px;
-    text-align: right;
-}}
-.flow-header {{
-    display: flex;
-    align-items: center;
-    padding: 14px 15px;
-    background: rgba(255, 215, 0, 0.15);
-    border-radius: 8px;
-    margin-bottom: 8px;
-    border: 1px solid rgba(255, 215, 0, 0.3);
-}}
-.flow-header .flow-rank,
-.flow-header .flow-name,
-.flow-header .flow-change,
-.flow-header .flow-value {{
-    font-size: 22px;
-    color: #ffd700;
-    font-weight: 500;
-}}
-.flow-row {{
-    display: flex;
-    align-items: center;
-    padding: 14px 15px;
-    background: rgba(0,0,0,0.2);
-    border-radius: 8px;
-    margin-bottom: 8px;
-}}
-.flow-rank {{
-    font-size: 26px;
-    font-weight: bold;
-    color: #ffd700;
-    width: 40px;
-}}
-.flow-name {{
-    font-size: 26px;
-    flex: 1;
-}}
-.flow-change {{
-    font-size: 26px;
-    font-weight: bold;
-    width: 100px;
-    text-align: right;
-}}
-.flow-value {{
-    font-size: 28px;
-    font-weight: bold;
-    width: 120px;
-    text-align: right;
-}}
-.footer {{
-    text-align: center;
-    margin-top: 20px;
-    font-size: 22px;
-    color: #666;
-}}
-</style>
-</head>
-<body>
-    <div class="header">
-        <div class="date">{datetime.now().strftime("%Y年%m月%d日")}</div>
-        <div class="title">概念板块表现</div>
-    </div>
-    
-    <div class="section">
-        <div class="section-title">今日涨幅排行</div>
-        {hot_html}
-    </div>
-    
-    <div class="footer">
-        数据来源：同花顺概念板块 | 仅供参考，不构成投资建议
-    </div>
-</body>
-</html>'''
-    
-    return html
-
-
-def generate_flow_html(data):
-    """生成净流入排行HTML（10条）"""
-    
-    # 流入排行（10条）
-    flow_concepts = sorted(data, key=lambda x: x['flow_in'], reverse=True)[:10]
-    
-    # 流入排行HTML - 表头
-    flow_html = '''
-    <div class="flow-header">
-        <div class="flow-rank">排名</div>
-        <div class="flow-name">概念名称</div>
-        <div class="flow-change">涨跌幅</div>
-        <div class="flow-value">净流入</div>
-    </div>
-    '''
-    for i, c in enumerate(flow_concepts, 1):
-        flow_color = "#ff4757" if c['flow_in'] > 0 else "#2ed573"
-        change_color = "#ff4757" if c['change_today'] > 0 else "#2ed573"
-        flow_html += f'''
-        <div class="flow-row">
-            <div class="flow-rank">{i}</div>
-            <div class="flow-name">{c['name']}</div>
-            <div class="flow-change" style="color:{change_color}">{c['change_today']:+.2f}%</div>
-            <div class="flow-value" style="color:{flow_color}">{c['flow_in']:.1f}亿</div>
-        </div>
-        '''
-    
     css = '''
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
     width: 1080px;
     height: 1920px;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    background: linear-gradient(180deg, #faf9f6 0%, #f5f3ee 100%);
     font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-    color: #fff;
-    padding: 120px 50px 120px;
+    color: #1a1a1a;
+    padding: 100px 45px 80px;
     overflow: hidden;
 }
-.header {
-    text-align: center;
-    margin-bottom: 25px;
-}
-.date {
-    font-size: 28px;
-    color: #888;
-    margin-bottom: 5px;
-}
+.header { text-align: center; margin-bottom: 40px; }
+.date { font-size: 36px; color: #666; margin-bottom: 12px; letter-spacing: 4px; }
 .title {
-    font-size: 56px;
-    font-weight: bold;
-    background: linear-gradient(90deg, #ffd700, #ffb700);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-size: 72px; font-weight: 800;
+    background: linear-gradient(90deg, #d4af37, #b8860b, #d4af37);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: 6px;
 }
 .section {
-    background: rgba(255,255,255,0.05);
-    border-radius: 15px;
-    padding: 25px 30px;
-    margin-bottom: 20px;
-    border: 1px solid rgba(255,215,0,0.2);
+    background: #fff; border-radius: 20px;
+    padding: 30px 35px; margin-bottom: 28px;
+    border: 2px solid #d4af37;
+    box-shadow: 0 4px 24px rgba(212,175,55,0.15);
 }
 .section-title {
-    font-size: 34px;
-    color: #ffd700;
-    margin-bottom: 15px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid rgba(255,215,0,0.3);
+    font-size: 38px; color: #b8860b;
+    margin-bottom: 20px; padding-bottom: 14px;
+    border-bottom: 2px solid #d4af37; font-weight: 700;
 }
-.flow-header {
-    display: flex;
-    align-items: center;
-    padding: 14px 15px;
-    background: rgba(255, 215, 0, 0.15);
-    border-radius: 8px;
-    margin-bottom: 8px;
-    border: 1px solid rgba(255, 215, 0, 0.3);
+.concept-header {
+    display: flex; align-items: center;
+    padding: 16px 22px; background: rgba(212,175,55,0.08);
+    border-radius: 10px; margin-bottom: 12px;
+    border: 1px solid #e8e4d9;
 }
-.flow-header .flow-rank,
-.flow-header .flow-name,
-.flow-header .flow-change,
-.flow-header .flow-value {
-    font-size: 22px;
-    color: #ffd700;
-    font-weight: 500;
+.concept-header .rank,
+.concept-header .concept-name,
+.concept-header .concept-change,
+.concept-header .concept-leader {
+    font-size: 28px; color: #b8860b; font-weight: 600;
 }
-.flow-row {
-    display: flex;
-    align-items: center;
-    padding: 14px 15px;
-    background: rgba(0,0,0,0.2);
-    border-radius: 8px;
-    margin-bottom: 8px;
+.concept-row {
+    display: flex; align-items: center;
+    padding: 16px 22px; background: #faf9f6;
+    border-radius: 10px; margin-bottom: 12px;
+    border: 1px solid #e8e4d9;
 }
-.flow-rank {
-    font-size: 26px;
-    font-weight: bold;
-    color: #ffd700;
-    width: 40px;
-}
-.flow-name {
-    font-size: 26px;
-    flex: 1;
-}
-.flow-change {
-    font-size: 26px;
-    font-weight: bold;
-    width: 100px;
-    text-align: right;
-}
-.flow-value {
-    font-size: 28px;
-    font-weight: bold;
-    width: 120px;
-    text-align: right;
-}
-.footer {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 22px;
-    color: #666;
-}
+.rank { font-size: 36px; font-weight: 800; color: #b8860b; width: 50px; }
+.concept-name { font-size: 34px; font-weight: 600; color: #1a1a1a; flex: 1; }
+.concept-change { font-size: 36px; font-weight: 800; width: 130px; text-align: right; }
+.concept-leader { font-size: 28px; color: #666; width: 240px; text-align: right; }
+.footer { text-align: center; margin-top: 24px; font-size: 26px; color: #999; }
 '''
+    
     date_str = datetime.now().strftime("%Y年%m月%d日")
     
     html = f'''<!DOCTYPE html>
@@ -383,15 +116,120 @@ body {
         <div class="date">{date_str}</div>
         <div class="title">概念板块表现</div>
     </div>
+    <div class="section">
+        <div class="section-title">📈 今日涨幅排行</div>
+        <div class="concept-header">
+            <div class="rank">排名</div>
+            <div class="concept-name">概念名称</div>
+            <div class="concept-change">涨跌幅</div>
+            <div class="concept-leader">领涨股</div>
+        </div>
+        {rows_html}
+    </div>
+    <div class="footer">数据来源：同花顺概念板块 | 仅供参考，不构成投资建议</div>
+</body>
+</html>'''
     
+    return html
+
+
+def generate_flow_html(data):
+    """生成净流入排行HTML（10条）"""
+    
+    flow_concepts = sorted(data, key=lambda x: x['flow_in'], reverse=True)[:10]
+    
+    rows_html = ''
+    for i, c in enumerate(flow_concepts, 1):
+        flow_color = "#dc143c" if c['flow_in'] > 0 else "#228b22"
+        change_color = "#dc143c" if c['change_today'] > 0 else "#228b22"
+        rows_html += f'''
+        <div class="flow-row">
+            <div class="flow-rank">{i}</div>
+            <div class="flow-name">{c['name']}</div>
+            <div class="flow-change" style="color:{change_color}">{c['change_today']:+.2f}%</div>
+            <div class="flow-value" style="color:{flow_color}">{c['flow_in']:.1f}亿</div>
+        </div>
+        '''
+    
+    css = '''
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    width: 1080px;
+    height: 1920px;
+    background: linear-gradient(180deg, #faf9f6 0%, #f5f3ee 100%);
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #1a1a1a;
+    padding: 100px 45px 80px;
+    overflow: hidden;
+}
+.header { text-align: center; margin-bottom: 40px; }
+.date { font-size: 36px; color: #666; margin-bottom: 12px; letter-spacing: 4px; }
+.title {
+    font-size: 72px; font-weight: 800;
+    background: linear-gradient(90deg, #d4af37, #b8860b, #d4af37);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: 6px;
+}
+.section {
+    background: #fff; border-radius: 20px;
+    padding: 30px 35px; margin-bottom: 28px;
+    border: 2px solid #d4af37;
+    box-shadow: 0 4px 24px rgba(212,175,55,0.15);
+}
+.section-title {
+    font-size: 38px; color: #b8860b;
+    margin-bottom: 20px; padding-bottom: 14px;
+    border-bottom: 2px solid #d4af37; font-weight: 700;
+}
+.flow-header {
+    display: flex; align-items: center;
+    padding: 16px 22px; background: rgba(212,175,55,0.08);
+    border-radius: 10px; margin-bottom: 12px;
+    border: 1px solid #e8e4d9;
+}
+.flow-header .flow-rank,
+.flow-header .flow-name,
+.flow-header .flow-change,
+.flow-header .flow-value {
+    font-size: 28px; color: #b8860b; font-weight: 600;
+}
+.flow-row {
+    display: flex; align-items: center;
+    padding: 16px 22px; background: #faf9f6;
+    border-radius: 10px; margin-bottom: 12px;
+    border: 1px solid #e8e4d9;
+}
+.flow-rank { font-size: 36px; font-weight: 800; color: #b8860b; width: 50px; }
+.flow-name { font-size: 34px; font-weight: 600; color: #1a1a1a; flex: 1; }
+.flow-change { font-size: 34px; font-weight: 700; width: 130px; text-align: right; }
+.flow-value { font-size: 36px; font-weight: 800; width: 150px; text-align: right; }
+.footer { text-align: center; margin-top: 24px; font-size: 26px; color: #999; }
+'''
+    
+    date_str = datetime.now().strftime("%Y年%m月%d日")
+    
+    html = f'''<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>{css}</style>
+</head>
+<body>
+    <div class="header">
+        <div class="date">{date_str}</div>
+        <div class="title">概念板块表现</div>
+    </div>
     <div class="section">
         <div class="section-title">💰 净流入排行（亿元）</div>
-        {flow_html}
+        <div class="flow-header">
+            <div class="flow-rank">排名</div>
+            <div class="flow-name">概念名称</div>
+            <div class="flow-change">涨跌幅</div>
+            <div class="flow-value">净流入</div>
+        </div>
+        {rows_html}
     </div>
-    
-    <div class="footer">
-        数据来源：同花顺概念板块 | 仅供参考，不构成投资建议
-    </div>
+    <div class="footer">数据来源：同花顺概念板块 | 仅供参考，不构成投资建议</div>
 </body>
 </html>'''
     
@@ -404,13 +242,14 @@ if __name__ == '__main__':
     
     print(f"获取 {len(data)} 个概念")
     
-    # 生成涨幅排行HTML（10条）
-    print("生成涨幅排行HTML...")
-    hot_html = generate_html(data)
     output_dir = os.path.expanduser('~/stock-analysis-pro/output/daily_content')
     os.makedirs(output_dir, exist_ok=True)
     
     date_str = datetime.now().strftime("%Y%m%d")
+    
+    # 生成涨幅排行HTML（10条）
+    print("生成涨幅排行HTML...")
+    hot_html = generate_hot_html(data)
     output_file = os.path.join(output_dir, f'concept_p1_{date_str}.html')
     
     with open(output_file, 'w', encoding='utf-8') as f:

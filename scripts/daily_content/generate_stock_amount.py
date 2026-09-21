@@ -137,7 +137,7 @@ def generate_html(stocks, yesterday_amount, yesterday_top10_codes):
     rows_html = ""
     display_stocks = stocks[:10]  # 只展示前10
     for i, s in enumerate(display_stocks, 1):
-        change_color = "#ff4757" if s['change_pct'] > 0 else "#2ed573" if s['change_pct'] < 0 else "#ffffff"
+        change_color = "#dc143c" if s['change_pct'] > 0 else "#228b22" if s['change_pct'] < 0 else "#1a1a1a"
         amount_str = format_amount(s['amount'])
         
         # 计算环比增减
@@ -145,12 +145,12 @@ def generate_html(stocks, yesterday_amount, yesterday_top10_codes):
         if code in yesterday_amount and yesterday_amount[code] > 0:
             ratio = (s['amount'] - yesterday_amount[code]) / yesterday_amount[code] * 100
             ratio_str = f"{ratio:+.1f}%"
-            ratio_color = "#ff4757" if ratio > 0 else "#2ed573" if ratio < 0 else "#ffffff"
+            ratio_color = "#dc143c" if ratio > 0 else "#228b22" if ratio < 0 else "#1a1a1a"
         else:
             ratio_str = "N/A"
             ratio_color = "#888"
         
-        # 新进入top10标记
+        # 新进入top10标记（只加标签，不改底色）
         is_new = code not in yesterday_top10_codes
         new_badge = '<span class="new-badge">NEW</span>' if is_new else ''
         
@@ -176,131 +176,146 @@ def generate_html(stocks, yesterday_amount, yesterday_top10_codes):
 body {{
     width: 1080px;
     height: 1920px;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    background: linear-gradient(180deg, #faf9f6 0%, #f5f3ee 100%);
     font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-    color: #fff;
-    padding: 120px 60px 120px;
+    color: #1a1a1a;
+    padding: 100px 45px 80px;
     overflow: hidden;
 }}
 .header {{
     text-align: center;
-    margin-bottom: 50px;
+    margin-bottom: 45px;
 }}
 .date {{
-    font-size: 32px;
-    color: #888;
-    margin-bottom: 15px;
+    font-size: 36px;
+    color: #666;
+    margin-bottom: 12px;
+    letter-spacing: 4px;
 }}
 .title {{
-    font-size: 64px;
-    font-weight: bold;
-    background: linear-gradient(90deg, #ffd700, #ffb700);
+    font-size: 72px;
+    font-weight: 800;
+    background: linear-gradient(90deg, #d4af37, #b8860b, #d4af37);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    letter-spacing: 6px;
 }}
 .table-header {{
     display: flex;
     align-items: center;
-    padding: 20px 30px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 15px;
-    margin-bottom: 25px;
-    border: 1px solid rgba(255,215,0,0.2);
+    padding: 20px 28px;
+    background: rgba(212,175,55,0.08);
+    border-radius: 14px;
+    margin-bottom: 18px;
+    border: 2px solid #d4af37;
 }}
 .header-rank {{
-    font-size: 28px;
-    color: #ffd700;
-    width: 50px;
+    font-size: 30px;
+    color: #b8860b;
+    font-weight: 700;
+    width: 55px;
     flex-shrink: 0;
 }}
 .header-name {{
-    font-size: 28px;
-    color: #ffd700;
-    width: 160px;
+    font-size: 30px;
+    color: #b8860b;
+    font-weight: 700;
+    width: 170px;
     flex-shrink: 0;
 }}
 .header-price {{
-    font-size: 28px;
-    color: #ffd700;
+    font-size: 30px;
+    color: #b8860b;
+    font-weight: 700;
     flex: 1;
     text-align: right;
 }}
 .header-change {{
-    font-size: 28px;
-    color: #ffd700;
+    font-size: 30px;
+    color: #b8860b;
+    font-weight: 700;
     flex: 1;
     text-align: right;
 }}
 .header-amount {{
-    font-size: 28px;
-    color: #ffd700;
+    font-size: 30px;
+    color: #b8860b;
+    font-weight: 700;
     flex: 1;
     text-align: right;
 }}
 .header-ratio {{
-    font-size: 28px;
-    color: #ffd700;
+    font-size: 30px;
+    color: #b8860b;
+    font-weight: 700;
     flex: 1;
     text-align: right;
 }}
 .stock-row {{
     display: flex;
     align-items: center;
-    padding: 28px 30px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 15px;
-    margin-bottom: 25px;
-    border: 1px solid rgba(255,215,0,0.1);
+    padding: 24px 28px;
+    background: #fff;
+    border-radius: 14px;
+    margin-bottom: 16px;
+    border: 1px solid #e8e4d9;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }}
 .new-badge {{
     display: inline-block;
-    font-size: 18px;
-    font-weight: bold;
-    color: #ffd700;
-    background: rgba(255,215,0,0.2);
-    border-radius: 4px;
-    padding: 2px 6px;
-    margin-left: 8px;
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(90deg, #d4af37, #b8860b);
+    border-radius: 6px;
+    padding: 3px 8px;
+    margin-left: 10px;
     vertical-align: middle;
+    letter-spacing: 1px;
 }}
 .rank {{
-    font-size: 36px;
-    font-weight: bold;
-    color: #ffd700;
-    width: 50px;
+    font-size: 40px;
+    font-weight: 800;
+    color: #b8860b;
+    width: 55px;
     flex-shrink: 0;
 }}
 .stock-name {{
-    font-size: 32px;
-    font-weight: bold;
-    width: 160px;
+    font-size: 36px;
+    font-weight: 700;
+    color: #1a1a1a;
+    width: 170px;
     flex-shrink: 0;
 }}
 .stock-price {{
-    font-size: 32px;
+    font-size: 34px;
     flex: 1;
     text-align: right;
+    font-weight: 500;
 }}
 .stock-change {{
-    font-size: 32px;
+    font-size: 36px;
+    font-weight: 800;
     flex: 1;
     text-align: right;
 }}
 .stock-amount {{
-    font-size: 32px;
+    font-size: 34px;
+    font-weight: 600;
     flex: 1;
     text-align: right;
 }}
 .stock-ratio {{
-    font-size: 32px;
+    font-size: 34px;
+    font-weight: 700;
     flex: 1;
     text-align: right;
 }}
 .footer {{
     text-align: center;
-    margin-top: 50px;
-    font-size: 24px;
-    color: #666;
+    margin-top: 30px;
+    font-size: 26px;
+    color: #999;
 }}
 </style>
 </head>

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""生成异常信号捕捉日报HTML - 腾讯源（含量比）+ 连板梯队"""
+"""生成异常信号捕捉日报HTML - 腾讯源（含量比）+ 连板梯队
+拆分为4张独立图片：放量滞涨/缩量新高/放量急拉/连板梯队
+"""
 
 import sys, os, json, time
 sys.path.insert(0, os.path.expanduser('~/stock-analysis-pro'))
@@ -157,158 +159,111 @@ def fetch_lianban_data():
 
 
 def build_css():
+    """浅色大字体样式（抖音优化）"""
     return """
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
-    width: 1080px;
-    height: 1920px;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    width: 1080px; height: 1920px;
+    background: linear-gradient(180deg, #faf9f6 0%, #f5f3ee 100%);
     font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-    color: #fff;
-    padding: 120px 50px 120px;
+    color: #1a1a1a;
+    padding: 100px 45px 80px;
     overflow: hidden;
 }
-.header {
-    text-align: center;
-    margin-bottom: 30px;
-}
-.date {
-    font-size: 28px;
-    color: #888;
-    margin-bottom: 5px;
-}
+.header { text-align: center; margin-bottom: 50px; }
+.date { font-size: 40px; color: #666; margin-bottom: 16px; letter-spacing: 4px; }
 .title {
-    font-size: 56px;
-    font-weight: bold;
-    background: linear-gradient(90deg, #ffd700, #ffb700);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-size: 80px; font-weight: 800;
+    background: linear-gradient(90deg, #d4af37, #b8860b, #d4af37);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: 6px;
 }
 .section {
-    background: rgba(255,255,255,0.05);
-    border-radius: 15px;
-    padding: 28px 30px;
-    margin-bottom: 25px;
-    border: 1px solid rgba(255,215,0,0.2);
+    background: #fff; border-radius: 24px;
+    padding: 40px 40px; margin-bottom: 30px;
+    border: 2px solid #d4af37;
+    box-shadow: 0 4px 24px rgba(212,175,55,0.15);
 }
 .section-title {
-    font-size: 32px;
-    color: #ffd700;
-    margin-bottom: 16px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid rgba(255,215,0,0.3);
+    font-size: 48px; color: #b8860b;
+    margin-bottom: 28px; padding-bottom: 18px;
+    border-bottom: 2px solid #d4af37; font-weight: 700;
 }
 .signal-row {
-    display: flex;
-    align-items: center;
-    padding: 14px 20px;
-    background: rgba(0,0,0,0.2);
-    border-radius: 6px;
-    margin-bottom: 10px;
+    display: flex; align-items: center;
+    padding: 22px 26px; background: #faf9f6;
+    border-radius: 12px; margin-bottom: 16px;
+    border: 1px solid #e8e4d9;
 }
-.signal-rank {
-    font-size: 26px;
-    font-weight: bold;
-    color: #ffd700;
-    width: 40px;
-    flex-shrink: 0;
-}
-.signal-name {
-    font-size: 26px;
-    width: 160px;
-    flex-shrink: 0;
-}
-.signal-code {
-    font-size: 22px;
-    color: #888;
-    flex: 1;
-    text-align: center;
-}
-.signal-change {
-    font-size: 26px;
-    font-weight: bold;
-    flex: 1;
-    text-align: center;
-}
-.signal-vol {
-    font-size: 24px;
-    color: #ffa502;
-    flex: 1;
-    text-align: right;
-}
+.signal-rank { font-size: 42px; font-weight: 800; color: #b8860b; width: 60px; }
+.signal-name { font-size: 42px; font-weight: 700; color: #1a1a1a; width: 200px; }
+.signal-code { font-size: 34px; color: #888; flex: 1; text-align: center; }
+.signal-change { font-size: 42px; font-weight: 800; flex: 1; text-align: center; }
+.signal-vol { font-size: 36px; color: #d4af37; font-weight: 600; flex: 1; text-align: right; }
 .lb-item {
-    display: flex;
-    align-items: center;
-    padding: 14px 18px;
-    background: rgba(0,0,0,0.3);
-    border-radius: 8px;
-    margin-bottom: 10px;
+    display: flex; align-items: center;
+    padding: 26px 26px; background: #faf9f6;
+    border-radius: 12px; margin-bottom: 16px;
+    border: 1px solid #e8e4d9;
 }
-.lb-level {
-    font-size: 30px;
-    font-weight: bold;
-    color: #ffd700;
-    width: 90px;
-}
-.lb-count {
-    font-size: 28px;
-    color: #ff4757;
-    width: 80px;
-    text-align: center;
-}
-.lb-names {
-    font-size: 24px;
-    color: #ccc;
-    flex: 1;
-}
-.footer {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 20px;
-    color: #666;
-}
+.lb-level { font-size: 48px; font-weight: 800; color: #b8860b; width: 120px; }
+.lb-count { font-size: 42px; color: #dc143c; font-weight: 700; width: 100px; text-align: center; }
+.lb-names { font-size: 36px; color: #333; flex: 1; }
+.footer { text-align: center; margin-top: 30px; font-size: 28px; color: #999; }
 """
 
 
-def generate_html(signals, lb_dist, lb_names, limit_stats):
-    """生成HTML"""
+def generate_signal_page(title, items, show_vol=True):
+    """生成单个信号页面的HTML"""
+    css = build_css()
+    date_str = datetime.now().strftime("%Y年%m月%d日")
     
-    def make_rows(items, show_vol=True):
-        html = ""
-        for i, s in enumerate(items[:6], 1):
-            cp = s.get('change_pct', 0) or 0
-            vr = s.get('volume_ratio', 0) or 0
-            right_col = f'<div class="signal-vol">量比{vr:.1f}</div>' if show_vol else ''
-            html += f'''
-            <div class="signal-row">
-                <div class="signal-rank">{i}</div>
-                <div class="signal-name">{s.get('name', '')}</div>
-                <div class="signal-code">{s.get('code', '')}</div>
-                <div class="signal-change" style="color:{'#ff4757' if cp > 0 else '#2ed573'}">{cp:+.2f}%</div>
-                {right_col}
-            </div>
-            '''
-        return html
-    
-    sections = [
-        ("⚠️ 放量滞涨（量比>3 涨幅<1%）", signals['vol_high_stagnant'], True),
-        ("🚀 缩量新高（量比<0.8 涨幅>5%）", signals['vol_low_surge'], True),
-        ("⚡ 放量急拉（量比>2 涨幅>5%）", signals['vol_surge'], True),
-    ]
-    
-    sections_html = ""
-    for title, items, show_vol in sections:
-        rows = make_rows(items, show_vol)
-        if not rows:
-            rows = '<div style="color:#888;text-align:center;padding:20px;">暂无符合条件个股</div>'
-        sections_html += f'''
-        <div class="section">
-            <div class="section-title">{title}</div>
-            {rows}
+    rows_html = ""
+    for i, s in enumerate(items, 1):
+        cp = s.get('change_pct', 0) or 0
+        vr = s.get('volume_ratio', 0) or 0
+        color = '#dc143c' if cp > 0 else '#228b22'
+        right_col = f'<div class="signal-vol">量比{vr:.1f}</div>' if show_vol else ''
+        rows_html += f'''
+        <div class="signal-row">
+            <div class="signal-rank">{i}</div>
+            <div class="signal-name">{s.get('name', '')}</div>
+            <div class="signal-code">{s.get('code', '')}</div>
+            <div class="signal-change" style="color:{color}">{cp:+.2f}%</div>
+            {right_col}
         </div>
         '''
     
-    # 连板梯队HTML - 超过5个名字时显示"等N家"
+    if not rows_html:
+        rows_html = '<div style="color:#888;text-align:center;padding:20px;font-size:32px;">暂无符合条件个股</div>'
+    
+    html = f'''<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>{css}</style>
+</head>
+<body>
+    <div class="header">
+        <div class="date">{date_str}</div>
+        <div class="title">异常信号捕捉</div>
+    </div>
+    <div class="section">
+        <div class="section-title">{title}</div>
+        {rows_html}
+    </div>
+    <div class="footer">数据来源：沪深A股 | 仅供参考，不构成投资建议</div>
+</body>
+</html>'''
+    
+    return html
+
+
+def generate_lianban_page(lb_dist, lb_names):
+    """生成连板梯队页面的HTML"""
+    css = build_css()
+    date_str = datetime.now().strftime("%Y年%m月%d日")
+    
     lb_html = ""
     for lb in sorted(lb_dist.keys(), reverse=True):
         count = lb_dist[lb]
@@ -325,8 +280,8 @@ def generate_html(signals, lb_dist, lb_names, limit_stats):
         </div>
         '''
     
-    css = build_css()
-    date_str = datetime.now().strftime("%Y年%m月%d日")
+    if not lb_html:
+        lb_html = '<div style="color:#888;text-align:center;padding:20px;font-size:32px;">暂无连板数据</div>'
     
     html = f'''<!DOCTYPE html>
 <html>
@@ -339,17 +294,11 @@ def generate_html(signals, lb_dist, lb_names, limit_stats):
         <div class="date">{date_str}</div>
         <div class="title">异常信号捕捉</div>
     </div>
-    
-    {sections_html}
-    
     <div class="section">
         <div class="section-title">🔥 连板梯队</div>
-        {lb_html if lb_html else '<div style="color:#888;text-align:center;padding:20px;">暂无连板数据</div>'}
+        {lb_html}
     </div>
-    
-    <div class="footer">
-        数据来源：沪深A股 | 仅供参考，不构成投资建议
-    </div>
+    <div class="footer">数据来源：沪深A股 | 仅供参考，不构成投资建议</div>
 </body>
 </html>'''
     
@@ -373,16 +322,38 @@ if __name__ == '__main__':
     print(f"涨停: {limit_stats['zt_count']} 跌停: {limit_stats['dt_count']}")
     print(f"连板分布: {lb_dist}")
     
-    print("\n生成HTML...")
-    html = generate_html(signals, lb_dist, lb_names, limit_stats)
-    
     output_dir = os.path.expanduser('~/stock-analysis-pro/output/daily_content')
     os.makedirs(output_dir, exist_ok=True)
     
     date_str = datetime.now().strftime("%Y%m%d")
-    output_file = os.path.join(output_dir, f'anomaly_{date_str}.html')
     
+    # 生成4张独立HTML
+    print("\n生成HTML（4张）...")
+    
+    # P1: 放量滞涨
+    html = generate_signal_page("⚠️ 放量滞涨（量比&gt;3 涨幅&lt;1%）", signals['vol_high_stagnant'])
+    output_file = os.path.join(output_dir, f'anomaly_p1_{date_str}.html')
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write(html)
+    print(f"✓ {output_file}")
     
-    print(f"✓ HTML已生成: {output_file}")
+    # P2: 缩量新高
+    html = generate_signal_page("🚀 缩量新高（量比&lt;0.8 涨幅&gt;5%）", signals['vol_low_surge'])
+    output_file = os.path.join(output_dir, f'anomaly_p2_{date_str}.html')
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write(html)
+    print(f"✓ {output_file}")
+    
+    # P3: 放量急拉
+    html = generate_signal_page("⚡ 放量急拉（量比&gt;2 涨幅&gt;5%）", signals['vol_surge'])
+    output_file = os.path.join(output_dir, f'anomaly_p3_{date_str}.html')
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write(html)
+    print(f"✓ {output_file}")
+    
+    # P4: 连板梯队
+    html = generate_lianban_page(lb_dist, lb_names)
+    output_file = os.path.join(output_dir, f'anomaly_p4_{date_str}.html')
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write(html)
+    print(f"✓ {output_file}")
