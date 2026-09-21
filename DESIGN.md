@@ -550,3 +550,14 @@ HTTP requests (push2.eastmoney.com/api/qt/clist/get)
 - 单元测试
 - 报告模板个性化定制
 - 更多数据源接入（同花顺/雪球）
+
+### 📋 Daily Content 功能说明
+
+#### 个股成交额TOP10 — 新进标记 + 缓存扩容
+- **功能**: 减少环比N/A，标记新进top10的股票
+- **缓存扩容**: `fetch_stock_amount()` 采集前50只（新浪按成交额排序），`save_amount_cache()` 保存前50的名称+成交额到JSON缓存
+- **新进标记**: 对比昨日top10名单，今日新进入top10的股票显示金色边框 + "NEW"徽章
+- **环比优化**: 由于缓存扩大到前50，新进top10的股票大概率在昨日缓存中能找到昨日成交额，只有完全不在昨日top50中的才会显示N/A
+- **展示**: HTML仍只展示top10行
+- **文件**: `scripts/daily_content/generate_stock_amount.py`
+- **缓存路径**: `cache/daily_content/stock_amount_cache_YYYYMMDD.json`

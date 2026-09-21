@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    width: 1080px;
+    height: 1920px;
+    background: linear-gradient(180deg, #faf9f6 0%, #f5f3ee 100%);
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #1a1a1a;
+    padding: 100px 45px 80px;
+    overflow: hidden;
+}
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+.date {
+    font-size: 36px;
+    color: #666;
+    margin-bottom: 12px;
+    letter-spacing: 4px;
+}
+.title {
+    font-size: 72px;
+    font-weight: 800;
+    background: linear-gradient(90deg, #d4af37, #b8860b, #d4af37);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 6px;
+}
+.section {
+    background: #fff;
+    border-radius: 20px;
+    padding: 30px 35px;
+    margin-bottom: 28px;
+    border: 2px solid #d4af37;
+    box-shadow: 0 4px 24px rgba(212,175,55,0.15);
+}
+.section-title {
+    font-size: 38px;
+    color: #b8860b;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid #d4af37;
+    font-weight: 700;
+}
+.signal-row {
+    display: flex;
+    align-items: center;
+    padding: 16px 22px;
+    background: #faf9f6;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    border: 1px solid #e8e4d9;
+}
+.signal-rank {
+    font-size: 34px;
+    font-weight: 800;
+    color: #b8860b;
+    width: 50px;
+    flex-shrink: 0;
+}
+.signal-name {
+    font-size: 34px;
+    font-weight: 700;
+    color: #1a1a1a;
+    width: 180px;
+    flex-shrink: 0;
+}
+.signal-code {
+    font-size: 28px;
+    color: #888;
+    flex: 1;
+    text-align: center;
+}
+.signal-change {
+    font-size: 34px;
+    font-weight: 800;
+    flex: 1;
+    text-align: center;
+}
+.signal-vol {
+    font-size: 30px;
+    color: #d4af37;
+    font-weight: 600;
+    flex: 1;
+    text-align: right;
+}
+.lb-item {
+    display: flex;
+    align-items: center;
+    padding: 18px 22px;
+    background: #faf9f6;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    border: 1px solid #e8e4d9;
+}
+.lb-level {
+    font-size: 38px;
+    font-weight: 800;
+    color: #b8860b;
+    width: 100px;
+}
+.lb-count {
+    font-size: 34px;
+    color: #dc143c;
+    font-weight: 700;
+    width: 90px;
+    text-align: center;
+}
+.lb-names {
+    font-size: 30px;
+    color: #333;
+    flex: 1;
+}
+.footer {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 26px;
+    color: #999;
+}
+</style>
+</head>
+<body>
+    <div class="header">
+        <div class="date">2026年09月21日</div>
+        <div class="title">异常信号捕捉</div>
+    </div>
+    
+        <div class="section">
+            <div class="section-title">⚠️ 放量滞涨（量比>3 涨幅<1%）</div>
+            <div class="signal-row">
+                <div class="signal-rank">1</div>
+                <div class="signal-name">新宏泽</div>
+                <div class="signal-code">002836</div>
+                <div class="signal-change" style="color:#dc143c">+0.50%</div>
+                <div class="signal-vol">量比5.4</div>
+            </div>
+            <div class="signal-row">
+                <div class="signal-rank">2</div>
+                <div class="signal-name">华鑫股份</div>
+                <div class="signal-code">600621</div>
+                <div class="signal-change" style="color:#dc143c">+0.99%</div>
+                <div class="signal-vol">量比4.2</div>
+            </div>
+            <div class="signal-row">
+                <div class="signal-rank">3</div>
+                <div class="signal-name">中捷精工</div>
+                <div class="signal-code">301072</div>
+                <div class="signal-change" style="color:#dc143c">+0.18%</div>
+                <div class="signal-vol">量比4.1</div>
+            </div>
+            <div class="signal-row">
+                <div class="signal-rank">4</div>
+                <div class="signal-name">华塑控股</div>
+                <div class="signal-code">000509</div>
+                <div class="signal-change" style="color:#dc143c">+0.80%</div>
+                <div class="signal-vol">量比4.0</div>
+            </div>
+            <div class="signal-row">
+                <div class="signal-rank">5</div>
+                <div class="signal-name">紫燕食品</div>
+                <div class="signal-code">603057</div>
+                <div class="signal-change" style="color:#dc143c">+0.22%</div>
+                <div class="signal-vol">量比4.0</div>
+            </div>
+            <div class="signal-row">
+                <div class="signal-rank">6</div>
+                <div class="signal-name">中超控股</div>
+                <div class="signal-code">002471</div>
+                <div class="signal-change" style="color:#228b22">-0.17%</div>
+                <div class="signal-vol">量比3.4</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">🚀 缩量新高（量比<0.8 涨幅>5%）</div>
+            <div class="signal-row">
+                <div class="signal-rank">1</div>
+                <div class="signal-name">海鸥住工</div>
+                <div class="signal-code">002084</div>
+                <div class="signal-change" style="color:#dc143c">+10.07%</div>
+                <div class="signal-vol">量比0.6</div>
+            </div>
+            <div class="signal-row">
+                <div class="signal-rank">2</div>
+                <div class="signal-name">澳洋健康</div>
+                <div class="signal-code">002172</div>
+                <div class="signal-change" style="color:#dc143c">+10.04%</div>
+                <div class="signal-vol">量比0.5</div>
+            </div>
+            <div class="signal-row">
+                <div class="signal-rank">3</div>
+                <div class="signal-name">双星新材</div>
+                <div class="signal-code">002585</div>
+                <div class="signal-change" style="color:#dc143c">+10.04%</div>
+                <div class="signal-vol">量比0.7</div>
+            </div>
+            <div class="signal-row">
+                <div class="signal-rank">4</div>
+                <div class="signal-name">国芳集团</div>
+                <div class="signal-code">601086</div>
+                <div class="signal-change" style="color:#dc143c">+10.02%</div>
+                <div class="signal-vol">量比0.7</div>
+            </div>
+            <div class="signal-row">
+                <div class="signal-rank">5</div>
+                <div class="signal-name">马矿股份</div>
+                <div class="signal-code">601123</div>
+                <div class="signal-change" style="color:#dc143c">+10.01%</div>
+                <div class="signal-vol">量比0.6</div>
+            </div>
+            <div class="signal-row">
+                <div class="signal-rank">6</div>
+                <div class="signal-name">诚邦股份</div>
+                <div class="signal-code">603316</div>
+                <div class="signal-change" style="color:#dc143c">+10.01%</div>
+                <div class="signal-vol">量比0.7</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">⚡ 放量急拉（量比>2 涨幅>5%）</div>
+            <div class="signal-row">
+                <div class="signal-rank">1</div>
+                <div class="signal-name">华仁药业</div>
+                <div class="signal-code">300110</div>
+                <div class="signal-change" style="color:#dc143c">+20.07%</div>
+                <div class="signal-vol">量比9.7</div>
+            </div>
+            <div class="signal-row">
+                <div class="signal-rank">2</div>
+                <div class="signal-name">鼎阳科技</div>
+                <div class="signal-code">688112</div>
+                <div class="signal-change" style="color:#dc143c">+20.00%</div>
+                <div class="signal-vol">量比2.9</div>
+            </div>
+            <div class="signal-row">
+                <div class="signal-rank">3</div>
+                <div class="signal-name">诺禾致源</div>
+                <div class="signal-code">688315</div>
+                <div class="signal-change" style="color:#dc143c">+20.00%</div>
+                <div class="signal-vol">量比2.3</div>
+            </div>
+            <div class="signal-row">
+                <div class="signal-rank">4</div>
+                <div class="signal-name">联合光电</div>
+                <div class="signal-code">300691</div>
+                <div class="signal-change" style="color:#dc143c">+20.00%</div>
+                <div class="signal-vol">量比10.6</div>
+            </div>
+            <div class="signal-row">
+                <div class="signal-rank">5</div>
+                <div class="signal-name">洁特生物</div>
+                <div class="signal-code">688026</div>
+                <div class="signal-change" style="color:#dc143c">+19.98%</div>
+                <div class="signal-vol">量比3.7</div>
+            </div>
+            <div class="signal-row">
+                <div class="signal-rank">6</div>
+                <div class="signal-name">亚虹医药-U</div>
+                <div class="signal-code">688176</div>
+                <div class="signal-change" style="color:#dc143c">+15.98%</div>
+                <div class="signal-vol">量比5.1</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">🔥 连板梯队</div>
+            <div class="lb-item">
+                <div class="lb-level">5板</div>
+                <div class="lb-count">1家</div>
+                <div class="lb-names">华瓷股份</div>
+            </div>
+            <div class="lb-item">
+                <div class="lb-level">4板</div>
+                <div class="lb-count">1家</div>
+                <div class="lb-names">内蒙新华</div>
+            </div>
+            <div class="lb-item">
+                <div class="lb-level">3板</div>
+                <div class="lb-count">4家</div>
+                <div class="lb-names">南华生物、龙头股份、华软科技、华纺股份</div>
+            </div>
+            <div class="lb-item">
+                <div class="lb-level">2板</div>
+                <div class="lb-count">7家</div>
+                <div class="lb-names">马矿股份、大亚圣象、诚邦股份、新华文轩、百通能源…</div>
+            </div>
+            <div class="lb-item">
+                <div class="lb-level">1板</div>
+                <div class="lb-count">17家</div>
+                <div class="lb-names">华媒控股、华远控股、华锡有色、新华传媒、奥佳华…</div>
+            </div>
+        </div>
+    
+    <div class="footer">数据来源：沪深A股 | 仅供参考，不构成投资建议</div>
+</body>
+</html>

@@ -316,7 +316,7 @@ def generate_html(signals, lb_dist, lb_names, limit_stats):
         if count <= 5:
             names_str = '、'.join(names)
         else:
-            names_str = '、'.join(names[:5]) + f'…等{count}家'
+            names_str = '、'.join(names[:5]) + f'等{count}家'
         lb_html += f'''
         <div class="lb-item">
             <div class="lb-level">{lb}板</div>

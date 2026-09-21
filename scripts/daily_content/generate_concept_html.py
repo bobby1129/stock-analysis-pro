@@ -32,13 +32,13 @@ def analyze_concepts():
 
 
 def generate_html(data):
-    """生成HTML"""
+    """生成HTML - 拆分为两个独立页面"""
     
-    # 涨幅排行
+    # 涨幅排行（10条）
     hot_concepts = data[:10]
     
-    # 流入排行
-    flow_concepts = sorted(data, key=lambda x: x['flow_in'], reverse=True)[:8]
+    # 流入排行（10条）
+    flow_concepts = sorted(data, key=lambda x: x['flow_in'], reverse=True)[:10]
     
     # 涨幅排行HTML - 表头
     hot_html = '''
@@ -49,7 +49,7 @@ def generate_html(data):
         <div class="concept-leader">领涨股</div>
     </div>
     '''
-    for i, c in enumerate(hot_concepts[:8], 1):
+    for i, c in enumerate(hot_concepts, 1):
         color = "#ff4757" if c['change_today'] > 0 else "#2ed573"
         hot_html += f'''
         <div class="concept-row">
@@ -69,7 +69,7 @@ def generate_html(data):
         <div class="flow-value">净流入</div>
     </div>
     '''
-    for i, c in enumerate(flow_concepts[:6], 1):
+    for i, c in enumerate(flow_concepts, 1):
         flow_color = "#ff4757" if c['flow_in'] > 0 else "#2ed573"
         change_color = "#ff4757" if c['change_today'] > 0 else "#2ed573"
         flow_html += f'''
@@ -239,6 +239,151 @@ body {{
         {hot_html}
     </div>
     
+    <div class="footer">
+        数据来源：同花顺概念板块 | 仅供参考，不构成投资建议
+    </div>
+</body>
+</html>'''
+    
+    return html
+
+
+def generate_flow_html(data):
+    """生成净流入排行HTML（10条）"""
+    
+    # 流入排行（10条）
+    flow_concepts = sorted(data, key=lambda x: x['flow_in'], reverse=True)[:10]
+    
+    # 流入排行HTML - 表头
+    flow_html = '''
+    <div class="flow-header">
+        <div class="flow-rank">排名</div>
+        <div class="flow-name">概念名称</div>
+        <div class="flow-change">涨跌幅</div>
+        <div class="flow-value">净流入</div>
+    </div>
+    '''
+    for i, c in enumerate(flow_concepts, 1):
+        flow_color = "#ff4757" if c['flow_in'] > 0 else "#2ed573"
+        change_color = "#ff4757" if c['change_today'] > 0 else "#2ed573"
+        flow_html += f'''
+        <div class="flow-row">
+            <div class="flow-rank">{i}</div>
+            <div class="flow-name">{c['name']}</div>
+            <div class="flow-change" style="color:{change_color}">{c['change_today']:+.2f}%</div>
+            <div class="flow-value" style="color:{flow_color}">{c['flow_in']:.1f}亿</div>
+        </div>
+        '''
+    
+    css = '''
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    width: 1080px;
+    height: 1920px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #fff;
+    padding: 120px 50px 120px;
+    overflow: hidden;
+}
+.header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+.date {
+    font-size: 28px;
+    color: #888;
+    margin-bottom: 5px;
+}
+.title {
+    font-size: 56px;
+    font-weight: bold;
+    background: linear-gradient(90deg, #ffd700, #ffb700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.section {
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    padding: 25px 30px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,215,0,0.2);
+}
+.section-title {
+    font-size: 34px;
+    color: #ffd700;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(255,215,0,0.3);
+}
+.flow-header {
+    display: flex;
+    align-items: center;
+    padding: 14px 15px;
+    background: rgba(255, 215, 0, 0.15);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+.flow-header .flow-rank,
+.flow-header .flow-name,
+.flow-header .flow-change,
+.flow-header .flow-value {
+    font-size: 22px;
+    color: #ffd700;
+    font-weight: 500;
+}
+.flow-row {
+    display: flex;
+    align-items: center;
+    padding: 14px 15px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+.flow-rank {
+    font-size: 26px;
+    font-weight: bold;
+    color: #ffd700;
+    width: 40px;
+}
+.flow-name {
+    font-size: 26px;
+    flex: 1;
+}
+.flow-change {
+    font-size: 26px;
+    font-weight: bold;
+    width: 100px;
+    text-align: right;
+}
+.flow-value {
+    font-size: 28px;
+    font-weight: bold;
+    width: 120px;
+    text-align: right;
+}
+.footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 22px;
+    color: #666;
+}
+'''
+    date_str = datetime.now().strftime("%Y年%m月%d日")
+    
+    html = f'''<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>{css}</style>
+</head>
+<body>
+    <div class="header">
+        <div class="date">{date_str}</div>
+        <div class="title">概念板块表现</div>
+    </div>
+    
     <div class="section">
         <div class="section-title">💰 净流入排行（亿元）</div>
         {flow_html}
@@ -259,16 +404,26 @@ if __name__ == '__main__':
     
     print(f"获取 {len(data)} 个概念")
     
-    print("生成HTML...")
-    html = generate_html(data)
-    
+    # 生成涨幅排行HTML（10条）
+    print("生成涨幅排行HTML...")
+    hot_html = generate_html(data)
     output_dir = os.path.expanduser('~/stock-analysis-pro/output/daily_content')
     os.makedirs(output_dir, exist_ok=True)
     
     date_str = datetime.now().strftime("%Y%m%d")
-    output_file = os.path.join(output_dir, f'concept_{date_str}.html')
+    output_file = os.path.join(output_dir, f'concept_p1_{date_str}.html')
     
     with open(output_file, 'w', encoding='utf-8') as f:
-        f.write(html)
+        f.write(hot_html)
     
-    print(f"✓ HTML已生成: {output_file}")
+    print(f"✓ 涨幅排行HTML已生成: {output_file}")
+    
+    # 生成净流入排行HTML（10条）
+    print("生成净流入排行HTML...")
+    flow_html = generate_flow_html(data)
+    output_file = os.path.join(output_dir, f'concept_p2_{date_str}.html')
+    
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write(flow_html)
+    
+    print(f"✓ 净流入排行HTML已生成: {output_file}")
