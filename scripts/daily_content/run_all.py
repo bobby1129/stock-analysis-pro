@@ -80,7 +80,13 @@ def main():
     if not html_to_png(f'concept_p2_{date_str}'):
         return 1
     
-    # 3. 异常信号捕捉（4张：放量滞涨/缩量新高/放量急拉/连板梯队）
+    # 3. 新进成交额TOP50（1张）
+    if not run_script('generate_new_top50.py'):
+        return 1
+    if not html_to_png(f'new_top50_{date_str}'):
+        return 1
+    
+    # 4. 异常信号捕捉（4张：放量滞涨/缩量新高/放量急拉/连板梯队）
     if not run_script('generate_anomaly.py'):
         return 1
     for i in range(1, 5):
@@ -88,7 +94,7 @@ def main():
             return 1
     
     print("\n" + "="*60)
-    print("✓ 全部完成，共生成7张图")
+    print("✓ 全部完成，共生成8张图")
     print("="*60)
     
     # 列出输出文件
@@ -97,6 +103,7 @@ def main():
         f'stock_amount_top10_{date_str}.png',
         f'concept_p1_{date_str}.png',
         f'concept_p2_{date_str}.png',
+        f'new_top50_{date_str}.png',
         f'anomaly_p1_{date_str}.png',
         f'anomaly_p2_{date_str}.png',
         f'anomaly_p3_{date_str}.png',

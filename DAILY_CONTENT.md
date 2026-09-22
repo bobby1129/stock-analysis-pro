@@ -8,7 +8,7 @@
 
 **重要**：除非用户明确要求"重做"，否则所有修改都只在现有基础上进行增量改动，不要推翻重来。
 
-## 三张图（共7张PNG）
+## 四张图（共8张PNG）
 
 ### 1. 个股成交额TOP10（1张）
 - **脚本**: `scripts/daily_content/generate_stock_amount.py`
@@ -54,7 +54,16 @@
 - **注意**: 同花顺接口只返回50条，概念板块够用
 - **状态**: ✅ 已完成
 
-### 3. 异常信号捕捉（4张）
+### 3. 新进成交额TOP50（1张）
+- **脚本**: `scripts/daily_content/generate_new_top50.py`
+- **数据源**: 新浪财经（全市场）
+- **逻辑**: 对比昨日TOP50缓存，找出首次进入成交额前50的股票
+- **显示列**: 排名、股票、现价、涨幅、成交额
+- **简称映射**: 新浪接口返回全称，通过 `stock_short_names.py` 维护简称映射表
+- **缓存依赖**: `cache/daily_content/stock_amount_cache_YYYYMMDD.json`（与TOP10共用）
+- **状态**: ✅ 已完成
+
+### 4. 异常信号捕捉（4张）
 - **脚本**: `scripts/daily_content/generate_anomaly.py`
 - **数据源**:
   - 量比数据：腾讯行情接口（批量获取）
