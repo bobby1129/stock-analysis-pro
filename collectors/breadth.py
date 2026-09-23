@@ -100,7 +100,7 @@ def fetch_limit_stats(date: Optional[str] = None) -> dict:
         zt_df = ak.stock_zt_pool_em(date=date)
         if zt_df is not None and not zt_df.empty:
             result['zt_count'] = len(zt_df)
-            for _, row in zt_df.head(30).iterrows():
+            for _, row in zt_df.iterrows():  # 全量遍历: head(30)会截断连板分布(涨停>30时首板家数被低估)
                 result['zt_stocks'].append({
                     'code': str(row.get('代码', '')),
                     'name': str(row.get('名称', '')),
@@ -118,7 +118,7 @@ def fetch_limit_stats(date: Optional[str] = None) -> dict:
         dt_df = ak.stock_zt_pool_dtgc_em(date=date)
         if dt_df is not None and not dt_df.empty:
             result['dt_count'] = len(dt_df)
-            for _, row in dt_df.head(20).iterrows():
+            for _, row in dt_df.iterrows():  # 全量遍历, 同涨停池
                 result['dt_stocks'].append({
                     'code': str(row.get('代码', '')),
                     'name': str(row.get('名称', '')),

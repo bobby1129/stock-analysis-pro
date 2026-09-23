@@ -11,21 +11,65 @@ for k in ['HTTPS_PROXY', 'https_proxy', 'HTTP_PROXY', 'http_proxy']:
 from datetime import datetime
 from collectors.ths_concept import fetch_ths_concept_fund_flow
 
+# 宽基属性桶(非题材概念), 资金榜单需过滤: 融资融券/沪深股通等是资金属性而非板块主线
+# 注意: "国家大基金持股"是芯片主线真题材, 不可用"持股/重仓"关键词误杀
+BUCKET_KEYWORDS = [
+    '融资融券', '转融券', '股通', '国企改革', '中报', '年报', '季报',
+    '预增', '预减', '预盈', '预亏', '扭亏', '举牌', '股权激励',
+    'QFII', 'MSCI', '标普', '富时', 'AH股', 'B股', '转债',
+    '昨日涨停', '昨日连板', '昨日触板', 'ST板块', '次新', '新股与',
+]
+
+
+def is_bucket_concept(name):
+    return any(kw in name for kw in BUCKET_KEYWORDS)
+
+
+def fetch_full_concept_flow():
+    """akshare全量概念资金流(387个) - 同花顺源, 依赖py_mini_racer生成hexin-v
+    返回与fetch_ths_concept_fund_flow相同的dict结构; 失败抛异常由调用方降级"""
+    import akshare as ak
+    df = ak.stock_fund_flow_concept(symbol="即时")
+    results = []
+    for _, r in df.iterrows():
+        name = str(r['行业']).strip()
+        if is_bucket_concept(name):
+            continue
+        try:
+            results.append({
+                'name': name,
+                'change_pct': float(r['行业-涨跌幅']),
+                'net': float(r['净额']),
+                'leader': str(r['领涨股']).strip(),
+                'leader_pct': float(r['领涨股-涨跌幅']),
+            })
+        except (ValueError, TypeError):
+            continue
+    return results
+
 
 def analyze_concepts():
-    """用同花顺概念资金流向"""
-    concepts = fetch_ths_concept_fund_flow(top_n=30, verbose=True)
-    
+    """概念资金流向: 优先akshare全量(387个,无采样偏差), 失败降级同花顺涨幅前50页"""
+    concepts = None
+    try:
+        concepts = fetch_full_concept_flow()
+        print(f"✓ akshare全量资金流: 过滤宽基桶后 {len(concepts)} 个概念")
+    except Exception as e:
+        print(f"⚠ akshare全量获取失败({e}), 降级到同花顺涨幅前50页")
+
+    if not concepts:
+        concepts = fetch_ths_concept_fund_flow(top_n=50, verbose=True)
+
     results = []
     for c in concepts:
         results.append({
-            'name': c['name'],
+            'name': c.get('name', ''),
             'change_today': c.get('change_pct', 0),
             'flow_in': c.get('net', 0),  # 净流入(亿)
             'leader': c.get('leader', ''),
             'leader_pct': c.get('leader_pct', 0),
         })
-    
+
     # 按涨幅排序
     results.sort(key=lambda x: x['change_today'], reverse=True)
     return results
