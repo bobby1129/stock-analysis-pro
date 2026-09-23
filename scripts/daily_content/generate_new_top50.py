@@ -90,9 +90,15 @@ def format_amount(amount):
         return f"{amount:.2f}"
 
 
-def generate_html(new_stocks):
-    """生成HTML，展示新进TOP50的股票"""
-    if not new_stocks:
+def generate_html(new_stocks, page=1, total_pages=1):
+    """生成HTML，展示新进TOP50的股票，支持分页"""
+    # 分页逻辑
+    items_per_page = 10 if total_pages > 1 else len(new_stocks)
+    start_idx = (page - 1) * items_per_page
+    end_idx = start_idx + items_per_page
+    page_stocks = new_stocks[start_idx:end_idx]
+    
+    if not page_stocks:
         rows_html = '''
         <div class="empty-row">
             <div class="empty-text">今日无新进TOP50股票</div>
@@ -100,7 +106,7 @@ def generate_html(new_stocks):
         '''
     else:
         rows_html = ""
-        for i, s in enumerate(new_stocks, 1):
+        for i, s in enumerate(page_stocks, start_idx + 1):
             change_color = "#dc143c" if s['change_pct'] > 0 else "#228b22" if s['change_pct'] < 0 else "#1a1a1a"
             amount_str = format_amount(s['amount'])
             
@@ -116,6 +122,7 @@ def generate_html(new_stocks):
     
     date_str = datetime.now().strftime("%Y年%m月%d日")
     count = len(new_stocks)
+    page_info = f"第{page}/{total_pages}页" if total_pages > 1 else ""
     
     html = f'''<!DOCTYPE html>
 <html>
@@ -134,16 +141,16 @@ body {{
 }}
 .header {{
     text-align: center;
-    margin-bottom: 45px;
+    margin-bottom: 30px;
 }}
 .date {{
-    font-size: 36px;
+    font-size: 32px;
     color: #666;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     letter-spacing: 4px;
 }}
 .title {{
-    font-size: 68px;
+    font-size: 60px;
     font-weight: 800;
     background: linear-gradient(90deg, #d4af37, #b8860b, #d4af37);
     -webkit-background-clip: text;
@@ -151,49 +158,49 @@ body {{
     letter-spacing: 6px;
 }}
 .subtitle {{
-    font-size: 30px;
+    font-size: 28px;
     color: #888;
-    margin-top: 10px;
+    margin-top: 8px;
 }}
 .table-header {{
     display: flex;
     align-items: center;
-    padding: 20px 28px;
+    padding: 16px 28px;
     background: rgba(212,175,55,0.08);
     border-radius: 14px;
-    margin-bottom: 18px;
+    margin-bottom: 12px;
     border: 2px solid #d4af37;
 }}
 .header-rank {{
-    font-size: 30px;
+    font-size: 28px;
     color: #b8860b;
     font-weight: 700;
     width: 55px;
     flex-shrink: 0;
 }}
 .header-name {{
-    font-size: 30px;
+    font-size: 28px;
     color: #b8860b;
     font-weight: 700;
     width: 260px;
     flex-shrink: 0;
 }}
 .header-price {{
-    font-size: 30px;
+    font-size: 28px;
     color: #b8860b;
     font-weight: 700;
     flex: 1;
     text-align: right;
 }}
 .header-change {{
-    font-size: 30px;
+    font-size: 28px;
     color: #b8860b;
     font-weight: 700;
     flex: 1;
     text-align: right;
 }}
 .header-amount {{
-    font-size: 30px;
+    font-size: 28px;
     color: #b8860b;
     font-weight: 700;
     flex: 1;
@@ -202,22 +209,22 @@ body {{
 .stock-row {{
     display: flex;
     align-items: center;
-    padding: 20px 28px;
+    padding: 16px 28px;
     background: #fff;
     border-radius: 14px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     border: 1px solid #e8e4d9;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }}
 .rank {{
-    font-size: 40px;
+    font-size: 36px;
     font-weight: 800;
     color: #b8860b;
     width: 55px;
     flex-shrink: 0;
 }}
 .stock-name {{
-    font-size: 36px;
+    font-size: 32px;
     font-weight: 700;
     color: #1a1a1a;
     width: 260px;
@@ -227,19 +234,19 @@ body {{
     text-overflow: ellipsis;
 }}
 .stock-price {{
-    font-size: 34px;
+    font-size: 30px;
     flex: 1;
     text-align: right;
     font-weight: 500;
 }}
 .stock-change {{
-    font-size: 36px;
+    font-size: 32px;
     font-weight: 800;
     flex: 1;
     text-align: right;
 }}
 .stock-amount {{
-    font-size: 34px;
+    font-size: 30px;
     font-weight: 600;
     flex: 1;
     text-align: right;
@@ -269,7 +276,7 @@ body {{
     <div class="header">
         <div class="date">{date_str}</div>
         <div class="title">新进成交额TOP50</div>
-        <div class="subtitle">首次进入成交额前50 · 共{count}只</div>
+        <div class="subtitle">首次进入成交额前50 · 共{count}只 {page_info}</div>
     </div>
     
     <div class="table-header">
@@ -313,9 +320,23 @@ if __name__ == '__main__':
     os.makedirs(output_dir, exist_ok=True)
     date_str = datetime.now().strftime("%Y%m%d")
     
-    print("生成新进TOP50 HTML...")
-    html = generate_html(new_stocks)
-    output_file = os.path.join(output_dir, f'new_top50_{date_str}.html')
-    with open(output_file, 'w', encoding='utf-8') as f:
-        f.write(html)
-    print(f"✓ {output_file}")
+    # 分页规则：≤15只→1页展示完；>15只→每页10只
+    total = len(new_stocks)
+    if total <= 15:
+        pages = [1]
+        total_pages = 1
+    else:
+        total_pages = (total + 9) // 10  # 每页10只
+        pages = list(range(1, total_pages + 1))
+    
+    print(f"分页：共{total_pages}页")
+    for page in pages:
+        print(f"生成新进TOP50 HTML (第{page}/{total_pages}页)...")
+        html = generate_html(new_stocks, page=page, total_pages=total_pages)
+        if total_pages == 1:
+            output_file = os.path.join(output_dir, f'new_top50_{date_str}.html')
+        else:
+            output_file = os.path.join(output_dir, f'new_top50_p{page}_{date_str}.html')
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(html)
+        print(f"✓ {output_file}")

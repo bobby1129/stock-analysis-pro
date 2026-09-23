@@ -109,6 +109,29 @@ def fetch_yesterday_top10_codes():
     return set()
 
 
+def fetch_yesterday_ranks():
+    """从缓存读取昨日每只股票的排名（code -> rank，1-indexed）"""
+    cache_dir = os.path.expanduser('~/stock-analysis-pro/cache/daily_content')
+    today = datetime.now()
+    for delta in range(1, 5):
+        d = today - timedelta(days=delta)
+        date_key = d.strftime("%Y%m%d")
+        cache_file = os.path.join(cache_dir, f'stock_amount_cache_{date_key}.json')
+        if os.path.exists(cache_file):
+            try:
+                with open(cache_file, 'r', encoding='utf-8') as f:
+                    cached = json.load(f)
+                ranks = {}
+                for idx, item in enumerate(cached):
+                    ranks[item['code']] = idx + 1
+                print(f"✓ 读取昨日排名: {date_key}, {len(ranks)} 只")
+                return ranks
+            except Exception as e:
+                print(f"读取昨日排名失败: {e}")
+    print("⚠ 未找到昨日排名缓存")
+    return {}
+
+
 def save_amount_cache(stocks):
     """保存当日成交额到缓存文件"""
     cache_dir = os.path.expanduser('~/stock-analysis-pro/cache/daily_content')
@@ -132,7 +155,7 @@ def format_amount(amount):
         return f"{amount:.2f}"
 
 
-def generate_html(stocks, yesterday_amount, yesterday_top10_codes):
+def generate_html(stocks, yesterday_amount, yesterday_top10_codes, yesterday_ranks):
     """生成HTML，stocks为前50只，只展示前10只。yesterday_top10_codes为昨日top10的代码集合。"""
     rows_html = ""
     display_stocks = stocks[:10]  # 只展示前10
@@ -154,10 +177,24 @@ def generate_html(stocks, yesterday_amount, yesterday_top10_codes):
         is_new = code not in yesterday_top10_codes
         new_badge = '<span class="new-badge">NEW</span>' if is_new else ''
         
+        # 排名变化箭头
+        rank_arrow = ""
+        if code in yesterday_ranks:
+            old_rank = yesterday_ranks[code]
+            diff = old_rank - i  # 正数=上升，负数=下降
+            if diff > 0:
+                rank_arrow = f'<span class="rank-arrow up">↑{diff}</span>'
+            elif diff < 0:
+                rank_arrow = f'<span class="rank-arrow down">↓{abs(diff)}</span>'
+            else:
+                rank_arrow = '<span class="rank-arrow same">-</span>'
+        else:
+            rank_arrow = '<span class="rank-arrow new">NEW</span>'
+        
         rows_html += f'''
         <div class="stock-row">
             <div class="rank">{i}</div>
-            <div class="stock-name">{s['name']}{new_badge}</div>
+            <div class="stock-name">{s['name']}{new_badge}{rank_arrow}</div>
             <div class="stock-price">{s['price']}</div>
             <div class="stock-change" style="color:{change_color}">{s['change_pct']:+.2f}%</div>
             <div class="stock-amount">{amount_str}</div>
@@ -279,6 +316,27 @@ body {{
     color: #b8860b;
     width: 55px;
     flex-shrink: 0;
+    position: relative;
+}}
+.rank-arrow {{
+    display: inline-block;
+    font-size: 24px;
+    font-weight: 700;
+    margin-left: 8px;
+    vertical-align: middle;
+}}
+.rank-arrow.up {{
+    color: #dc143c;
+}}
+.rank-arrow.down {{
+    color: #228b22;
+}}
+.rank-arrow.same {{
+    color: #999;
+}}
+.rank-arrow.new {{
+    color: #d4af37;
+    font-size: 20px;
 }}
 .stock-name {{
     font-size: 36px;
@@ -359,12 +417,15 @@ if __name__ == '__main__':
     # 获取昨日top10代码集合（用于新进标记）
     yesterday_top10_codes = fetch_yesterday_top10_codes()
     
+    # 获取昨日排名（用于排名变化箭头）
+    yesterday_ranks = fetch_yesterday_ranks()
+    
     output_dir = os.path.expanduser('~/stock-analysis-pro/output/daily_content')
     os.makedirs(output_dir, exist_ok=True)
     date_str = datetime.now().strftime("%Y%m%d")
     
     print("生成成交额TOP10...")
-    html = generate_html(stocks, yesterday_amount, yesterday_top10_codes)
+    html = generate_html(stocks, yesterday_amount, yesterday_top10_codes, yesterday_ranks)
     output_file = os.path.join(output_dir, f'stock_amount_top10_{date_str}.html')
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write(html)

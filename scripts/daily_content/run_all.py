@@ -80,11 +80,21 @@ def main():
     if not html_to_png(f'concept_p2_{date_str}'):
         return 1
     
-    # 3. 新进成交额TOP50（1张）
+    # 3. 新进成交额TOP50（1张或多张）
     if not run_script('generate_new_top50.py'):
         return 1
-    if not html_to_png(f'new_top50_{date_str}'):
-        return 1
+    # 单页
+    if os.path.exists(os.path.join(OUTPUT_DIR, f'new_top50_{date_str}.html')):
+        if not html_to_png(f'new_top50_{date_str}'):
+            return 1
+    # 多页
+    for p in range(1, 10):
+        html_name = f'new_top50_p{p}_{date_str}'
+        if os.path.exists(os.path.join(OUTPUT_DIR, f'{html_name}.html')):
+            if not html_to_png(html_name):
+                return 1
+        else:
+            break
     
     # 4. 异常信号捕捉（4张：放量滞涨/缩量新高/放量急拉/连板梯队）
     if not run_script('generate_anomaly.py'):
@@ -103,12 +113,21 @@ def main():
         f'stock_amount_top10_{date_str}.png',
         f'concept_p1_{date_str}.png',
         f'concept_p2_{date_str}.png',
-        f'new_top50_{date_str}.png',
         f'anomaly_p1_{date_str}.png',
         f'anomaly_p2_{date_str}.png',
         f'anomaly_p3_{date_str}.png',
         f'anomaly_p4_{date_str}.png',
     ]
+    # 动态添加new_top50文件（单页或多页）
+    if os.path.exists(os.path.join(OUTPUT_DIR, f'new_top50_{date_str}.png')):
+        files.insert(3, f'new_top50_{date_str}.png')
+    else:
+        for p in range(1, 10):
+            png_name = f'new_top50_p{p}_{date_str}.png'
+            if os.path.exists(os.path.join(OUTPUT_DIR, png_name)):
+                files.insert(2 + p, png_name)
+            else:
+                break
     for name in files:
         png_path = os.path.join(OUTPUT_DIR, name)
         if os.path.exists(png_path):
