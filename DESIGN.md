@@ -561,3 +561,13 @@ HTTP requests (push2.eastmoney.com/api/qt/clist/get)
 - **展示**: HTML仍只展示top10行
 - **文件**: `scripts/daily_content/generate_stock_amount.py`
 - **缓存路径**: `cache/daily_content/stock_amount_cache_YYYYMMDD.json`
+
+#### 概念板块资金意图矩阵（v3.11, 2026-09-24转正）
+- **功能**: 替代旧版概念2图（涨幅榜/净流入榜），5张图从"价格×资金"二维矩阵识别主力意图
+- **数据源**: akshare `stock_fund_flow_concept("即时")` 同花顺全量概念资金流（373个，无采样偏差）
+- **核心指标**: 留存率=净额/总成交（决心，归一化跨板块可比）；能量=总成交/公司家数（活跃度，亿/只）
+- **四区筛选**: bleed失血（净额≤-3亿+成交≥50亿）/ fake对倒（涨幅>0.8%+留存<1.5%+成交≥100亿）/ firm主攻（三共振）/ lurk潜伏（涨幅<0.5%+留存≥4%），空区诚实显示不凑数
+- **宽基桶过滤**: 复用 `generate_concept_html.is_bucket_concept`（融资融券/沪深股通等资金属性桶）
+- **文件**: `scripts/daily_content/generate_matrix.py`（自带Playwright截图+溢出检测）
+- **缓存路径**: `cache/daily_content/matrix_zone_cache_YYYYMMDD.json`（四区各top10名单，次日NEW标记对比）
+- **注意**: 文件名后缀是交易日（15:30前运行=上一交易日），run_all.py清单动态匹配

@@ -105,24 +105,26 @@ Agent 会自动调用本工具并给你解读结果。
 - 🔥 **赚钱效应** — 涨停数、连板高度、热门方向
 - 🎯 **综合研判** — 操作建议(积极看多/谨慎/防守)
 
-### 6. 抖音日更内容（新增 v3.10）
+### 6. 抖音日更内容（v3.11）
 
 **一句话触发：** `生成日更内容` 或 `做今天的抖音图片`
 
-自动生成3张竖屏图片（1080×1920），适合抖音发布：
+自动生成11张竖屏图片（1080×1920），适合抖音发布：
 
-1. **个股成交额TOP10** — 全市场成交额最高的10只股票
-2. **概念板块资金流向** — 涨幅TOP10 + 净流入TOP10
-3. **异常信号捕捉** — 放量滞涨/缩量新高/放量急拉 + 连板梯队
+1. **个股成交额TOP10**（1张）— 全市场成交额最高的10只股票，含排名变化箭头
+2. **概念板块资金意图矩阵**（5张）— 全量概念四象限：p0全景/p1失血榜/p2对倒嫌疑榜/p3主攻方向榜/p4潜伏吸筹榜
+3. **新进成交额TOP50**（1张或多张）— 首次进入成交额前50的股票
+4. **异常信号捕捉**（4张）— 放量滞涨/缩量新高/放量急拉 + 连板梯队
 
 输出文件：
 - `output/daily_content/stock_amount_top10_YYYYMMDD.png`
-- `output/daily_content/concept_YYYYMMDD.png`
-- `output/daily_content/anomaly_YYYYMMDD.png`
+- `output/daily_content/matrix_p0~p4_YYYYMMDD.png`（YYYYMMDD=交易日，15:30前运行为上一交易日）
+- `output/daily_content/new_top50_YYYYMMDD.png`
+- `output/daily_content/anomaly_p1~p4_YYYYMMDD.png`
 
 数据源：
 - 个股成交额：新浪财经（全市场）
-- 概念板块：同花顺概念资金流向
+- 概念板块：akshare同花顺全量概念资金流（`stock_fund_flow_concept("即时")`）
 - 异常信号：腾讯行情（量比）+ akshare（涨停池）
 
 详细文档：[DAILY_CONTENT.md](DAILY_CONTENT.md)
