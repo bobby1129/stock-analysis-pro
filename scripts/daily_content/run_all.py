@@ -72,12 +72,8 @@ def main():
     if not html_to_png(f'stock_amount_top10_{date_str}'):
         return 1
     
-    # 2. 概念板块（2张：涨幅TOP10 + 净流入TOP10）
-    if not run_script('generate_concept_html.py'):
-        return 1
-    if not html_to_png(f'concept_p1_{date_str}'):
-        return 1
-    if not html_to_png(f'concept_p2_{date_str}'):
+    # 2. 概念板块资金意图矩阵（5张: p0全景+p1失血+p2对倒+p3主攻+p4潜伏，脚本自带截图）
+    if not run_script('generate_matrix.py'):
         return 1
     
     # 3. 新进成交额TOP50（1张或多张）
@@ -104,15 +100,18 @@ def main():
             return 1
     
     print("\n" + "="*60)
-    print("✓ 全部完成，共生成8张图")
+    print("✓ 全部完成，共生成11张图")
     print("="*60)
     
     # 列出输出文件
     print(f"\n输出文件 ({OUTPUT_DIR}):")
     files = [
         f'stock_amount_top10_{date_str}.png',
-        f'concept_p1_{date_str}.png',
-        f'concept_p2_{date_str}.png',
+        f'matrix_p0_{date_str}.png',
+        f'matrix_p1_{date_str}.png',
+        f'matrix_p2_{date_str}.png',
+        f'matrix_p3_{date_str}.png',
+        f'matrix_p4_{date_str}.png',
         f'anomaly_p1_{date_str}.png',
         f'anomaly_p2_{date_str}.png',
         f'anomaly_p3_{date_str}.png',
@@ -120,14 +119,27 @@ def main():
     ]
     # 动态添加new_top50文件（单页或多页）
     if os.path.exists(os.path.join(OUTPUT_DIR, f'new_top50_{date_str}.png')):
-        files.insert(3, f'new_top50_{date_str}.png')
+        files.insert(6, f'new_top50_{date_str}.png')
     else:
         for p in range(1, 10):
             png_name = f'new_top50_p{p}_{date_str}.png'
             if os.path.exists(os.path.join(OUTPUT_DIR, png_name)):
-                files.insert(2 + p, png_name)
+                files.insert(5 + p, png_name)
             else:
                 break
+    # matrix文件名带交易日后缀（15:30前运行=上一交易日，与run_all的date_str可能不同），动态补入
+    matrix_files = [f for f in files if f.startswith('matrix_')]
+    if not all(os.path.exists(os.path.join(OUTPUT_DIR, f)) for f in matrix_files):
+        files = [f for f in files if not f.startswith('matrix_')]
+        from datetime import timedelta
+        td = datetime.now()
+        if (td.hour, td.minute) < (15, 30):
+            td -= timedelta(days=1)
+        while td.weekday() >= 5:
+            td -= timedelta(days=1)
+        mdate = td.strftime('%Y%m%d')
+        for i in range(5):
+            files.insert(1 + i, f'matrix_p{i}_{mdate}.png')
     for name in files:
         png_path = os.path.join(OUTPUT_DIR, name)
         if os.path.exists(png_path):

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""概念板块资金意图矩阵 原型v4 - 四区四图终版
-p1「失血强度榜」: 抽血率TOP5 + 象限全景条 (避坑)
+"""概念板块资金意图矩阵（正式版, 2026-09-24转正接入run_all.py）
+p0「资金全景图」: 四象限计数大卡片 + 资金面研判
+p1「失血强度榜」: 抽血率TOP5 (避坑)
 p2「对倒嫌疑榜」: 巨量不留钱TOP5 (避坑)
 p3「主攻方向榜」: 三共振TOP5 (寻宝)
 p4「潜伏吸筹榜」: 钱进价未动TOP5 (寻宝)
@@ -403,16 +404,16 @@ def main():
         print(f'  {z}: 候选{len(zones[z])}个, 显示前{min(len(zones[z]), N_PER_ZONE)}条, 其中NEW {n_new}条')
 
     from playwright.sync_api import sync_playwright
-    pages = [('matrix_p0', gen_p0(df, date_cn, med)),
-             ('matrix_p1', gen_p1(zones, date_cn, med, prev_zones)),
-             ('matrix_p2', gen_p2(zones, date_cn, med, prev_zones)),
-             ('matrix_p3', gen_p3(zones, date_cn, med, prev_zones)),
-             ('matrix_p4', gen_p4(zones, date_cn, med, prev_zones))]
+    pages = [(f'matrix_p0_{date_key}', gen_p0(df, date_cn, med)),
+             (f'matrix_p1_{date_key}', gen_p1(zones, date_cn, med, prev_zones)),
+             (f'matrix_p2_{date_key}', gen_p2(zones, date_cn, med, prev_zones)),
+             (f'matrix_p3_{date_key}', gen_p3(zones, date_cn, med, prev_zones)),
+             (f'matrix_p4_{date_key}', gen_p4(zones, date_cn, med, prev_zones))]
     with sync_playwright() as p:
         browser = p.chromium.launch()
         context = browser.new_context(viewport={'width':1080,'height':1920}, device_scale_factor=2)
         for name, html in pages:
-            hpath = os.path.join(OUT_DIR, f'prototype_{name}.html')
+            hpath = os.path.join(OUT_DIR, f'{name}.html')
             with open(hpath,'w',encoding='utf-8') as f: f.write(html)
             pg = context.new_page()
             pg.goto(f'file://{hpath}')
@@ -427,7 +428,7 @@ def main():
                         scrollH: document.body.scrollHeight};
             }""")
             ok = r['lastBottom'] < r['footerTop'] and r['scrollH'] <= 1920
-            png = os.path.join(OUT_DIR, f'prototype_{name}.png')
+            png = os.path.join(OUT_DIR, f'{name}.png')
             pg.screenshot(path=png, full_page=False)
             pg.close()
             gap = r['footerTop'] - r['lastBottom']
