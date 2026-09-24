@@ -257,7 +257,7 @@ body {{
     font-size: 30px;
     color: #b8860b;
     font-weight: 700;
-    width: 170px;
+    width: 200px;
     flex-shrink: 0;
 }}
 .header-price {{
@@ -320,7 +320,7 @@ body {{
 }}
 .rank-arrow {{
     display: inline-block;
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 700;
     margin-left: 8px;
     vertical-align: middle;
@@ -342,7 +342,7 @@ body {{
     font-size: 36px;
     font-weight: 700;
     color: #1a1a1a;
-    width: 170px;
+    width: 200px;
     flex-shrink: 0;
 }}
 .stock-price {{

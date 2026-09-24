@@ -93,7 +93,20 @@ def format_amount(amount):
 def generate_html(new_stocks, page=1, total_pages=1):
     """生成HTML，展示新进TOP50的股票，支持分页"""
     # 分页逻辑
-    items_per_page = 10 if total_pages > 1 else len(new_stocks)
+    total = len(new_stocks)
+    if total <= 10:
+        # ≤10只：单页大字体
+        items_per_page = total
+        font_size = 'large'
+    elif total <= 15:
+        # 11-15只：单页小字体
+        items_per_page = total
+        font_size = 'small'
+    else:
+        # >15只：分页，每页10只，大字体
+        items_per_page = 10
+        font_size = 'large'
+    
     start_idx = (page - 1) * items_per_page
     end_idx = start_idx + items_per_page
     page_stocks = new_stocks[start_idx:end_idx]
@@ -123,6 +136,29 @@ def generate_html(new_stocks, page=1, total_pages=1):
     date_str = datetime.now().strftime("%Y年%m月%d日")
     count = len(new_stocks)
     page_info = f"第{page}/{total_pages}页" if total_pages > 1 else ""
+    
+    if font_size == 'large':
+        row_padding = '24px 28px'
+        row_margin = '16px'
+        rank_size = '40px'
+        name_size = '36px'
+        price_size = '34px'
+        change_size = '36px'
+        amount_size = '34px'
+        header_size = '30px'
+        header_padding = '20px 28px'
+        header_margin = '18px'
+    else:
+        row_padding = '16px 28px'
+        row_margin = '10px'
+        rank_size = '36px'
+        name_size = '32px'
+        price_size = '30px'
+        change_size = '32px'
+        amount_size = '30px'
+        header_size = '28px'
+        header_padding = '16px 28px'
+        header_margin = '12px'
     
     html = f'''<!DOCTYPE html>
 <html>
@@ -165,42 +201,42 @@ body {{
 .table-header {{
     display: flex;
     align-items: center;
-    padding: 16px 28px;
+    padding: {header_padding};
     background: rgba(212,175,55,0.08);
     border-radius: 14px;
-    margin-bottom: 12px;
+    margin-bottom: {header_margin};
     border: 2px solid #d4af37;
 }}
 .header-rank {{
-    font-size: 28px;
+    font-size: {header_size};
     color: #b8860b;
     font-weight: 700;
     width: 55px;
     flex-shrink: 0;
 }}
 .header-name {{
-    font-size: 28px;
+    font-size: {header_size};
     color: #b8860b;
     font-weight: 700;
     width: 260px;
     flex-shrink: 0;
 }}
 .header-price {{
-    font-size: 28px;
+    font-size: {header_size};
     color: #b8860b;
     font-weight: 700;
     flex: 1;
     text-align: right;
 }}
 .header-change {{
-    font-size: 28px;
+    font-size: {header_size};
     color: #b8860b;
     font-weight: 700;
     flex: 1;
     text-align: right;
 }}
 .header-amount {{
-    font-size: 28px;
+    font-size: {header_size};
     color: #b8860b;
     font-weight: 700;
     flex: 1;
@@ -209,22 +245,22 @@ body {{
 .stock-row {{
     display: flex;
     align-items: center;
-    padding: 16px 28px;
+    padding: {row_padding};
     background: #fff;
     border-radius: 14px;
-    margin-bottom: 10px;
+    margin-bottom: {row_margin};
     border: 1px solid #e8e4d9;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }}
 .rank {{
-    font-size: 36px;
+    font-size: {rank_size};
     font-weight: 800;
     color: #b8860b;
     width: 55px;
     flex-shrink: 0;
 }}
 .stock-name {{
-    font-size: 32px;
+    font-size: {name_size};
     font-weight: 700;
     color: #1a1a1a;
     width: 260px;
@@ -234,19 +270,19 @@ body {{
     text-overflow: ellipsis;
 }}
 .stock-price {{
-    font-size: 30px;
+    font-size: {price_size};
     flex: 1;
     text-align: right;
     font-weight: 500;
 }}
 .stock-change {{
-    font-size: 32px;
+    font-size: {change_size};
     font-weight: 800;
     flex: 1;
     text-align: right;
 }}
 .stock-amount {{
-    font-size: 30px;
+    font-size: {amount_size};
     font-weight: 600;
     flex: 1;
     text-align: right;
@@ -320,7 +356,7 @@ if __name__ == '__main__':
     os.makedirs(output_dir, exist_ok=True)
     date_str = datetime.now().strftime("%Y%m%d")
     
-    # 分页规则：≤15只→1页展示完；>15只→每页10只
+    # 分页规则：≤10只→1页大字体；11-15只→1页小字体；>15只→每页10只大字体
     total = len(new_stocks)
     if total <= 15:
         pages = [1]

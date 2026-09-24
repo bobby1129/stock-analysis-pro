@@ -86,6 +86,10 @@
 - **脚本**: `scripts/daily_content/generate_new_top50.py`
 - **数据源**: 新浪财经（全市场）
 - **逻辑**: 对比昨日TOP50缓存，找出首次进入成交额前50的股票
+- **分页规则**:
+  - ≤10只：单页，大字体（与TOP10一致）
+  - 11-15只：单页，小字体
+  - \>15只：分页，每页10只，大字体
 - **显示列**: 排名、股票、现价、涨幅、成交额
 - **简称映射**: 新浪接口返回全称，通过 `stock_short_names.py` 维护简称映射表
 - **缓存依赖**: `cache/daily_content/stock_amount_cache_YYYYMMDD.json`（与TOP10共用）
