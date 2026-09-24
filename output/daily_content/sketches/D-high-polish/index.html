@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    width: 1080px;
+    height: 1920px;
+    background: linear-gradient(180deg, #1a1612 0%, #0f0d0a 100%);
+    font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    color: #e8e0d0;
+    padding: 160px 56px 120px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* 背景装饰 */
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(ellipse at 20% 10%, rgba(212,168,67,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 90%, rgba(212,168,67,0.05) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+/* Header */
+.header {
+    text-align: center;
+    margin-bottom: 56px;
+    position: relative;
+    z-index: 1;
+}
+.date {
+    font-size: 32px;
+    color: #8a7d6b;
+    font-weight: 500;
+    letter-spacing: 8px;
+    margin-bottom: 20px;
+}
+.title {
+    font-size: 80px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #f0d48a 0%, #d4a843 30%, #f0d48a 50%, #d4a843 70%, #f0d48a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 12px;
+    line-height: 1.1;
+    text-shadow: 0 4px 20px rgba(212,168,67,0.3);
+    filter: drop-shadow(0 2px 10px rgba(212,168,67,0.2));
+}
+.divider {
+    width: 200px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #d4a843, transparent);
+    margin: 28px auto 0;
+    position: relative;
+}
+.divider::before, .divider::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #d4a843;
+    border-radius: 50%;
+    top: -2.5px;
+}
+.divider::before { left: 0; }
+.divider::after { right: 0; }
+
+/* 列头 */
+.table-header {
+    display: flex;
+    align-items: center;
+    padding: 24px 32px;
+    background: rgba(212,168,67,0.06);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(212,168,67,0.2);
+    backdrop-filter: blur(10px);
+    position: relative;
+    z-index: 1;
+}
+.header-rank {
+    font-size: 28px;
+    color: #d4a843;
+    font-weight: 700;
+    width: 60px;
+    flex-shrink: 0;
+    letter-spacing: 2px;
+}
+.header-name {
+    font-size: 28px;
+    color: #d4a843;
+    font-weight: 700;
+    width: 180px;
+    flex-shrink: 0;
+    letter-spacing: 2px;
+}
+.header-price {
+    font-size: 28px;
+    color: #d4a843;
+    font-weight: 700;
+    flex: 1;
+    text-align: right;
+    letter-spacing: 2px;
+}
+.header-change {
+    font-size: 28px;
+    color: #d4a843;
+    font-weight: 700;
+    flex: 1;
+    text-align: right;
+    letter-spacing: 2px;
+}
+.header-amount {
+    font-size: 28px;
+    color: #d4a843;
+    font-weight: 700;
+    flex: 1;
+    text-align: right;
+    letter-spacing: 2px;
+}
+.header-ratio {
+    font-size: 28px;
+    color: #d4a843;
+    font-weight: 700;
+    flex: 1;
+    text-align: right;
+    letter-spacing: 2px;
+}
+
+/* 股票行 */
+.stock-row {
+    display: flex;
+    align-items: center;
+    padding: 26px 32px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 16px;
+    margin-bottom: 14px;
+    border: 1px solid rgba(212,168,67,0.1);
+    backdrop-filter: blur(10px);
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s;
+}
+.stock-row:nth-child(odd) {
+    background: rgba(255,255,255,0.05);
+}
+.stock-row:nth-child(1), .stock-row:nth-child(2), .stock-row:nth-child(3) {
+    background: rgba(212,168,67,0.08);
+    border-color: rgba(212,168,67,0.25);
+    box-shadow: 0 4px 20px rgba(212,168,67,0.1);
+}
+
+.rank {
+    font-size: 44px;
+    font-weight: 700;
+    color: #8a7d6b;
+    width: 60px;
+    flex-shrink: 0;
+    position: relative;
+}
+.stock-row:nth-child(1) .rank,
+.stock-row:nth-child(2) .rank,
+.stock-row:nth-child(3) .rank {
+    background: linear-gradient(135deg, #f0d48a, #d4a843);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 900;
+    font-size: 48px;
+}
+
+.rank-arrow {
+    display: inline-block;
+    font-size: 26px;
+    font-weight: 700;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+.rank-arrow.up { color: #ff6b6b; }
+.rank-arrow.down { color: #4ecdc4; }
+.rank-arrow.same { color: #8a7d6b; }
+.rank-arrow.new { color: #d4a843; font-size: 22px; }
+
+.stock-name {
+    font-size: 36px;
+    font-weight: 700;
+    color: #f0e6d2;
+    width: 180px;
+    flex-shrink: 0;
+}
+.new-badge {
+    display: inline-block;
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f0d0a;
+    background: linear-gradient(135deg, #f0d48a, #d4a843);
+    border-radius: 6px;
+    padding: 3px 8px;
+    margin-left: 10px;
+    vertical-align: middle;
+    letter-spacing: 1px;
+}
+
+.stock-price {
+    font-size: 34px;
+    flex: 1;
+    text-align: right;
+    font-weight: 500;
+    color: #b0a590;
+    font-variant-numeric: tabular-nums;
+}
+
+.stock-change {
+    font-size: 36px;
+    font-weight: 800;
+    flex: 1;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    padding: 6px 16px;
+    border-radius: 8px;
+}
+.stock-change.up {
+    color: #ff6b6b;
+    background: rgba(255,107,107,0.15);
+}
+.stock-change.down {
+    color: #4ecdc4;
+    background: rgba(78,205,196,0.15);
+}
+.stock-change.flat {
+    color: #8a7d6b;
+    background: rgba(138,125,107,0.15);
+}
+
+.stock-amount {
+    font-size: 34px;
+    font-weight: 600;
+    flex: 1;
+    text-align: right;
+    color: #e8e0d0;
+    font-variant-numeric: tabular-nums;
+}
+
+.stock-ratio {
+    font-size: 34px;
+    font-weight: 700;
+    flex: 1;
+    text-align: right;
+    color: #b0a590;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    margin-top: 40px;
+    font-size: 24px;
+    color: #5a5245;
+    letter-spacing: 2px;
+    position: relative;
+    z-index: 1;
+}
+</style>
+</head>
+<body>
+    <div class="header">
+        <div class="date">2026 年 09 月 24 日</div>
+        <div class="title">个股成交额 TOP10</div>
+        <div class="divider"></div>
+    </div>
+    
+    <div class="table-header">
+        <div class="header-rank">排名</div>
+        <div class="header-name">股票</div>
+        <div class="header-price">现价</div>
+        <div class="header-change">涨幅</div>
+        <div class="header-amount">成交额</div>
+        <div class="header-ratio">环比</div>
+    </div>
+    
+    <div class="stock-row">
+        <div class="rank">1<span class="rank-arrow same">-</span></div>
+        <div class="stock-name">中际旭创</div>
+        <div class="stock-price">922.500</div>
+        <div class="stock-change down">-0.56%</div>
+        <div class="stock-amount">136.80亿</div>
+        <div class="stock-ratio">+0.0%</div>
+    </div>
+    
+    <div class="stock-row">
+        <div class="rank">2<span class="rank-arrow same">-</span></div>
+        <div class="stock-name">长鑫科技</div>
+        <div class="stock-price">58.620</div>
+        <div class="stock-change up">+1.31%</div>
+        <div class="stock-amount">121.49亿</div>
+        <div class="stock-ratio">+0.0%</div>
+    </div>
+    
+    <div class="stock-row">
+        <div class="rank">3<span class="rank-arrow same">-</span></div>
+        <div class="stock-name">亨通光电</div>
+        <div class="stock-price">69.940</div>
+        <div class="stock-change down">-4.19%</div>
+        <div class="stock-amount">111.47亿</div>
+        <div class="stock-ratio">+0.0%</div>
+    </div>
+    
+    <div class="stock-row">
+        <div class="rank">4<span class="rank-arrow same">-</span></div>
+        <div class="stock-name">兆易创新</div>
+        <div class="stock-price">398.720</div>
+        <div class="stock-change down">-0.84%</div>
+        <div class="stock-amount">105.22亿</div>
+        <div class="stock-ratio">+0.0%</div>
+    </div>
+    
+    <div class="stock-row">
+        <div class="rank">5<span class="rank-arrow same">-</span></div>
+        <div class="stock-name">新易盛</div>
+        <div class="stock-price">451.200</div>
+        <div class="stock-change down">-0.83%</div>
+        <div class="stock-amount">102.95亿</div>
+        <div class="stock-ratio">+0.0%</div>
+    </div>
+    
+    <div class="stock-row">
+        <div class="rank">6<span class="rank-arrow same">-</span></div>
+        <div class="stock-name">京东方A</div>
+        <div class="stock-price">6.020</div>
+        <div class="stock-change up">+0.33%</div>
+        <div class="stock-amount">96.48亿</div>
+        <div class="stock-ratio">+0.0%</div>
+    </div>
+    
+    <div class="stock-row">
+        <div class="rank">7<span class="rank-arrow same">-</span></div>
+        <div class="stock-name">东山精密</div>
+        <div class="stock-price">193.000</div>
+        <div class="stock-change down">-2.58%</div>
+        <div class="stock-amount">94.40亿</div>
+        <div class="stock-ratio">+0.0%</div>
+    </div>
+    
+    <div class="stock-row">
+        <div class="rank">8<span class="rank-arrow same">-</span></div>
+        <div class="stock-name">澜起科技</div>
+        <div class="stock-price">223.370</div>
+        <div class="stock-change up">+0.69%</div>
+        <div class="stock-amount">79.87亿</div>
+        <div class="stock-ratio">+0.0%</div>
+    </div>
+    
+    <div class="stock-row">
+        <div class="rank">9<span class="rank-arrow same">-</span></div>
+        <div class="stock-name">先导基电</div>
+        <div class="stock-price">47.800</div>
+        <div class="stock-change up">+9.28%</div>
+        <div class="stock-amount">79.56亿</div>
+        <div class="stock-ratio">+0.0%</div>
+    </div>
+    
+    <div class="stock-row">
+        <div class="rank">10<span class="rank-arrow same">-</span></div>
+        <div class="stock-name">沪电股份</div>
+        <div class="stock-price">128.100</div>
+        <div class="stock-change up">+2.37%</div>
+        <div class="stock-amount">79.15亿</div>
+        <div class="stock-ratio">+0.0%</div>
+    </div>
+    
+    <div class="footer">
+        数据来源：新浪财经 | 仅供参考，不构成投资建议
+    </div>
+</body>
+</html>

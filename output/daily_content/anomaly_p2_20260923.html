@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    width: 1080px; height: 1920px;
+    background: linear-gradient(180deg, #faf9f6 0%, #f5f3ee 100%);
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #1a1a1a;
+    padding: 100px 45px 80px;
+    overflow: hidden;
+}
+.header { text-align: center; margin-bottom: 50px; }
+.date { font-size: 40px; color: #666; margin-bottom: 16px; letter-spacing: 4px; }
+.title {
+    font-size: 80px; font-weight: 800;
+    background: linear-gradient(90deg, #d4af37, #b8860b, #d4af37);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: 6px;
+}
+.section {
+    background: #fff; border-radius: 24px;
+    padding: 40px 40px; margin-bottom: 30px;
+    border: 2px solid #d4af37;
+    box-shadow: 0 4px 24px rgba(212,175,55,0.15);
+}
+.section-title {
+    font-size: 48px; color: #b8860b;
+    margin-bottom: 28px; padding-bottom: 18px;
+    border-bottom: 2px solid #d4af37; font-weight: 700;
+}
+.signal-row {
+    display: flex; align-items: center;
+    padding: 22px 26px; background: #faf9f6;
+    border-radius: 12px; margin-bottom: 16px;
+    border: 1px solid #e8e4d9;
+}
+.signal-rank { font-size: 42px; font-weight: 800; color: #b8860b; width: 60px; }
+.signal-name { font-size: 42px; font-weight: 700; color: #1a1a1a; width: 200px; }
+.signal-code { font-size: 34px; color: #888; flex: 1; text-align: center; }
+.signal-change { font-size: 42px; font-weight: 800; flex: 1; text-align: center; }
+.signal-vol { font-size: 36px; color: #d4af37; font-weight: 600; flex: 1; text-align: right; }
+.lb-item {
+    display: flex; align-items: center;
+    padding: 26px 26px; background: #faf9f6;
+    border-radius: 12px; margin-bottom: 16px;
+    border: 1px solid #e8e4d9;
+}
+.lb-level { font-size: 48px; font-weight: 800; color: #b8860b; width: 120px; }
+.lb-count { font-size: 42px; color: #dc143c; font-weight: 700; width: 100px; text-align: center; }
+.lb-names { font-size: 36px; color: #333; flex: 1; }
+.footer { text-align: center; margin-top: 30px; font-size: 28px; color: #999; }
+</style>
+</head>
+<body>
+    <div class="header">
+        <div class="date">2026年09月23日</div>
+        <div class="title">异常信号捕捉</div>
+    </div>
+    <div class="section">
+        <div class="section-title">🚀 缩量新高（量比&lt;0.8 涨幅&gt;5%）</div>
+        
+        <div class="signal-row">
+            <div class="signal-rank">1</div>
+            <div class="signal-name">三峡新材</div>
+            <div class="signal-code">600293</div>
+            <div class="signal-change" style="color:#dc143c">+10.12%</div>
+            <div class="signal-vol">量比0.7</div>
+        </div>
+        
+        <div class="signal-row">
+            <div class="signal-rank">2</div>
+            <div class="signal-name">新华传媒</div>
+            <div class="signal-code">600825</div>
+            <div class="signal-change" style="color:#dc143c">+9.97%</div>
+            <div class="signal-vol">量比0.4</div>
+        </div>
+        
+        <div class="signal-row">
+            <div class="signal-rank">3</div>
+            <div class="signal-name">威尔高</div>
+            <div class="signal-code">301251</div>
+            <div class="signal-change" style="color:#dc143c">+5.58%</div>
+            <div class="signal-vol">量比0.8</div>
+        </div>
+        
+        <div class="signal-row">
+            <div class="signal-rank">4</div>
+            <div class="signal-name">天禄科技</div>
+            <div class="signal-code">301045</div>
+            <div class="signal-change" style="color:#dc143c">+5.23%</div>
+            <div class="signal-vol">量比0.8</div>
+        </div>
+        
+    </div>
+    <div class="footer">数据来源：沪深A股 | 仅供参考，不构成投资建议</div>
+</body>
+</html>

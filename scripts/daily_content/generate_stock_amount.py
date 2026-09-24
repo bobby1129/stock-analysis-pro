@@ -155,7 +155,56 @@ def format_amount(amount):
         return f"{amount:.2f}"
 
 
-def generate_html(stocks, yesterday_amount, yesterday_top10_codes, yesterday_ranks):
+def get_episode_vol():
+    """期号计数器：每个交易日+1（同一天多次运行不变）"""
+    cache_dir = os.path.expanduser('~/stock-analysis-pro/cache/daily_content')
+    os.makedirs(cache_dir, exist_ok=True)
+    counter_file = os.path.join(cache_dir, 'episode_counter.json')
+    today = datetime.now().strftime("%Y%m%d")
+    data = {'last_date': '', 'vol': 0}
+    if os.path.exists(counter_file):
+        try:
+            with open(counter_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception:
+            pass
+    if data.get('last_date') != today:
+        data['vol'] = int(data.get('vol', 0)) + 1
+        data['last_date'] = today
+        with open(counter_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False)
+    return data['vol']
+
+
+def build_verdict(stocks, yesterday_amount, yesterday_top10_codes):
+    """从当日数据自动生成一句研判（每天内容必不同，打破模板指纹）"""
+    display = stocks[:10]
+    top = display[0]
+    top_yi = top['amount'] / 1e8
+    # 龙头环比
+    ratio_txt = ""
+    if top['code'] in yesterday_amount and yesterday_amount[top['code']] > 0:
+        ratio = (top['amount'] - yesterday_amount[top['code']]) / yesterday_amount[top['code']] * 100
+        cls = 'red' if ratio > 0 else 'green'
+        ratio_txt = f"，环比<span class='{cls}'>{ratio:+.0f}%</span>"
+    # 新进家数
+    new_count = sum(1 for s in display if s['code'] not in yesterday_top10_codes)
+    # 红绿家数
+    up = sum(1 for s in display if s['change_pct'] > 0)
+    down = sum(1 for s in display if s['change_pct'] < 0)
+    red_green = f"{up}红{down}绿" if down > 0 else f"{up}红"
+    if up == 0:
+        red_green = f"{down}绿"
+    # 龙头是否易主
+    if yesterday_top10_codes and top['code'] not in yesterday_top10_codes:
+        lead = "龙头易主："
+    else:
+        lead = "今日量王："
+    new_txt = f"，新进{new_count}只" if new_count > 0 else ""
+    return f"{lead}<span class='red'>{top['name']}</span> {top_yi:.0f}亿登顶{ratio_txt}｜TOP10 {red_green}{new_txt}"
+
+
+def generate_html(stocks, yesterday_amount, yesterday_top10_codes, yesterday_ranks, verdict, vol):
     """生成HTML，stocks为前50只，只展示前10只。yesterday_top10_codes为昨日top10的代码集合。"""
     rows_html = ""
     display_stocks = stocks[:10]  # 只展示前10
@@ -216,34 +265,62 @@ body {{
     background: linear-gradient(180deg, #faf9f6 0%, #f5f3ee 100%);
     font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
     color: #1a1a1a;
-    padding: 100px 45px 80px;
+    padding: 56px 45px 60px;
     overflow: hidden;
 }}
 .header {{
     text-align: center;
-    margin-bottom: 45px;
+    margin-bottom: 26px;
+}}
+.kicker {{
+    display: inline-block;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: #b8860b;
+    border: 2px solid #d4af37;
+    border-radius: 10px;
+    padding: 6px 16px;
+    background: rgba(212,175,55,0.08);
+    margin-bottom: 18px;
 }}
 .date {{
-    font-size: 36px;
+    font-size: 32px;
     color: #666;
     margin-bottom: 12px;
     letter-spacing: 4px;
 }}
 .title {{
-    font-size: 72px;
+    font-size: 66px;
     font-weight: 800;
     background: linear-gradient(90deg, #d4af37, #b8860b, #d4af37);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     letter-spacing: 6px;
 }}
+.verdict {{
+    background: #fff;
+    border: 2px solid #d4af37;
+    border-left: 12px solid #b8860b;
+    border-radius: 16px;
+    padding: 22px 26px;
+    font-size: 34px;
+    font-weight: 800;
+    color: #1a1a1a;
+    line-height: 1.5;
+    box-shadow: 0 4px 14px rgba(184,134,11,0.10);
+    word-break: keep-all;
+    margin-bottom: 26px;
+}}
+.verdict .red {{ color: #dc143c; }}
+.verdict .green {{ color: #228b22; }}
 .table-header {{
     display: flex;
     align-items: center;
-    padding: 20px 28px;
+    padding: 16px 28px;
     background: rgba(212,175,55,0.08);
     border-radius: 14px;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
     border: 2px solid #d4af37;
 }}
 .header-rank {{
@@ -291,10 +368,10 @@ body {{
 .stock-row {{
     display: flex;
     align-items: center;
-    padding: 24px 28px;
+    padding: 18px 28px;
     background: #fff;
     border-radius: 14px;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     border: 1px solid #e8e4d9;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }}
@@ -371,17 +448,23 @@ body {{
 }}
 .footer {{
     text-align: center;
-    margin-top: 30px;
+    margin-top: 24px;
     font-size: 26px;
     color: #999;
+    font-weight: 600;
+    letter-spacing: 1px;
 }}
+.footer .brand {{ color: #b8860b; font-weight: 800; }}
 </style>
 </head>
 <body>
     <div class="header">
+        <div class="kicker">盘后情报局 · Vol.{vol}</div>
         <div class="date">{date_str}</div>
         <div class="title">个股成交额 TOP10</div>
     </div>
+    
+    <div class="verdict">💡 {verdict}</div>
     
     <div class="table-header">
         <div class="header-rank">排名</div>
@@ -395,7 +478,7 @@ body {{
     {rows_html}
     
     <div class="footer">
-        数据来源：新浪财经 | 仅供参考，不构成投资建议
+        数据来源：新浪财经 ｜ <span class="brand">盘后情报局</span> 每日16:00 ｜ 仅供参考，不构成投资建议
     </div>
 </body>
 </html>'''
@@ -425,7 +508,9 @@ if __name__ == '__main__':
     date_str = datetime.now().strftime("%Y%m%d")
     
     print("生成成交额TOP10...")
-    html = generate_html(stocks, yesterday_amount, yesterday_top10_codes, yesterday_ranks)
+    verdict = build_verdict(stocks, yesterday_amount, yesterday_top10_codes)
+    vol = get_episode_vol()
+    html = generate_html(stocks, yesterday_amount, yesterday_top10_codes, yesterday_ranks, verdict, vol)
     output_file = os.path.join(output_dir, f'stock_amount_top10_{date_str}.html')
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write(html)

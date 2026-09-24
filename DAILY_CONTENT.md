@@ -8,7 +8,7 @@
 
 **重要**：除非用户明确要求"重做"，否则所有修改都只在现有基础上进行增量改动，不要推翻重来。
 
-## 四张图（共11张PNG）
+## 四张图 + 1视频（共11张PNG + 1个MP4）
 
 ### 1. 个股成交额TOP10（1张）
 - **脚本**: `scripts/daily_content/generate_stock_amount.py`
@@ -37,6 +37,26 @@
 - **NEW标记**: 新进入TOP10的股票显示金色NEW标签 + NEW箭头
 - **注意**: 新浪接口返回全市场数据，可按成交额排序，不受50条限制
 - **状态**: ✅ 已完成
+
+### 1b. 交易额TOP10 龙虎标尺动画视频（1个MP4）
+- **脚本**: `scripts/daily_content/generate_ruler_video.py`
+- **数据源**: 与个股成交额TOP10完全同源（新浪实时 + `stock_amount_cache_YYYYMMDD.json` 昨日对比）
+- **不写缓存**（缓存由 generate_stock_amount.py 负责保存，本脚本只读，run_all.py 中排在其后运行）
+- **形态**: 1080×1920 竖屏动画视频（约18秒，H.264 MP4）
+- **布局**: 中央垂直排名标尺（No.1~No.10等距），左右各5只（奇数名左、偶数名右）
+  - 每支大卡片从侧边飞入中央舞台放大展示6项（名称/现价/涨幅/成交额/环比/箭头）
+  - 落到自己排名的y位置后缩小定格为双行结构：第一行「名称+排名箭头」，第二行「成交额居左、环比居右」
+  - NEW股：金色NEW徽章钉在名称框左上角，行内不再显示箭头
+- **定稿布局参数**（v3.2，勿轻动）: PLOT_TOP=380, PLOT_BOTTOM=1622, ROW_H=260, CARD_W=430,
+  名称/成交额58px、环比40px、箭头44px、刻度No.N 34px；标题只保留「日期+交易额TOP10」；
+  Vol期号在页脚（与图片版共用 episode_counter.json，每交易日+1）
+- **超宽保护**: 名称或数据行超过框宽时JS自动逐档缩小字号（58→34px），边框不动
+- **转码**: 系统ffmpeg无libx264，使用 `scripts/daily_content/ffmpeg_static`（imageio-ffmpeg静态版，51MB已gitignore不入库）。
+  重装方法：`uv venv /tmp/ffv && uv pip install --python /tmp/ffv/bin/python --index-url https://mirrors.aliyun.com/pypi/simple/ imageio-ffmpeg`，
+  然后复制 `/tmp/ffv/lib/python3.11/site-packages/imageio_ffmpeg/binaries/ffmpeg-linux-aarch64-v7.0.2` 到 `scripts/daily_content/ffmpeg_static` 并 chmod +x。
+  Playwright录屏webm(vp8) → libx264 mp4（crf 20）。Playwright自带ffmpeg仅vp8编码，不能用。
+- **测试**: `--cache-date YYYYMMDD` 可强制指定对比缓存日期（演示/回测用）
+- **状态**: ✅ 已完成（2026-09-25 接入 run_all.py 步骤1b）
 
 ### 2. 概念板块资金意图矩阵（5张）
 
@@ -112,6 +132,8 @@
 - **状态**: ✅ 已完成
 
 ## 运行方式
+
+> **交易日检查（2026-09-25新增）**：`run_all.py` 入口先判断是否交易日——周末直接跳过；工作日对比上证指数行情日期（新浪 `hq.sinajs.cn/list=sh000001` 第30字段）与今天，不一致=节假日休市，跳过生成（退出码0）。行情接口异常时保守放行。避免节假日用旧数据生成内容。
 
 ```bash
 cd ~/stock-analysis-pro

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    width: 1080px;
+    height: 1920px;
+    background: linear-gradient(180deg, #1a1612 0%, #0f0d0a 100%);
+    font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    color: #e8e0d0;
+    padding: 160px 56px 120px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.header {
+    text-align: center;
+    margin-bottom: 44px;
+}
+.date {
+    font-size: 28px;
+    color: #8a7d6b;
+    font-weight: 500;
+    letter-spacing: 6px;
+    margin-bottom: 16px;
+}
+.title {
+    font-size: 68px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #f0d48a 0%, #d4a843 40%, #f0d48a 60%, #b8942e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 8px;
+    line-height: 1.2;
+}
+.divider {
+    width: 120px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #d4a843, transparent);
+    margin: 20px auto 0;
+}
+.subtitle {
+    font-size: 24px;
+    color: #8a7d6b;
+    margin-top: 12px;
+    font-weight: 400;
+    letter-spacing: 2px;
+}
+
+/* Column header */
+.col-header {
+    display: grid;
+    grid-template-columns: 50px 140px 1fr 110px 110px;
+    gap: 10px;
+    padding: 16px 28px;
+    font-size: 22px;
+    font-weight: 600;
+    color: #8a7d6b;
+    letter-spacing: 2px;
+    border-bottom: 1px solid rgba(212,168,67,0.2);
+    margin-bottom: 10px;
+}
+.col-header .right { text-align: right; }
+
+/* Stock rows */
+.stock-row {
+    display: grid;
+    grid-template-columns: 50px 140px 1fr 110px 110px;
+    gap: 10px;
+    align-items: center;
+    padding: 20px 28px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(212,168,67,0.08);
+}
+.stock-row:nth-child(odd) {
+    background: rgba(255,255,255,0.05);
+}
+
+.rank {
+    font-size: 32px;
+    font-weight: 700;
+    color: #8a7d6b;
+}
+.stock-row:nth-child(1) .rank {
+    background: linear-gradient(135deg, #f0d48a, #d4a843);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 900;
+}
+.stock-row:nth-child(2) .rank {
+    background: linear-gradient(135deg, #f0d48a, #d4a843);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 900;
+}
+.stock-row:nth-child(3) .rank {
+    background: linear-gradient(135deg, #f0d48a, #d4a843);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 900;
+}
+
+.name {
+    font-size: 32px;
+    font-weight: 700;
+    color: #f0e6d2;
+    white-space: nowrap;
+}
+
+/* Amount bar */
+.amount-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.amount-bar-bg {
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    overflow: hidden;
+}
+.amount-bar {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #d4a843, #f0d48a);
+}
+.amount-text {
+    font-size: 26px;
+    font-weight: 600;
+    color: #e8e0d0;
+    font-variant-numeric: tabular-nums;
+}
+
+.price {
+    font-size: 26px;
+    font-weight: 500;
+    text-align: right;
+    color: #b0a590;
+    font-variant-numeric: tabular-nums;
+}
+
+.change {
+    font-size: 26px;
+    font-weight: 700;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    padding: 5px 12px;
+    border-radius: 6px;
+}
+.change.up {
+    color: #ff6b6b;
+    background: rgba(255,107,107,0.12);
+}
+.change.down {
+    color: #4ecdc4;
+    background: rgba(78,205,196,0.12);
+}
+.change.flat {
+    color: #8a7d6b;
+    background: rgba(138,125,107,0.12);
+}
+
+/* Footer */
+.footer {
+    margin-top: auto;
+    padding-top: 28px;
+    text-align: center;
+    font-size: 22px;
+    color: #5a5245;
+    border-top: 1px solid rgba(212,168,67,0.15);
+    letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+    <div class="header">
+        <div class="date">2026 · 09 · 24</div>
+        <div class="title">个股成交额<br>TOP 10</div>
+        <div class="divider"></div>
+        <div class="subtitle">全市场最活跃个股 · 单位：亿元</div>
+    </div>
+
+    <div class="col-header">
+        <div>#</div>
+        <div>股票</div>
+        <div>成交额</div>
+        <div class="right">现价</div>
+        <div class="right">涨幅</div>
+    </div>
+
+    <div class="stock-row">
+        <div class="rank">1</div>
+        <div class="name">中际旭创</div>
+        <div class="amount-cell">
+            <div class="amount-bar-bg"><div class="amount-bar" style="width:100%"></div></div>
+            <div class="amount-text">136.80</div>
+        </div>
+        <div class="price">922.50</div>
+        <div class="change down">-0.56%</div>
+    </div>
+
+    <div class="stock-row">
+        <div class="rank">2</div>
+        <div class="name">长鑫科技</div>
+        <div class="amount-cell">
+            <div class="amount-bar-bg"><div class="amount-bar" style="width:88.8%"></div></div>
+            <div class="amount-text">121.49</div>
+        </div>
+        <div class="price">58.62</div>
+        <div class="change up">+1.31%</div>
+    </div>
+
+    <div class="stock-row">
+        <div class="rank">3</div>
+        <div class="name">亨通光电</div>
+        <div class="amount-cell">
+            <div class="amount-bar-bg"><div class="amount-bar" style="width:81.5%"></div></div>
+            <div class="amount-text">111.47</div>
+        </div>
+        <div class="price">69.94</div>
+        <div class="change down">-4.19%</div>
+    </div>
+
+    <div class="stock-row">
+        <div class="rank">4</div>
+        <div class="name">兆易创新</div>
+        <div class="amount-cell">
+            <div class="amount-bar-bg"><div class="amount-bar" style="width:76.9%"></div></div>
+            <div class="amount-text">105.22</div>
+        </div>
+        <div class="price">398.72</div>
+        <div class="change down">-0.84%</div>
+    </div>
+
+    <div class="stock-row">
+        <div class="rank">5</div>
+        <div class="name">新易盛</div>
+        <div class="amount-cell">
+            <div class="amount-bar-bg"><div class="amount-bar" style="width:75.3%"></div></div>
+            <div class="amount-text">102.95</div>
+        </div>
+        <div class="price">451.20</div>
+        <div class="change down">-0.83%</div>
+    </div>
+
+    <div class="stock-row">
+        <div class="rank">6</div>
+        <div class="name">京东方A</div>
+        <div class="amount-cell">
+            <div class="amount-bar-bg"><div class="amount-bar" style="width:70.5%"></div></div>
+            <div class="amount-text">96.48</div>
+        </div>
+        <div class="price">6.02</div>
+        <div class="change up">+0.33%</div>
+    </div>
+
+    <div class="stock-row">
+        <div class="rank">7</div>
+        <div class="name">东山精密</div>
+        <div class="amount-cell">
+            <div class="amount-bar-bg"><div class="amount-bar" style="width:69.0%"></div></div>
+            <div class="amount-text">94.40</div>
+        </div>
+        <div class="price">193.00</div>
+        <div class="change down">-2.58%</div>
+    </div>
+
+    <div class="stock-row">
+        <div class="rank">8</div>
+        <div class="name">澜起科技</div>
+        <div class="amount-cell">
+            <div class="amount-bar-bg"><div class="amount-bar" style="width:58.4%"></div></div>
+            <div class="amount-text">79.87</div>
+        </div>
+        <div class="price">223.37</div>
+        <div class="change up">+0.69%</div>
+    </div>
+
+    <div class="stock-row">
+        <div class="rank">9</div>
+        <div class="name">先导基电</div>
+        <div class="amount-cell">
+            <div class="amount-bar-bg"><div class="amount-bar" style="width:58.2%"></div></div>
+            <div class="amount-text">79.56</div>
+        </div>
+        <div class="price">47.80</div>
+        <div class="change up">+9.28%</div>
+    </div>
+
+    <div class="stock-row">
+        <div class="rank">10</div>
+        <div class="name">沪电股份</div>
+        <div class="amount-cell">
+            <div class="amount-bar-bg"><div class="amount-bar" style="width:57.9%"></div></div>
+            <div class="amount-text">79.15</div>
+        </div>
+        <div class="price">128.10</div>
+        <div class="change up">+2.37%</div>
+    </div>
+
+    <div class="footer">
+        数据来源：新浪财经 · 仅供参考，不构成投资建议
+    </div>
+</body>
+</html>

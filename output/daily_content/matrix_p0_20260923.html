@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { width:1080px; height:1920px; overflow:hidden;
+  background:linear-gradient(160deg,#faf9f6 0%,#f5f3ee 55%,#f0ece2 100%);
+  font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif; position:relative; }
+.header { padding:62px 46px 0; }
+.kicker { display:inline-block; font-size:28px; font-weight:800; letter-spacing:3px; color:#b8860b;
+  border:2px solid #d4af37; border-radius:10px; padding:6px 16px; background:rgba(212,175,55,0.08); }
+.title { font-size:86px; font-weight:900; color:#1a1a1a; margin-top:20px; letter-spacing:2px; }
+.title .gold { color:#b8860b; } .title .red { color:#c0141c; } .title .green { color:#1d7a2f; }
+.sub { font-size:32px; color:#888; margin-top:12px; font-weight:600; }
+.verdict { margin:30px 46px 0; background:#fff; border:2px solid #d4af37; border-left:12px solid #b8860b;
+  border-radius:16px; padding:24px 30px; font-size:38px; font-weight:800; color:#1a1a1a;
+  line-height:1.5; box-shadow:0 4px 14px rgba(184,134,11,0.10); word-break:keep-all; }
+.verdict .red { color:#dc143c; } .verdict .green { color:#228b22; }
+.vsub { display:block; font-size:28px; font-weight:700; color:#888; margin-top:8px; }
+.section { margin:28px 46px 0; background:#fff; border:2px solid #d4af37; border-radius:22px;
+  padding:30px 28px 22px; box-shadow:0 4px 18px rgba(212,175,55,0.12); }
+.sec-title { font-size:48px; font-weight:900; color:#1a1a1a; margin-bottom:6px; letter-spacing:1px; }
+.sec-title .tag { font-size:27px; font-weight:700; color:#fff; border-radius:8px; padding:5px 14px;
+  margin-left:12px; vertical-align:middle; letter-spacing:2px; }
+.tag.warn { background:linear-gradient(90deg,#c0392b,#922b21); }
+.tag.gold { background:linear-gradient(90deg,#d4af37,#b8860b); }
+.tag.green { background:linear-gradient(90deg,#27ae60,#1d7a2f); }
+.sec-note { font-size:28px; color:#999; margin-bottom:18px; font-weight:600; line-height:1.4; }
+.footer { position:absolute; bottom:34px; left:0; right:0; text-align:center;
+  font-size:26px; color:#999; font-weight:600; letter-spacing:1px; }
+.footer .brand { color:#b8860b; font-weight:800; }
+.lempty { font-size:34px; color:#aaa; padding:40px 4px; font-weight:600; text-align:center; }
+.erow { display:flex; align-items:center; padding:28px 6px 24px; border-bottom:1px solid #f0ead9; }
+.erow:last-child { border-bottom:none; }
+.erank { width:64px; font-size:52px; font-weight:900; color:#d4af37; text-align:center; }
+.emain { flex:1; min-width:0; padding-right:14px; }
+.eline { display:flex; align-items:baseline; gap:14px; }
+.ename { font-size:50px; font-weight:800; color:#1a1a1a; }
+.ebadge { font-size:24px; font-weight:800; border-radius:6px; padding:3px 11px; white-space:nowrap; }
+.badge-fire { color:#fff; background:linear-gradient(90deg,#e67e22,#c0392b); }
+.badge-calm { color:#7a5c00; background:#f4e9c8; border:1px solid #e0cd90; }
+.badge-dv { color:#fff; background:#c0392b; }
+.badge-new { color:#fff; background:linear-gradient(90deg,#d4af37,#b8860b); }
+.echg { font-size:34px; font-weight:700; margin-left:auto; white-space:nowrap; }
+.etrack { height:16px; background:#f4efe2; border-radius:8px; margin:14px 0 11px; overflow:hidden; }
+.ebar { height:100%; border-radius:7px; }
+.emeta { font-size:28px; color:#999; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.eval { width:210px; text-align:right; font-size:60px; font-weight:900; letter-spacing:-1px; }
+.eval .unit { font-size:30px; font-weight:700; margin-left:2px; }
+.quad { margin:24px 46px 0; display:flex; gap:14px; }
+.qbox { flex:1; background:#fff; border:2px solid #e0d9c8; border-radius:16px; padding:16px 8px; text-align:center; }
+.qbox .qn { font-size:54px; font-weight:900; }
+.qbox .ql { font-size:25px; color:#666; font-weight:700; margin-top:4px; }
+.qbox.h .qn { color:#dc143c; } .qbox.w .qn { color:#b8860b; }
+.qbox.l .qn { color:#228b22; } .qbox.b .qn { color:#666; }
+
+.qgrid { margin:36px 46px 0; display:grid; grid-template-columns:1fr 1fr; gap:26px; }
+.qcard { background:#fff; border:3px solid #e0d9c8; border-radius:24px; padding:36px 34px 30px;
+  box-shadow:0 4px 18px rgba(0,0,0,0.05); }
+.qcard.h { border-color:#f0b8bc; background:linear-gradient(165deg,#fff 60%,#fdf1f2); }
+.qcard.w { border-color:#ecd9a0; background:linear-gradient(165deg,#fff 60%,#fdf8ea); }
+.qcard.l { border-color:#b8dfc2; background:linear-gradient(165deg,#fff 60%,#f0f9f2); }
+.qcard.b { border-color:#d8d4cc; background:linear-gradient(165deg,#fff 60%,#f6f5f2); }
+.qhead { display:flex; align-items:center; gap:14px; }
+.qicon { font-size:44px; }
+.qnum { font-size:88px; font-weight:900; line-height:1; letter-spacing:-2px; }
+.qcard.h .qnum { color:#dc143c; } .qcard.w .qnum { color:#b8860b; }
+.qcard.l .qnum { color:#1d7a2f; } .qcard.b .qnum { color:#888; }
+.qlabel { font-size:40px; font-weight:900; color:#1a1a1a; margin-top:14px; letter-spacing:2px; }
+.qsub { font-size:26px; color:#999; font-weight:600; margin-top:6px; }
+.qfoot { font-size:27px; font-weight:800; color:#555; margin-top:18px; padding-top:16px;
+  border-top:1px dashed #e0d9c8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+</style></head>
+<body>
+  <div class="header">
+    <span class="kicker">盘后情报局 · 资金意图矩阵 0/4</span>
+    <div class="title">资金<span class="gold">全景图</span></div>
+    <div class="sub">2026年09月23日 收盘 ｜ 357个活跃板块（成交&gt;20亿）按 价格×资金 分四象限</div>
+  </div>
+  <div class="verdict">💡 资金面恶劣：238/357 板块价跌钱出，普跌行情，轻仓观望</div>
+  <div class="qgrid"><div class="qcard h">
+      <div class="qhead"><span class="qicon">📈</span><span class="qnum">25</span></div>
+      <div class="qlabel">健康上涨</div>
+      <div class="qsub">价涨 + 资金流入</div>
+      <div class="qfoot">之最：先进封装 +47.7亿</div>
+    </div><div class="qcard w">
+      <div class="qhead"><span class="qicon">⚠️</span><span class="qnum">23</span></div>
+      <div class="qlabel">涨但流出</div>
+      <div class="qsub">价涨 + 资金撤离（背离）</div>
+      <div class="qfoot">之最：汽车电子 53.0亿</div>
+    </div><div class="qcard l">
+      <div class="qhead"><span class="qicon">🕵️</span><span class="qnum">1</span></div>
+      <div class="qlabel">跌却流入</div>
+      <div class="qsub">价跌 + 资金逆势进场</div>
+      <div class="qfoot">之最：土壤修复 +1.6亿</div>
+    </div><div class="qcard b">
+      <div class="qhead"><span class="qicon">📉</span><span class="qnum">238</span></div>
+      <div class="qlabel">跌且流出</div>
+      <div class="qsub">价跌 + 资金撤离（回避）</div>
+      <div class="qfoot">之最：人工智能 233.1亿</div>
+    </div></div>
+  <div class="footer">象限判据：涨跌幅±0.3% × 净额正负 ｜ 全口径（含散户）｜ <span class="brand">盘后情报局</span> 每日16:00</div>
+</body></html>

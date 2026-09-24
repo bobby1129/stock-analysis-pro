@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    width: 1080px;
+    height: 1920px;
+    background: linear-gradient(180deg, #faf9f6 0%, #f5f3ee 100%);
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #1a1a1a;
+    padding: 100px 45px 80px;
+    overflow: hidden;
+}
+.header { text-align: center; margin-bottom: 40px; }
+.date { font-size: 36px; color: #666; margin-bottom: 12px; letter-spacing: 4px; }
+.title {
+    font-size: 72px; font-weight: 800;
+    background: linear-gradient(90deg, #d4af37, #b8860b, #d4af37);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: 6px;
+}
+.section {
+    background: #fff; border-radius: 20px;
+    padding: 30px 35px; margin-bottom: 28px;
+    border: 2px solid #d4af37;
+    box-shadow: 0 4px 24px rgba(212,175,55,0.15);
+}
+.section-title {
+    font-size: 38px; color: #b8860b;
+    margin-bottom: 20px; padding-bottom: 14px;
+    border-bottom: 2px solid #d4af37; font-weight: 700;
+}
+.concept-header {
+    display: flex; align-items: center;
+    padding: 16px 22px; background: rgba(212,175,55,0.08);
+    border-radius: 10px; margin-bottom: 12px;
+    border: 1px solid #e8e4d9;
+}
+.concept-header .rank,
+.concept-header .concept-name,
+.concept-header .concept-change,
+.concept-header .concept-leader {
+    font-size: 28px; color: #b8860b; font-weight: 600;
+}
+.concept-row {
+    display: flex; align-items: center;
+    padding: 16px 22px; background: #faf9f6;
+    border-radius: 10px; margin-bottom: 12px;
+    border: 1px solid #e8e4d9;
+}
+.rank { font-size: 36px; font-weight: 800; color: #b8860b; width: 50px; }
+.concept-name { font-size: 34px; font-weight: 600; color: #1a1a1a; flex: 1; }
+.concept-change { font-size: 36px; font-weight: 800; width: 130px; text-align: right; }
+.concept-leader { font-size: 28px; color: #666; width: 240px; text-align: right; }
+.new-badge {
+    display: inline-block;
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(90deg, #d4af37, #b8860b);
+    border-radius: 6px;
+    padding: 3px 8px;
+    margin-left: 10px;
+    vertical-align: middle;
+    letter-spacing: 1px;
+}
+.footer { text-align: center; margin-top: 24px; font-size: 26px; color: #999; }
+</style>
+</head>
+<body>
+    <div class="header">
+        <div class="date">2026年09月23日</div>
+        <div class="title">概念板块表现</div>
+    </div>
+    <div class="section">
+        <div class="section-title">📈 今日涨幅排行</div>
+        <div class="concept-header">
+            <div class="rank">排名</div>
+            <div class="concept-name">概念名称</div>
+            <div class="concept-change">涨跌幅</div>
+            <div class="concept-leader">领涨股</div>
+        </div>
+        
+        <div class="concept-row">
+            <div class="rank">1</div>
+            <div class="concept-name">PET铜箔<span class="new-badge">NEW</span></div>
+            <div class="concept-change" style="color:#dc143c">+2.46%</div>
+            <div class="concept-leader">中一科技 +20.0%</div>
+        </div>
+        
+        <div class="concept-row">
+            <div class="rank">2</div>
+            <div class="concept-name">玻璃基板<span class="new-badge">NEW</span></div>
+            <div class="concept-change" style="color:#dc143c">+2.16%</div>
+            <div class="concept-leader">三峡新材 +10.1%</div>
+        </div>
+        
+        <div class="concept-row">
+            <div class="rank">3</div>
+            <div class="concept-name">培育钻石<span class="new-badge">NEW</span></div>
+            <div class="concept-change" style="color:#dc143c">+1.52%</div>
+            <div class="concept-leader">沃尔德 +4.8%</div>
+        </div>
+        
+        <div class="concept-row">
+            <div class="rank">4</div>
+            <div class="concept-name">先进封装<span class="new-badge">NEW</span></div>
+            <div class="concept-change" style="color:#dc143c">+1.43%</div>
+            <div class="concept-leader">康强电子 +10.0%</div>
+        </div>
+        
+        <div class="concept-row">
+            <div class="rank">5</div>
+            <div class="concept-name">PCB概念<span class="new-badge">NEW</span></div>
+            <div class="concept-change" style="color:#dc143c">+1.40%</div>
+            <div class="concept-leader">中一科技 +20.0%</div>
+        </div>
+        
+        <div class="concept-row">
+            <div class="rank">6</div>
+            <div class="concept-name">MLCC概念<span class="new-badge">NEW</span></div>
+            <div class="concept-change" style="color:#dc143c">+1.40%</div>
+            <div class="concept-leader">雅创电子 +9.4%</div>
+        </div>
+        
+        <div class="concept-row">
+            <div class="rank">7</div>
+            <div class="concept-name">科创次新股<span class="new-badge">NEW</span></div>
+            <div class="concept-change" style="color:#dc143c">+1.27%</div>
+            <div class="concept-leader">泰金新能 +12.0%</div>
+        </div>
+        
+        <div class="concept-row">
+            <div class="rank">8</div>
+            <div class="concept-name">有机硅概念<span class="new-badge">NEW</span></div>
+            <div class="concept-change" style="color:#dc143c">+1.25%</div>
+            <div class="concept-leader">锦华新材 +14.8%</div>
+        </div>
+        
+        <div class="concept-row">
+            <div class="rank">9</div>
+            <div class="concept-name">国家大基金持股<span class="new-badge">NEW</span></div>
+            <div class="concept-change" style="color:#dc143c">+1.19%</div>
+            <div class="concept-leader">慧智微 +20.0%</div>
+        </div>
+        
+        <div class="concept-row">
+            <div class="rank">10</div>
+            <div class="concept-name">光刻胶<span class="new-badge">NEW</span></div>
+            <div class="concept-change" style="color:#dc143c">+1.15%</div>
+            <div class="concept-leader">莱伯泰科 +20.0%</div>
+        </div>
+        
+    </div>
+    <div class="footer">数据来源：同花顺概念板块 | 仅供参考，不构成投资建议</div>
+</body>
+</html>

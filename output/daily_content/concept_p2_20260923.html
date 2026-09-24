@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    width: 1080px;
+    height: 1920px;
+    background: linear-gradient(180deg, #faf9f6 0%, #f5f3ee 100%);
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #1a1a1a;
+    padding: 100px 45px 80px;
+    overflow: hidden;
+}
+.header { text-align: center; margin-bottom: 40px; }
+.date { font-size: 36px; color: #666; margin-bottom: 12px; letter-spacing: 4px; }
+.title {
+    font-size: 72px; font-weight: 800;
+    background: linear-gradient(90deg, #d4af37, #b8860b, #d4af37);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: 6px;
+}
+.section {
+    background: #fff; border-radius: 20px;
+    padding: 30px 35px; margin-bottom: 28px;
+    border: 2px solid #d4af37;
+    box-shadow: 0 4px 24px rgba(212,175,55,0.15);
+}
+.section-title {
+    font-size: 38px; color: #b8860b;
+    margin-bottom: 20px; padding-bottom: 14px;
+    border-bottom: 2px solid #d4af37; font-weight: 700;
+}
+.flow-header {
+    display: flex; align-items: center;
+    padding: 16px 22px; background: rgba(212,175,55,0.08);
+    border-radius: 10px; margin-bottom: 12px;
+    border: 1px solid #e8e4d9;
+}
+.flow-header .flow-rank,
+.flow-header .flow-name,
+.flow-header .flow-change,
+.flow-header .flow-value {
+    font-size: 28px; color: #b8860b; font-weight: 600;
+}
+.flow-row {
+    display: flex; align-items: center;
+    padding: 16px 22px; background: #faf9f6;
+    border-radius: 10px; margin-bottom: 12px;
+    border: 1px solid #e8e4d9;
+}
+.flow-rank { font-size: 36px; font-weight: 800; color: #b8860b; width: 50px; }
+.flow-name { font-size: 34px; font-weight: 600; color: #1a1a1a; flex: 1; }
+.flow-change { font-size: 34px; font-weight: 700; width: 130px; text-align: right; }
+.flow-value { font-size: 36px; font-weight: 800; width: 150px; text-align: right; }
+.new-badge {
+    display: inline-block;
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(90deg, #d4af37, #b8860b);
+    border-radius: 6px;
+    padding: 3px 8px;
+    margin-left: 10px;
+    vertical-align: middle;
+    letter-spacing: 1px;
+}
+.footer { text-align: center; margin-top: 24px; font-size: 26px; color: #999; }
+</style>
+</head>
+<body>
+    <div class="header">
+        <div class="date">2026年09月23日</div>
+        <div class="title">概念板块表现</div>
+    </div>
+    <div class="section">
+        <div class="section-title">💰 净流入排行（亿元）</div>
+        <div class="flow-header">
+            <div class="flow-rank">排名</div>
+            <div class="flow-name">概念名称</div>
+            <div class="flow-change">涨跌幅</div>
+            <div class="flow-value">净流入</div>
+        </div>
+        
+        <div class="flow-row">
+            <div class="flow-rank">1</div>
+            <div class="flow-name">先进封装<span class="new-badge">NEW</span></div>
+            <div class="flow-change" style="color:#dc143c">+1.43%</div>
+            <div class="flow-value" style="color:#dc143c">47.7亿</div>
+        </div>
+        
+        <div class="flow-row">
+            <div class="flow-rank">2</div>
+            <div class="flow-name">专精特新<span class="new-badge">NEW</span></div>
+            <div class="flow-change" style="color:#dc143c">+0.51%</div>
+            <div class="flow-value" style="color:#dc143c">40.7亿</div>
+        </div>
+        
+        <div class="flow-row">
+            <div class="flow-rank">3</div>
+            <div class="flow-name">第三代半导体<span class="new-badge">NEW</span></div>
+            <div class="flow-change" style="color:#dc143c">+1.06%</div>
+            <div class="flow-value" style="color:#dc143c">24.6亿</div>
+        </div>
+        
+        <div class="flow-row">
+            <div class="flow-rank">4</div>
+            <div class="flow-name">PCB概念<span class="new-badge">NEW</span></div>
+            <div class="flow-change" style="color:#dc143c">+1.40%</div>
+            <div class="flow-value" style="color:#dc143c">22.4亿</div>
+        </div>
+        
+        <div class="flow-row">
+            <div class="flow-rank">5</div>
+            <div class="flow-name">MLCC概念<span class="new-badge">NEW</span></div>
+            <div class="flow-change" style="color:#dc143c">+1.40%</div>
+            <div class="flow-value" style="color:#dc143c">18.8亿</div>
+        </div>
+        
+        <div class="flow-row">
+            <div class="flow-rank">6</div>
+            <div class="flow-name">国家大基金持股<span class="new-badge">NEW</span></div>
+            <div class="flow-change" style="color:#dc143c">+1.19%</div>
+            <div class="flow-value" style="color:#dc143c">16.7亿</div>
+        </div>
+        
+        <div class="flow-row">
+            <div class="flow-rank">7</div>
+            <div class="flow-name">OLED<span class="new-badge">NEW</span></div>
+            <div class="flow-change" style="color:#dc143c">+0.71%</div>
+            <div class="flow-value" style="color:#dc143c">15.3亿</div>
+        </div>
+        
+        <div class="flow-row">
+            <div class="flow-rank">8</div>
+            <div class="flow-name">存储芯片<span class="new-badge">NEW</span></div>
+            <div class="flow-change" style="color:#dc143c">+1.08%</div>
+            <div class="flow-value" style="color:#dc143c">14.5亿</div>
+        </div>
+        
+        <div class="flow-row">
+            <div class="flow-rank">9</div>
+            <div class="flow-name">光刻胶<span class="new-badge">NEW</span></div>
+            <div class="flow-change" style="color:#dc143c">+1.15%</div>
+            <div class="flow-value" style="color:#dc143c">13.1亿</div>
+        </div>
+        
+        <div class="flow-row">
+            <div class="flow-rank">10</div>
+            <div class="flow-name">PET铜箔<span class="new-badge">NEW</span></div>
+            <div class="flow-change" style="color:#dc143c">+2.46%</div>
+            <div class="flow-value" style="color:#dc143c">12.9亿</div>
+        </div>
+        
+    </div>
+    <div class="footer">数据来源：同花顺概念板块 | 仅供参考，不构成投资建议</div>
+</body>
+</html>

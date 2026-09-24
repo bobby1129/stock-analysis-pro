@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    width: 1080px;
+    height: 1920px;
+    background: linear-gradient(180deg, #faf9f6 0%, #f5f3ee 100%);
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #1a1a1a;
+    padding: 100px 45px 80px;
+    overflow: hidden;
+}
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.date {
+    font-size: 32px;
+    color: #666;
+    margin-bottom: 8px;
+    letter-spacing: 4px;
+}
+.title {
+    font-size: 60px;
+    font-weight: 800;
+    background: linear-gradient(90deg, #d4af37, #b8860b, #d4af37);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 6px;
+}
+.subtitle {
+    font-size: 28px;
+    color: #888;
+    margin-top: 8px;
+}
+.table-header {
+    display: flex;
+    align-items: center;
+    padding: 16px 28px;
+    background: rgba(212,175,55,0.08);
+    border-radius: 14px;
+    margin-bottom: 12px;
+    border: 2px solid #d4af37;
+}
+.header-rank {
+    font-size: 28px;
+    color: #b8860b;
+    font-weight: 700;
+    width: 55px;
+    flex-shrink: 0;
+}
+.header-name {
+    font-size: 28px;
+    color: #b8860b;
+    font-weight: 700;
+    width: 260px;
+    flex-shrink: 0;
+}
+.header-price {
+    font-size: 28px;
+    color: #b8860b;
+    font-weight: 700;
+    flex: 1;
+    text-align: right;
+}
+.header-change {
+    font-size: 28px;
+    color: #b8860b;
+    font-weight: 700;
+    flex: 1;
+    text-align: right;
+}
+.header-amount {
+    font-size: 28px;
+    color: #b8860b;
+    font-weight: 700;
+    flex: 1;
+    text-align: right;
+}
+.stock-row {
+    display: flex;
+    align-items: center;
+    padding: 16px 28px;
+    background: #fff;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    border: 1px solid #e8e4d9;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.rank {
+    font-size: 36px;
+    font-weight: 800;
+    color: #b8860b;
+    width: 55px;
+    flex-shrink: 0;
+}
+.stock-name {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a1a1a;
+    width: 260px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.stock-price {
+    font-size: 30px;
+    flex: 1;
+    text-align: right;
+    font-weight: 500;
+}
+.stock-change {
+    font-size: 32px;
+    font-weight: 800;
+    flex: 1;
+    text-align: right;
+}
+.stock-amount {
+    font-size: 30px;
+    font-weight: 600;
+    flex: 1;
+    text-align: right;
+}
+.empty-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 28px;
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid #e8e4d9;
+}
+.empty-text {
+    font-size: 36px;
+    color: #999;
+}
+.footer {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 26px;
+    color: #999;
+}
+</style>
+</head>
+<body>
+    <div class="header">
+        <div class="date">2026年09月23日</div>
+        <div class="title">新进成交额TOP50</div>
+        <div class="subtitle">首次进入成交额前50 · 共15只 </div>
+    </div>
+    
+    <div class="table-header">
+        <div class="header-rank">#</div>
+        <div class="header-name">股票</div>
+        <div class="header-price">现价</div>
+        <div class="header-change">涨幅</div>
+        <div class="header-amount">成交额</div>
+    </div>
+    
+    
+            <div class="stock-row">
+                <div class="rank">1</div>
+                <div class="stock-name">先导基电</div>
+                <div class="stock-price">47.800</div>
+                <div class="stock-change" style="color:#dc143c">+9.28%</div>
+                <div class="stock-amount">79.56亿</div>
+            </div>
+            
+            <div class="stock-row">
+                <div class="rank">2</div>
+                <div class="stock-name">哈药股份</div>
+                <div class="stock-price">9.040</div>
+                <div class="stock-change" style="color:#228b22">-0.44%</div>
+                <div class="stock-amount">67.32亿</div>
+            </div>
+            
+            <div class="stock-row">
+                <div class="rank">3</div>
+                <div class="stock-name">佰维存储</div>
+                <div class="stock-price">222.690</div>
+                <div class="stock-change" style="color:#dc143c">+2.52%</div>
+                <div class="stock-amount">61.24亿</div>
+            </div>
+            
+            <div class="stock-row">
+                <div class="rank">4</div>
+                <div class="stock-name">东材科技</div>
+                <div class="stock-price">55.000</div>
+                <div class="stock-change" style="color:#dc143c">+5.38%</div>
+                <div class="stock-amount">53.65亿</div>
+            </div>
+            
+            <div class="stock-row">
+                <div class="rank">5</div>
+                <div class="stock-name">太极实业</div>
+                <div class="stock-price">20.590</div>
+                <div class="stock-change" style="color:#dc143c">+3.62%</div>
+                <div class="stock-amount">52.32亿</div>
+            </div>
+            
+            <div class="stock-row">
+                <div class="rank">6</div>
+                <div class="stock-name">莲花控股</div>
+                <div class="stock-price">13.590</div>
+                <div class="stock-change" style="color:#dc143c">+5.10%</div>
+                <div class="stock-amount">49.95亿</div>
+            </div>
+            
+            <div class="stock-row">
+                <div class="rank">7</div>
+                <div class="stock-name">沃格光电</div>
+                <div class="stock-price">102.500</div>
+                <div class="stock-change" style="color:#dc143c">+10.00%</div>
+                <div class="stock-amount">49.93亿</div>
+            </div>
+            
+            <div class="stock-row">
+                <div class="rank">8</div>
+                <div class="stock-name">铜冠铜箔</div>
+                <div class="stock-price">119.230</div>
+                <div class="stock-change" style="color:#dc143c">+4.09%</div>
+                <div class="stock-amount">49.85亿</div>
+            </div>
+            
+            <div class="stock-row">
+                <div class="rank">9</div>
+                <div class="stock-name">江淮汽车</div>
+                <div class="stock-price">23.450</div>
+                <div class="stock-change" style="color:#dc143c">+9.99%</div>
+                <div class="stock-amount">49.35亿</div>
+            </div>
+            
+            <div class="stock-row">
+                <div class="rank">10</div>
+                <div class="stock-name">深南电路</div>
+                <div class="stock-price">414.770</div>
+                <div class="stock-change" style="color:#dc143c">+3.69%</div>
+                <div class="stock-amount">45.21亿</div>
+            </div>
+            
+            <div class="stock-row">
+                <div class="rank">11</div>
+                <div class="stock-name">万 科Ａ</div>
+                <div class="stock-price">3.920</div>
+                <div class="stock-change" style="color:#dc143c">+2.89%</div>
+                <div class="stock-amount">42.92亿</div>
+            </div>
+            
+            <div class="stock-row">
+                <div class="rank">12</div>
+                <div class="stock-name">中石科技</div>
+                <div class="stock-price">119.500</div>
+                <div class="stock-change" style="color:#dc143c">+6.93%</div>
+                <div class="stock-amount">40.76亿</div>
+            </div>
+            
+            <div class="stock-row">
+                <div class="rank">13</div>
+                <div class="stock-name">光智科技</div>
+                <div class="stock-price">264.020</div>
+                <div class="stock-change" style="color:#dc143c">+6.03%</div>
+                <div class="stock-amount">39.11亿</div>
+            </div>
+            
+            <div class="stock-row">
+                <div class="rank">14</div>
+                <div class="stock-name">贵州茅台</div>
+                <div class="stock-price">1251.240</div>
+                <div class="stock-change" style="color:#228b22">-0.20%</div>
+                <div class="stock-amount">38.95亿</div>
+            </div>
+            
+            <div class="stock-row">
+                <div class="rank">15</div>
+                <div class="stock-name">沈鼓集团</div>
+                <div class="stock-price">30.000</div>
+                <div class="stock-change" style="color:#228b22">-21.01%</div>
+                <div class="stock-amount">38.91亿</div>
+            </div>
+            
+    
+    <div class="footer">
+        数据来源：新浪财经 | 仅供参考，不构成投资建议
+    </div>
+</body>
+</html>

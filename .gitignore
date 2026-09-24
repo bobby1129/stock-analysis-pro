@@ -41,3 +41,6 @@ cache/
 .DS_Store
 Thumbs.db
 config/config.yaml
+
+# 本地工具二进制（体积大，不入库；安装方法见 DAILY_CONTENT.md）
+scripts/daily_content/ffmpeg_static

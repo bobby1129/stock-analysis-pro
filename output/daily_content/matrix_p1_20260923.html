@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { width:1080px; height:1920px; overflow:hidden;
+  background:linear-gradient(160deg,#faf9f6 0%,#f5f3ee 55%,#f0ece2 100%);
+  font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif; position:relative; }
+.header { padding:62px 46px 0; }
+.kicker { display:inline-block; font-size:28px; font-weight:800; letter-spacing:3px; color:#b8860b;
+  border:2px solid #d4af37; border-radius:10px; padding:6px 16px; background:rgba(212,175,55,0.08); }
+.title { font-size:86px; font-weight:900; color:#1a1a1a; margin-top:20px; letter-spacing:2px; }
+.title .gold { color:#b8860b; } .title .red { color:#c0141c; } .title .green { color:#1d7a2f; }
+.sub { font-size:32px; color:#888; margin-top:12px; font-weight:600; }
+.verdict { margin:30px 46px 0; background:#fff; border:2px solid #d4af37; border-left:12px solid #b8860b;
+  border-radius:16px; padding:24px 30px; font-size:38px; font-weight:800; color:#1a1a1a;
+  line-height:1.5; box-shadow:0 4px 14px rgba(184,134,11,0.10); word-break:keep-all; }
+.verdict .red { color:#dc143c; } .verdict .green { color:#228b22; }
+.vsub { display:block; font-size:28px; font-weight:700; color:#888; margin-top:8px; }
+.section { margin:28px 46px 0; background:#fff; border:2px solid #d4af37; border-radius:22px;
+  padding:30px 28px 22px; box-shadow:0 4px 18px rgba(212,175,55,0.12); }
+.sec-title { font-size:48px; font-weight:900; color:#1a1a1a; margin-bottom:6px; letter-spacing:1px; }
+.sec-title .tag { font-size:27px; font-weight:700; color:#fff; border-radius:8px; padding:5px 14px;
+  margin-left:12px; vertical-align:middle; letter-spacing:2px; }
+.tag.warn { background:linear-gradient(90deg,#c0392b,#922b21); }
+.tag.gold { background:linear-gradient(90deg,#d4af37,#b8860b); }
+.tag.green { background:linear-gradient(90deg,#27ae60,#1d7a2f); }
+.sec-note { font-size:28px; color:#999; margin-bottom:18px; font-weight:600; line-height:1.4; }
+.footer { position:absolute; bottom:34px; left:0; right:0; text-align:center;
+  font-size:26px; color:#999; font-weight:600; letter-spacing:1px; }
+.footer .brand { color:#b8860b; font-weight:800; }
+.lempty { font-size:34px; color:#aaa; padding:40px 4px; font-weight:600; text-align:center; }
+.erow { display:flex; align-items:center; padding:28px 6px 24px; border-bottom:1px solid #f0ead9; }
+.erow:last-child { border-bottom:none; }
+.erank { width:64px; font-size:52px; font-weight:900; color:#d4af37; text-align:center; }
+.emain { flex:1; min-width:0; padding-right:14px; }
+.eline { display:flex; align-items:baseline; gap:14px; }
+.ename { font-size:50px; font-weight:800; color:#1a1a1a; }
+.ebadge { font-size:24px; font-weight:800; border-radius:6px; padding:3px 11px; white-space:nowrap; }
+.badge-fire { color:#fff; background:linear-gradient(90deg,#e67e22,#c0392b); }
+.badge-calm { color:#7a5c00; background:#f4e9c8; border:1px solid #e0cd90; }
+.badge-dv { color:#fff; background:#c0392b; }
+.badge-new { color:#fff; background:linear-gradient(90deg,#d4af37,#b8860b); }
+.echg { font-size:34px; font-weight:700; margin-left:auto; white-space:nowrap; }
+.etrack { height:16px; background:#f4efe2; border-radius:8px; margin:14px 0 11px; overflow:hidden; }
+.ebar { height:100%; border-radius:7px; }
+.emeta { font-size:28px; color:#999; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.eval { width:210px; text-align:right; font-size:60px; font-weight:900; letter-spacing:-1px; }
+.eval .unit { font-size:30px; font-weight:700; margin-left:2px; }
+.quad { margin:24px 46px 0; display:flex; gap:14px; }
+.qbox { flex:1; background:#fff; border:2px solid #e0d9c8; border-radius:16px; padding:16px 8px; text-align:center; }
+.qbox .qn { font-size:54px; font-weight:900; }
+.qbox .ql { font-size:25px; color:#666; font-weight:700; margin-top:4px; }
+.qbox.h .qn { color:#dc143c; } .qbox.w .qn { color:#b8860b; }
+.qbox.l .qn { color:#228b22; } .qbox.b .qn { color:#666; }
+</style></head>
+<body>
+  <div class="header">
+    <span class="kicker">盘后情报局 · 资金意图矩阵 1/4</span>
+    <div class="title">资金<span class="green">失血榜</span></div>
+    <div class="sub">2026年09月23日 收盘 ｜ 抽血率=净流出/成交额，越高失血越狠</div>
+  </div>
+  <div class="verdict">💡 失血最狠：<span class='green'>华为盘古</span>，每100元成交撤走30元（-18.0亿）</div>
+  <div class="section">
+    <div class="sec-title">🩸 抽血率排行<span class="tag warn">失血</span></div>
+    <div class="sec-note">成交每100元被抽走多少，大小板块同尺度可比 ｜ ⚠背离=还在涨但钱在撤（拉高出货嫌疑）</div>
+    
+    <div class="erow">
+      <div class="erank">1</div>
+      <div class="emain">
+        <div class="eline"><span class="ename">华为盘古</span><span class="ebadge badge-new">NEW</span><span class="ebadge badge-calm">能量2.0亿/只</span>
+          <span class="echg" style="color:#228b22">-1.44%</span></div>
+        <div class="etrack"><div class="ebar" style="width:99%;background:linear-gradient(90deg,#5cb87a,#1d7a2f)"></div></div>
+        <div class="emeta">净流出18.0亿 · 成交61亿 · 龙头南威软件 +10.0%</div>
+      </div>
+      <div class="eval" style="color:#1d7a2f">-29.8<span class='unit'>%</span></div>
+    </div>
+    <div class="erow">
+      <div class="erank">2</div>
+      <div class="emain">
+        <div class="eline"><span class="ename">数据确权</span><span class="ebadge badge-new">NEW</span><span class="ebadge badge-calm">能量1.6亿/只</span>
+          <span class="echg" style="color:#228b22">-1.85%</span></div>
+        <div class="etrack"><div class="ebar" style="width:83%;background:linear-gradient(90deg,#5cb87a,#1d7a2f)"></div></div>
+        <div class="emeta">净流出27.1亿 · 成交109亿 · 龙头三未信安 +11.1%</div>
+      </div>
+      <div class="eval" style="color:#1d7a2f">-24.9<span class='unit'>%</span></div>
+    </div>
+    <div class="erow">
+      <div class="erank">3</div>
+      <div class="emain">
+        <div class="eline"><span class="ename">超超临界发电</span><span class="ebadge badge-new">NEW</span><span class="ebadge badge-calm">能量1.2亿/只</span>
+          <span class="echg" style="color:#228b22">-1.40%</span></div>
+        <div class="etrack"><div class="ebar" style="width:77%;background:linear-gradient(90deg,#5cb87a,#1d7a2f)"></div></div>
+        <div class="emeta">净流出24.7亿 · 成交107亿 · 龙头争光股份 +3.0%</div>
+      </div>
+      <div class="eval" style="color:#1d7a2f">-23.1<span class='unit'>%</span></div>
+    </div>
+    <div class="erow">
+      <div class="erank">4</div>
+      <div class="emain">
+        <div class="eline"><span class="ename">快手概念</span><span class="ebadge badge-new">NEW</span><span class="ebadge badge-fire">🔥能量3.3</span>
+          <span class="echg" style="color:#228b22">-2.73%</span></div>
+        <div class="etrack"><div class="ebar" style="width:74%;background:linear-gradient(90deg,#5cb87a,#1d7a2f)"></div></div>
+        <div class="emeta">净流出37.6亿 · 成交170亿 · 龙头亚康股份 +2.4%</div>
+      </div>
+      <div class="eval" style="color:#1d7a2f">-22.1<span class='unit'>%</span></div>
+    </div>
+    <div class="erow">
+      <div class="erank">5</div>
+      <div class="emain">
+        <div class="eline"><span class="ename">手机游戏</span><span class="ebadge badge-new">NEW</span><span class="ebadge badge-calm">能量2.2亿/只</span>
+          <span class="echg" style="color:#228b22">-2.58%</span></div>
+        <div class="etrack"><div class="ebar" style="width:72%;background:linear-gradient(90deg,#5cb87a,#1d7a2f)"></div></div>
+        <div class="emeta">净流出26.3亿 · 成交122亿 · 龙头宝通科技 +1.2%</div>
+      </div>
+      <div class="eval" style="color:#1d7a2f">-21.6<span class='unit'>%</span></div>
+    </div>
+  </div>
+  <div class="footer">门槛：成交≥50亿·净流出≥3亿 ｜ 全口径净额（含散户）｜ <span class="brand">盘后情报局</span> 每日16:00</div>
+</body></html>
