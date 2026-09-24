@@ -1,4 +1,34 @@
 
+## ✅ v3.12 龙虎标尺动画视频 + 低质破局 — 已完成 (2026-09-25)
+
+### 核心改动
+| 文件 | 改动 |
+|------|------|
+| `scripts/daily_content/generate_ruler_video.py` | 新增：交易额TOP10龙虎标尺动画视频（~18s mp4，Playwright录屏+ffmpeg_static转码） |
+| `scripts/daily_content/generate_stock_amount.py` | 新增：盘后情报局IP角标（Vol.期号，episode_counter.json每交易日+1）+ 今日一句研判（数据自动生成） |
+| `scripts/daily_content/run_all.py` | 步骤1b接入视频生成；入口新增交易日检查（周末/节假日跳过） |
+| `DAILY_CONTENT.md` / `README.md` / `USAGE.md` | 文档同步 |
+
+### 背景（抖音低质整改第二阶段）
+- 图片CSS迭代已到美学天花板（4套风格方向均被判"差强人意"），转向**图→视频**：抖音对视频的低质阈值宽于图文轮播，且动画每帧像素不同，彻底打破模板指纹重复
+- TOP10 从纯表格升级为**排名标尺叙事**：中轴No.1~10等距，左右各5只交替飞入落座，兼具"逐支揭晓"的观看张力与排名结构的信息增量
+
+### 视频形态（定稿 v3.2）
+- 飞入：大卡片居中放大1.6倍，展示6项（名称/现价/涨幅/成交额/环比/箭头）
+- 落座：缩至框内双行定格——第一行「名称+排名箭头」，第二行「成交额居左、环比居右」
+- NEW股：金色徽章钉名称框左上角，行内不重复箭头
+- 布局参数：PLOT_TOP=380 / PLOT_BOTTOM=1622 / ROW_H=260 / CARD_W=430，字号58/58/40/44px
+- 超宽保护：JS逐档缩字号58→34px，边框不动
+- 数据同源 generate_stock_amount.py（只读缓存不写），`--cache-date` 支持回测演示
+
+### 环境修复
+- 系统ffmpeg无libx264（仅rkmpp硬编，ARM上init失败）、Playwright自带ffmpeg仅vp8 → 用 imageio-ffmpeg 静态版（阿里云镜像），存为 `ffmpeg_static`（51MB，gitignore，重装方法见 DAILY_CONTENT.md）
+
+### 交易日检查
+- 节假日cron照跑会用旧数据出错日期内容（中秋9/25实测）→ run_all.py 入口对比上证指数行情日期（新浪hq.sinajs.cn第30字段）与今天，不一致则跳过（exit 0）；接口异常保守放行
+
+---
+
 ## ✅ v3.11 概念板块资金意图矩阵转正 — 已完成 (2026-09-24)
 
 ### 核心改动
