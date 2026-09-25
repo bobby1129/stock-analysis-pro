@@ -1,4 +1,26 @@
 
+## ✅ v3.15 板块资金全景图动画视频 — 已完成 (2026-09-25)
+
+### 核心改动
+| 文件 | 改动 |
+|------|------|
+| `scripts/daily_content/generate_p0_video.py` | 新增：板块资金全景图动画视频(~14s mp4)，第三个视频化图表，复用龙虎标尺管线(Playwright录屏+ffmpeg_static) |
+| `scripts/daily_content/generate_matrix.py` | 重构：四象限统计抽为共享函数 `compute_quadrants()`（图片p0与视频同源，数据逻辑单一来源，gen_p0改为调用它） |
+| `scripts/daily_content/run_all.py` | 步骤2b接入视频生成(失败不阻断)；产出清单在matrix_p0后插入mp4；总结改"11张图+3个动画视频" |
+| `DAILY_CONTENT.md` / `README.md` / `USAGE.md` | 文档同步(11图+3视频，新增2b章节；象限判据等规则按用户要求只存档文档、前端不展示) |
+
+### 动画结构（用户定稿，两轮反馈）
+1. 标题区只有「日期 + 板块资金全景图」，居中放大1.5倍展示1.6s → 缩回顶部
+2. 四张象限卡片依次飞入中央放大1.35倍（完整内容：图标+计数+标签+副注+之最）→ 落座2×2四宫格；顺序：健康上涨(左上)→涨但流出(右上)→跌却流入(左下)→跌且流出(右下)
+3. 全部落座后，说明行(N个活跃板块…分四象限) + 研判句 一起淡入，位于标题与四宫格之间（用户第2轮反馈：研判放中间填补空白，不放底部；放大标题只留时间+标题）
+- 前端去掉「盘后情报局」kicker/页脚（用户要求）；图片版p0不受影响
+- 时间参数：TITLE_HOLD 1600 / TITLE_MOVE 900 / CARDS_START 2900 / STEP 1700 / FLY_HOLD 700 / SEAT 800 / VERDICT_GAP 600 / TAIL 3000 ms
+- 布局：GRID_TOP=560, CARD_W≈481, CARD_H=430, STAGE_Y=1010, FLY_SCALE=1.35；说明+研判块top=290
+- 输出 `p0_panorama_video_YYYYMMDD.mp4`（交易日后缀同matrix图片）；`--html-only` 调试
+- cron prompt(16:00抖音日更)已同步：新增mp4产出说明，总时长提示改约4-5分钟
+
+---
+
 ## ✅ v3.14 新进TOP50升级：图片增强 + 动画视频 — 已完成 (2026-09-25)
 
 ### 核心改动

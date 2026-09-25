@@ -102,6 +102,23 @@
 - **旧版概念2图**: `generate_concept_html.py` 保留（提供 `is_bucket_concept` 宽基桶过滤函数被矩阵脚本复用），但已从 run_all.py 移除，不再生成 concept_p1/p2
 - **状态**: ✅ 已转正（2026-09-24，run_all.py 总图数 8→11）
 
+### 2b. 板块资金全景图 动画视频（1个MP4）
+- **脚本**: `scripts/daily_content/generate_p0_video.py`
+- **数据源**: 与图片p0完全同源（import `generate_matrix.py` 的 `fetch_data` / `compute_quadrants`，四象限统计逻辑单一来源），不写缓存
+- **形态**: 1080×1920 竖屏动画视频（约14秒，H.264 MP4），管线复用龙虎标尺（Playwright录屏 → ffmpeg_static转码）
+- **动画结构**（用户定稿 2026-09-25）:
+  1. 标题区只有「日期 + 板块资金全景图」两部分，先在屏幕中央放大1.5倍展示（1.6s），缩回顶部
+  2. 四张象限卡片依次飞到屏幕中央放大1.35倍展示（完整卡片：图标+计数+标签+副注+之最），再飞落到2×2四宫格位置。顺序：健康上涨(左上)→涨但流出(右上)→跌却流入(左下)→跌且流出(右下)
+  3. 全部落座后，说明行（N个活跃板块…分四象限）+ 研判句 **一起淡入**，位于标题与四宫格之间（用户指定：研判不放底部，放中间填补空间）
+- **时间参数**: TITLE_HOLD=1600ms, TITLE_MOVE=900ms, CARDS_START=2900ms, STEP=1700ms, FLY_HOLD=700ms, SEAT=800ms, VERDICT_GAP=600ms, TAIL=3000ms
+- **布局参数**: GRID_TOP=560, CARD_W≈481, CARD_H=430, STAGE_Y=1010, FLY_SCALE=1.35；说明+研判块 top=290
+- **前端不展示**（用户要求，规则仅存档于此）:
+  - 「盘后情报局」kicker角标、页脚brand 均去掉（图片版p0仍保留）
+  - 象限判据规则：涨跌幅±0.3% × 净额正负分界；活跃板块门槛=总成交>20亿；净额为全口径（含散户）
+- **输出**: `output/daily_content/p0_panorama_video_YYYYMMDD.mp4`（文件名带交易日后缀，与matrix图片一致）
+- **测试**: `--html-only` 只生成HTML不录屏（调试用）
+- **状态**: ✅ 已完成（2026-09-25 接入 run_all.py 步骤2b，失败不阻断图片流程）
+
 ### 3. 新进成交额TOP50（1张或多张）
 - **脚本**: `scripts/daily_content/generate_new_top50.py`
 - **数据源**: 新浪财经（全市场成交额）+ 腾讯行情（量比 parts[49]/换手 parts[38]，字段映射已打印验证 2026-09-25）

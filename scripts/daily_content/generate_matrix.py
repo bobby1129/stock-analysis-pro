@@ -232,14 +232,47 @@ def zone_rows(zone_df, med, mode, empty_msg, prev_names=None):
     return rows or empty_zone(empty_msg)
 
 
-def gen_p0(df, date_cn, med):
-    """市场概览页: 象限四宫格(大卡片) + 各区头条摘要"""
+def compute_quadrants(df):
+    """四象限统计（图片p0与动画视频共用，数据逻辑单一来源）
+    返回 dict: active/q1~q4/total/mood + 每区之最头条"""
     active = df[df['总额'] > 20].copy()
     chg, net = active['行业-涨跌幅'], active['净额']
     q1 = active[(chg > 0.3) & (net > 0)]
     q2 = active[(chg > 0.3) & (net < 0)]
     q3 = active[(chg < -0.3) & (net > 0)]
     q4 = active[(chg < -0.3) & (net < 0)]
+
+    def top_of(qdf, sortcol, asc, sign):
+        if len(qdf):
+            t = qdf.sort_values(sortcol, ascending=asc).iloc[0]
+            return f"{t['行业']} {sign}{abs(t[sortcol]):.1f}{'%' if sortcol == '留存率' else '亿'}"
+        return '—'
+
+    total = len(active)
+    up_ratio = len(q1) / total * 100 if total else 0
+    if up_ratio >= 50:
+        mood = f"资金面健康：{len(q1)}/{total} 板块价涨钱进，多头主导"
+    elif len(q4) / total >= 0.6:
+        mood = f"资金面恶劣：{len(q4)}/{total} 板块价跌钱出，普跌行情，轻仓观望"
+    else:
+        mood = f"资金面分化：健康上涨仅{len(q1)}个，跌且流出{len(q4)}个，结构性行情"
+
+    return {
+        'active': active, 'q1': q1, 'q2': q2, 'q3': q3, 'q4': q4,
+        'total': total, 'mood': mood,
+        'tops': {
+            'q1': top_of(q1, '净额', False, '+'),
+            'q2': top_of(q2, '净额', True, ''),
+            'q3': top_of(q3, '净额', False, '+'),
+            'q4': top_of(q4, '净额', True, ''),
+        },
+    }
+
+
+def gen_p0(df, date_cn, med):
+    """市场概览页: 象限四宫格(大卡片) + 各区头条摘要"""
+    qs = compute_quadrants(df)
+    active, q1, q2, q3, q4 = qs['active'], qs['q1'], qs['q2'], qs['q3'], qs['q4']
 
     def qcard(cls, icon, label, sub, qdf, sortcol, asc, sign):
         if len(qdf):
@@ -261,14 +294,8 @@ def gen_p0(df, date_cn, med):
         qcard('b', '📉', '跌且流出', '价跌 + 资金撤离（回避）', q4, '净额', True, '')
     )
 
-    total = len(active)
-    up_ratio = len(q1) / total * 100 if total else 0
-    if up_ratio >= 50:
-        mood = f"资金面健康：{len(q1)}/{total} 板块价涨钱进，多头主导"
-    elif len(q4) / total >= 0.6:
-        mood = f"资金面恶劣：{len(q4)}/{total} 板块价跌钱出，普跌行情，轻仓观望"
-    else:
-        mood = f"资金面分化：健康上涨仅{len(q1)}个，跌且流出{len(q4)}个，结构性行情"
+    total = qs['total']
+    mood = qs['mood']
 
     html = f'''<!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="UTF-8">

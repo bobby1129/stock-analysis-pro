@@ -111,6 +111,8 @@ def main():
     # 2. 概念板块资金意图矩阵（5张: p0全景+p1失血+p2对倒+p3主攻+p4潜伏，脚本自带截图）
     if not run_script('generate_matrix.py'):
         return 1
+    # 2b. 板块资金全景图动画视频（mp4，数据同源generate_matrix，失败不阻断）
+    run_script('generate_p0_video.py')
     
     # 3. 新进成交额TOP50（1张或多张）
     if not run_script('generate_new_top50.py'):
@@ -138,7 +140,7 @@ def main():
             return 1
     
     print("\n" + "="*60)
-    print("✓ 全部完成，共生成11张图 + 2个动画视频")
+    print("✓ 全部完成，共生成11张图 + 3个动画视频")
     print("="*60)
     
     # 列出输出文件
@@ -185,6 +187,12 @@ def main():
         mdate = td.strftime('%Y%m%d')
         for i in range(5):
             files.insert(1 + i, f'matrix_p{i}_{mdate}.png')
+    # 全景图动画视频与matrix同交易日后缀，插到matrix_p0之后
+    matrix_p0 = next((f for f in files if f.startswith('matrix_p0_')), None)
+    if matrix_p0:
+        vname = f'p0_panorama_video_{matrix_p0.split("_")[-1].split(".")[0]}.mp4'
+        if os.path.exists(os.path.join(OUTPUT_DIR, vname)):
+            files.insert(files.index(matrix_p0) + 1, vname)
     for name in files:
         png_path = os.path.join(OUTPUT_DIR, name)
         if os.path.exists(png_path):
