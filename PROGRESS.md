@@ -1,4 +1,28 @@
 
+## ✅ v3.16 资金意图矩阵四榜动画视频 — 已完成 (2026-09-26)
+
+### 核心改动
+| 文件 | 改动 |
+|------|------|
+| `scripts/daily_content/generate_zone_video.py` | 新增：矩阵p1-p4四榜动画视频(4个mp4，每条约7s)，复用同一录屏管线 |
+| `scripts/daily_content/generate_matrix.py` | 重构：四榜内容抽为共享函数 `zone_content(zkey,...)`（返回title/sub/verdict/section，图片p1-p4与视频同源）；页脚/kicker抽为 `ZONE_FOOTERS`/`ZONE_KICKERS` 常量。回归验证：重构后5张图片HTML与备份逐字节一致 |
+| `scripts/daily_content/run_all.py` | 步骤2c接入(失败不阻断)；产出清单每个mp4紧跟对应matrix png；总结改"11张图+7个动画视频" |
+| `DAILY_CONTENT.md` / `README.md` / `USAGE.md` | 文档同步(11图+7视频，新增2c章节；四榜门槛规则按用户要求只存档文档、视频前端不展示) |
+
+### 动画结构（用户定稿，四榜统一）
+1. 开场：标题区只有「日期 + 榜名」（保留黑/绿/红/金配色），居中放大1.5倍展示1.6s → 落座顶部
+2. 落座后其余内容轻微先后淡入（各间隔300ms）：副标题说明行 → 💡研判 → 榜单section（不逐行飞入）
+3. 尾部定格3s
+- 视频版去掉「盘后情报局」kicker角标+门槛规则页脚（用户确认：规则存档文档、前端不展示；图片版p1-p4保留）
+- 视频版副标题自动剥离「X月X日收盘 ｜」日期前缀（标题区已有日期）
+- 时间参数：TITLE_HOLD 1600 / TITLE_MOVE 900 / CONTENT_START 2800 / FADE_STEP 300 / FADE 600 / TAIL 3000 ms
+- 内置程序化溢出检查；已知误报：`.emeta` 龙头名过长nowrap截7px为图片版同款行为
+- 输出 `matrix_p{1..4}_video_YYYYMMDD.mp4`（交易日后缀同matrix图片）；`--html-only` 调试
+- QA：9/25数据关键帧核对通过（标题放大帧居中完整、淡入层次帧、定格帧无盘后情报局字样）；当日p2/p3空榜、p4仅1条为真实数据
+- cron prompt(16:00抖音日更)已同步：新增4个mp4产出说明
+
+---
+
 ## ✅ v3.15 板块资金全景图动画视频 — 已完成 (2026-09-25)
 
 ### 核心改动

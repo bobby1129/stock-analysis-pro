@@ -113,6 +113,8 @@ def main():
         return 1
     # 2b. 板块资金全景图动画视频（mp4，数据同源generate_matrix，失败不阻断）
     run_script('generate_p0_video.py')
+    # 2c. 资金意图矩阵四榜动画视频（mp4 x4，数据同源generate_matrix，失败不阻断）
+    run_script('generate_zone_video.py')
     
     # 3. 新进成交额TOP50（1张或多张）
     if not run_script('generate_new_top50.py'):
@@ -140,7 +142,7 @@ def main():
             return 1
     
     print("\n" + "="*60)
-    print("✓ 全部完成，共生成11张图 + 3个动画视频")
+    print("✓ 全部完成，共生成11张图 + 7个动画视频")
     print("="*60)
     
     # 列出输出文件
@@ -187,12 +189,18 @@ def main():
         mdate = td.strftime('%Y%m%d')
         for i in range(5):
             files.insert(1 + i, f'matrix_p{i}_{mdate}.png')
-    # 全景图动画视频与matrix同交易日后缀，插到matrix_p0之后
+    # 全景图动画视频与matrix同交易日后缀，插到matrix_p0之后；四榜视频插到各自png之后
     matrix_p0 = next((f for f in files if f.startswith('matrix_p0_')), None)
     if matrix_p0:
-        vname = f'p0_panorama_video_{matrix_p0.split("_")[-1].split(".")[0]}.mp4'
+        mdate = matrix_p0.split('_')[-1].split('.')[0]
+        vname = f'p0_panorama_video_{mdate}.mp4'
         if os.path.exists(os.path.join(OUTPUT_DIR, vname)):
             files.insert(files.index(matrix_p0) + 1, vname)
+        for i in range(1, 5):
+            png_i = f'matrix_p{i}_{mdate}.png'
+            vid_i = f'matrix_p{i}_video_{mdate}.mp4'
+            if png_i in files and os.path.exists(os.path.join(OUTPUT_DIR, vid_i)):
+                files.insert(files.index(png_i) + 1, vid_i)
     for name in files:
         png_path = os.path.join(OUTPUT_DIR, name)
         if os.path.exists(png_path):

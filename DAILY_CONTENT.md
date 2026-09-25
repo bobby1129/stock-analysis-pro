@@ -8,7 +8,7 @@
 
 **重要**：除非用户明确要求"重做"，否则所有修改都只在现有基础上进行增量改动，不要推翻重来。
 
-## 四张图 + 2视频（共11张PNG + 2个MP4）
+## 四张图 + 7视频（共11张PNG + 7个MP4）
 
 ### 1. 个股成交额TOP10（1张）
 - **脚本**: `scripts/daily_content/generate_stock_amount.py`
@@ -118,6 +118,25 @@
 - **输出**: `output/daily_content/p0_panorama_video_YYYYMMDD.mp4`（文件名带交易日后缀，与matrix图片一致）
 - **测试**: `--html-only` 只生成HTML不录屏（调试用）
 - **状态**: ✅ 已完成（2026-09-25 接入 run_all.py 步骤2b，失败不阻断图片流程）
+
+### 2c. 资金意图矩阵四榜 动画视频（4个MP4）
+- **脚本**: `scripts/daily_content/generate_zone_video.py`
+- **对象**: p1资金失血榜 / p2对倒嫌疑榜 / p3主攻方向榜 / p4潜伏吸筹榜，四个视频同一动画逻辑
+- **数据源**: 与图片p1-p4完全同源（import `generate_matrix.py` 的 `fetch_data` / `select_zones` / `load_yesterday_zones` / `zone_content`；`zone_content` 为2026-09-26抽取的共享函数，返回 title/sub/verdict/section，图片与视频单一来源），只读缓存不写
+- **形态**: 1080×1920 竖屏动画视频（每条约7秒，H.264 MP4），管线复用龙虎标尺（Playwright录屏 → ffmpeg_static转码）
+- **动画结构**（用户定稿 2026-09-26）:
+  1. 开场：标题区只有「日期 + 榜名」（保留黑/绿/红/金配色），居中放大1.5倍展示（1.6s）→ 落座顶部
+  2. 落座后其余内容**轻微先后淡入**（各间隔300ms）：副标题说明行 → 💡研判 → 榜单section（不逐行飞入）
+  3. 尾部定格3s
+- **时间参数**: TITLE_HOLD=1600ms, TITLE_MOVE=900ms, CONTENT_START=2800ms, FADE_STEP=300ms, FADE=600ms, TAIL=3000ms
+- **副标题去日期前缀**: 视频版标题区已有日期，sub 中「X月X日收盘 ｜」前缀自动剥离
+- **前端不展示**（用户要求，规则仅存档于此；图片版p1-p4仍保留kicker/页脚）:
+  - 「盘后情报局 · 资金意图矩阵 N/4」kicker角标、门槛规则页脚 均去掉
+  - 四榜门槛规则存档：失血榜=成交≥50亿·净流出≥3亿·按抽血率(净流出/成交额)排序；对倒榜=成交≥100亿·涨幅>0.8%·净流入为正但留存率<1.5%·按成交排序；主攻榜=涨幅≥0.5%·净流入≥3亿·留存率≥3%·能量≥全市场中位·按留存率排序；潜伏榜=涨幅<0.5%·净流入≥3亿·留存率≥4%·按留存率排序。留存率=净额/总成交；能量=总成交/公司家数（亿/只）；净额为全口径（含散户）；空榜诚实显示"暂无"不放宽门槛
+- **QA**: 内置程序化溢出检查（内容底边>1830或scrollWidth超宽即警告）；已知误报：`.emeta` 龙头名过长时 nowrap+ellipsis 截7px属图片版同款行为，非缺陷
+- **输出**: `output/daily_content/matrix_p{1..4}_video_YYYYMMDD.mp4`（交易日后缀与matrix图片一致）
+- **测试**: `--html-only` 只生成HTML不录屏（调试用）
+- **状态**: ✅ 已完成（2026-09-26 接入 run_all.py 步骤2c，失败不阻断图片流程）
 
 ### 3. 新进成交额TOP50（1张或多张）
 - **脚本**: `scripts/daily_content/generate_new_top50.py`

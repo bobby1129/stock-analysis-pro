@@ -330,88 +330,102 @@ def gen_p0(df, date_cn, med):
     return html
 
 
-def gen_p1(zones, date_cn, med, prev_zones):
-    bleed = zones['bleed']
-    rows = zone_rows(bleed, med, 'bleed', '今日无明显失血板块', prev_zones and prev_zones.get('bleed'))
+def zone_content(zkey, zones, date_cn, med, prev_zones):
+    """四榜内容单一来源（图片p1-p4与动画视频共用，2026-09-26抽取）
+    返回 dict: title_html / sub / verdict / section"""
+    zdf = zones[zkey]
+    pz = prev_zones and prev_zones.get(zkey)
 
-    if len(bleed):
-        t = bleed.iloc[0]
-        verdict = f"失血最狠：<span class='green'>{t['行业']}</span>，每100元成交撤走{abs(t['留存率']):.0f}元（{t['净额']:.1f}亿）"
-    else:
-        verdict = "今日无显著失血板块，资金面平稳"
-
-    section = f'''<div class="section">
+    if zkey == 'bleed':
+        rows = zone_rows(zdf, med, 'bleed', '今日无明显失血板块', pz)
+        if len(zdf):
+            t = zdf.iloc[0]
+            verdict = f"失血最狠：<span class='green'>{t['行业']}</span>，每100元成交撤走{abs(t['留存率']):.0f}元（{t['净额']:.1f}亿）"
+        else:
+            verdict = "今日无显著失血板块，资金面平稳"
+        section = f'''<div class="section">
     <div class="sec-title">🩸 抽血率排行<span class="tag warn">失血</span></div>
     <div class="sec-note">成交每100元被抽走多少，大小板块同尺度可比 ｜ ⚠背离=还在涨但钱在撤（拉高出货嫌疑）</div>
     {rows}
   </div>'''
-    return page('盘后情报局 · 资金意图矩阵 1/4', '资金<span class="green">失血榜</span>',
-                f'{date_cn} 收盘 ｜ 抽血率=净流出/成交额，越高失血越狠',
-                verdict, section,
-                '门槛：成交≥50亿·净流出≥3亿 ｜ 全口径净额（含散户）｜ <span class="brand">盘后情报局</span> 每日16:00')
-
-
-def gen_p2(zones, date_cn, med, prev_zones):
-    fake = zones['fake']
-    rows = zone_rows(fake, med, 'fake', '今日无明显对倒板块', prev_zones and prev_zones.get('fake'))
-
-    if len(fake):
-        t = fake.iloc[0]
-        verdict = f"最大绞肉机：<span class='red'>{t['行业']}</span> 成交{t['总额']:.0f}亿，100元只留下{t['留存率']:.1f}元——涨是涨了，钱没留下"
-    else:
-        verdict = "今日无巨量对倒板块，涨幅含金量普遍较高"
-
-    section = f'''<div class="section">
+        title_html = '资金<span class="green">失血榜</span>'
+        sub = f'{date_cn} 收盘 ｜ 抽血率=净流出/成交额，越高失血越狠'
+    elif zkey == 'fake':
+        rows = zone_rows(zdf, med, 'fake', '今日无明显对倒板块', pz)
+        if len(zdf):
+            t = zdf.iloc[0]
+            verdict = f"最大绞肉机：<span class='red'>{t['行业']}</span> 成交{t['总额']:.0f}亿，100元只留下{t['留存率']:.1f}元——涨是涨了，钱没留下"
+        else:
+            verdict = "今日无巨量对倒板块，涨幅含金量普遍较高"
+        section = f'''<div class="section">
     <div class="sec-title">🎭 巨量不留钱<span class="tag warn">对倒</span></div>
     <div class="sec-note">涨幅&gt;0.8%、净流入为正，但留存率&lt;1.5%：天量换手后净额勉强为正，小心边拉边出 ｜ 红条=成交规模</div>
     {rows}
   </div>'''
-    return page('盘后情报局 · 资金意图矩阵 2/4', '对倒<span class="red">嫌疑榜</span>',
-                f'{date_cn} 收盘 ｜ 流入是假象：成交巨大但钱留不住',
-                verdict, section,
-                '门槛：成交≥100亿·涨幅&gt;0.8%·留存&lt;1.5% ｜ 全口径（含散户）｜ <span class="brand">盘后情报局</span> 每日16:00')
-
-
-def gen_p3(zones, date_cn, med, prev_zones):
-    firm = zones['firm']
-    rows = zone_rows(firm, med, 'firm', '今日无三共振主攻板块，资金观望', prev_zones and prev_zones.get('firm'))
-
-    if len(firm):
-        t = firm.iloc[0]
-        verdict = f"最坚决资金在 <span class='red'>{t['行业']}</span>：每100元成交留下{t['留存率']:.0f}元（+{t['净额']:.1f}亿），买了不撒手"
-    else:
-        verdict = "今日无价涨+高留存+高能量的三共振板块，主线不明"
-
-    section = f'''<div class="section">
+        title_html = '对倒<span class="red">嫌疑榜</span>'
+        sub = f'{date_cn} 收盘 ｜ 流入是假象：成交巨大但钱留不住'
+    elif zkey == 'firm':
+        rows = zone_rows(zdf, med, 'firm', '今日无三共振主攻板块，资金观望', pz)
+        if len(zdf):
+            t = zdf.iloc[0]
+            verdict = f"最坚决资金在 <span class='red'>{t['行业']}</span>：每100元成交留下{t['留存率']:.0f}元（+{t['净额']:.1f}亿），买了不撒手"
+        else:
+            verdict = "今日无价涨+高留存+高能量的三共振板块，主线不明"
+        section = f'''<div class="section">
     <div class="sec-title">💪 三共振主攻<span class="tag gold">价涨+钱进+锁仓</span></div>
     <div class="sec-note">涨幅≥0.5% + 净流入≥3亿 + 留存率≥3% + 能量≥全市场中位（{med:.1f}亿/只）｜ 金条=留存率，越高越坚决</div>
     {rows}
   </div>'''
-    return page('盘后情报局 · 资金意图矩阵 3/4', '主攻<span class="gold">方向榜</span>',
-                f'{date_cn} 收盘 ｜ 按<b>留存率</b>排名：不看流入多少，看流入后<b>卖不卖</b>',
-                verdict, section,
-                '全口径净额（含散户）｜ <span class="brand">盘后情报局</span> 每日16:00')
-
-
-def gen_p4(zones, date_cn, med, prev_zones):
-    lurk = zones['lurk']
-    rows = zone_rows(lurk, med, 'lurk', '今日无潜伏吸筹信号', prev_zones and prev_zones.get('lurk'))
-
-    if len(lurk):
-        t = lurk.iloc[0]
-        verdict = f"最隐蔽的吸筹：<span class='red'>{t['行业']}</span> 价格几乎没动（{t['行业-涨跌幅']:+.2f}%），资金却留下{t['留存率']:.1f}%（+{t['净额']:.1f}亿）——埋伏期特征"
-    else:
-        verdict = "今日无高留存潜伏板块，资金没有悄悄布局的动作"
-
-    section = f'''<div class="section">
+        title_html = '主攻<span class="gold">方向榜</span>'
+        sub = f'{date_cn} 收盘 ｜ 按<b>留存率</b>排名：不看流入多少，看流入后<b>卖不卖</b>'
+    else:  # lurk
+        rows = zone_rows(zdf, med, 'lurk', '今日无潜伏吸筹信号', pz)
+        if len(zdf):
+            t = zdf.iloc[0]
+            verdict = f"最隐蔽的吸筹：<span class='red'>{t['行业']}</span> 价格几乎没动（{t['行业-涨跌幅']:+.2f}%），资金却留下{t['留存率']:.1f}%（+{t['净额']:.1f}亿）——埋伏期特征"
+        else:
+            verdict = "今日无高留存潜伏板块，资金没有悄悄布局的动作"
+        section = f'''<div class="section">
     <div class="sec-title">🕵️ 钱进价未动<span class="tag green">潜伏</span></div>
     <div class="sec-note">涨幅&lt;0.5%但留存率≥4%进场：不等拉升才追，专找资金已埋伏、价格未启动的板块 ｜ 金条=留存率</div>
     {rows}
   </div>'''
-    return page('盘后情报局 · 资金意图矩阵 4/4', '潜伏<span class="green">吸筹榜</span>',
-                f'{date_cn} 收盘 ｜ 主力埋伏期信号：资金进场，价格未动',
-                verdict, section,
-                '门槛：净流入≥3亿·留存≥4% ｜ 全口径净额（含散户）｜ <span class="brand">盘后情报局</span> 每日16:00')
+        title_html = '潜伏<span class="green">吸筹榜</span>'
+        sub = f'{date_cn} 收盘 ｜ 主力埋伏期信号：资金进场，价格未动'
+
+    return {'title_html': title_html, 'sub': sub, 'verdict': verdict, 'section': section}
+
+
+# 各榜图片版页脚规则（前端图片保留；视频版不展示，规则存档DAILY_CONTENT.md）
+ZONE_FOOTERS = {
+    'bleed': '门槛：成交≥50亿·净流出≥3亿 ｜ 全口径净额（含散户）｜ <span class="brand">盘后情报局</span> 每日16:00',
+    'fake': '门槛：成交≥100亿·涨幅&gt;0.8%·留存&lt;1.5% ｜ 全口径（含散户）｜ <span class="brand">盘后情报局</span> 每日16:00',
+    'firm': '全口径净额（含散户）｜ <span class="brand">盘后情报局</span> 每日16:00',
+    'lurk': '门槛：净流入≥3亿·留存≥4% ｜ 全口径净额（含散户）｜ <span class="brand">盘后情报局</span> 每日16:00',
+}
+ZONE_KICKERS = {'bleed': '盘后情报局 · 资金意图矩阵 1/4', 'fake': '盘后情报局 · 资金意图矩阵 2/4',
+                'firm': '盘后情报局 · 资金意图矩阵 3/4', 'lurk': '盘后情报局 · 资金意图矩阵 4/4'}
+
+
+def gen_p1(zones, date_cn, med, prev_zones):
+    zc = zone_content('bleed', zones, date_cn, med, prev_zones)
+    return page(ZONE_KICKERS['bleed'], zc['title_html'], zc['sub'],
+                zc['verdict'], zc['section'], ZONE_FOOTERS['bleed'])
+
+def gen_p2(zones, date_cn, med, prev_zones):
+    zc = zone_content('fake', zones, date_cn, med, prev_zones)
+    return page(ZONE_KICKERS['fake'], zc['title_html'], zc['sub'],
+                zc['verdict'], zc['section'], ZONE_FOOTERS['fake'])
+
+def gen_p3(zones, date_cn, med, prev_zones):
+    zc = zone_content('firm', zones, date_cn, med, prev_zones)
+    return page(ZONE_KICKERS['firm'], zc['title_html'], zc['sub'],
+                zc['verdict'], zc['section'], ZONE_FOOTERS['firm'])
+
+def gen_p4(zones, date_cn, med, prev_zones):
+    zc = zone_content('lurk', zones, date_cn, med, prev_zones)
+    return page(ZONE_KICKERS['lurk'], zc['title_html'], zc['sub'],
+                zc['verdict'], zc['section'], ZONE_FOOTERS['lurk'])
 
 
 def main():
