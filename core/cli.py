@@ -158,6 +158,12 @@ def main():
                 print(f"  {s}")
 
         elif args.command == "review":
+            # 交易日检查：非交易日（周末/节假日）直接退出，避免用旧数据生成复盘
+            from core.trading_calendar import is_trading_day
+            ok, reason = is_trading_day()
+            if not ok:
+                print(f"NON_TRADING_DAY: {reason}")
+                return
             from plans.daily_report import run as run_review, format_report as format_review
             data = run_review(date=args.date, verbose=not args.json and not args.html)
             if args.html:
