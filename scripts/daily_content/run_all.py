@@ -140,9 +140,11 @@ def main():
     for i in range(1, 5):
         if not html_to_png(f'anomaly_p{i}_{date_str}'):
             return 1
+    # 4b. 异常信号捕捉四张动画视频（mp4 x4，只读anomaly缓存，失败不阻断）
+    run_script('generate_anomaly_video.py')
     
     print("\n" + "="*60)
-    print("✓ 全部完成，共生成11张图 + 7个动画视频")
+    print("✓ 全部完成，共生成11张图 + 11个动画视频")
     print("="*60)
     
     # 列出输出文件
@@ -201,6 +203,12 @@ def main():
             vid_i = f'matrix_p{i}_video_{mdate}.mp4'
             if png_i in files and os.path.exists(os.path.join(OUTPUT_DIR, vid_i)):
                 files.insert(files.index(png_i) + 1, vid_i)
+    # 异常信号视频插到各自anomaly png之后
+    for i in range(1, 5):
+        png_i = f'anomaly_p{i}_{date_str}.png'
+        vid_i = f'anomaly_p{i}_video_{date_str}.mp4'
+        if png_i in files and os.path.exists(os.path.join(OUTPUT_DIR, vid_i)):
+            files.insert(files.index(png_i) + 1, vid_i)
     for name in files:
         png_path = os.path.join(OUTPUT_DIR, name)
         if os.path.exists(png_path):

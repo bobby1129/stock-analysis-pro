@@ -327,6 +327,20 @@ if __name__ == '__main__':
     
     date_str = datetime.now().strftime("%Y%m%d")
     
+    # 写数据缓存（供 generate_anomaly_video.py 只读复用，避免视频重新抓全市场）
+    cache_dir = os.path.expanduser('~/stock-analysis-pro/cache/daily_content')
+    os.makedirs(cache_dir, exist_ok=True)
+    cache_file = os.path.join(cache_dir, f'anomaly_cache_{date_str}.json')
+    with open(cache_file, 'w', encoding='utf-8') as f:
+        json.dump({
+            'date': date_str,
+            'date_cn': datetime.now().strftime("%Y年%m月%d日"),
+            'signals': signals,
+            'lb_dist': {str(k): v for k, v in lb_dist.items()},
+            'lb_names': {str(k): v for k, v in lb_names.items()},
+        }, f, ensure_ascii=False)
+    print(f"✓ 数据缓存: {cache_file}")
+    
     # 生成4张独立HTML
     print("\n生成HTML（4张）...")
     
