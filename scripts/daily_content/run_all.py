@@ -127,6 +127,8 @@ def main():
                 return 1
         else:
             break
+    # 3b. 交易额新进TOP50 动画视频（mp4，数据同源，失败不阻断）
+    run_script('generate_new_top50_video.py')
     
     # 4. 异常信号捕捉（4张：放量滞涨/缩量新高/放量急拉/连板梯队）
     if not run_script('generate_anomaly.py'):
@@ -136,7 +138,7 @@ def main():
             return 1
     
     print("\n" + "="*60)
-    print("✓ 全部完成，共生成11张图")
+    print("✓ 全部完成，共生成11张图 + 2个动画视频")
     print("="*60)
     
     # 列出输出文件
@@ -154,16 +156,22 @@ def main():
         f'anomaly_p3_{date_str}.png',
         f'anomaly_p4_{date_str}.png',
     ]
-    # 动态添加new_top50文件（单页或多页）
+    # 动态添加new_top50文件（单页或多页）+ 动画视频
     if os.path.exists(os.path.join(OUTPUT_DIR, f'new_top50_{date_str}.png')):
         files.insert(6, f'new_top50_{date_str}.png')
+        if os.path.exists(os.path.join(OUTPUT_DIR, f'new_top50_video_{date_str}.mp4')):
+            files.insert(7, f'new_top50_video_{date_str}.mp4')
     else:
+        inserted = 0
         for p in range(1, 10):
             png_name = f'new_top50_p{p}_{date_str}.png'
             if os.path.exists(os.path.join(OUTPUT_DIR, png_name)):
                 files.insert(5 + p, png_name)
+                inserted = p
             else:
                 break
+        if os.path.exists(os.path.join(OUTPUT_DIR, f'new_top50_video_{date_str}.mp4')):
+            files.insert(6 + inserted, f'new_top50_video_{date_str}.mp4')
     # matrix文件名带交易日后缀（15:30前运行=上一交易日，与run_all的date_str可能不同），动态补入
     matrix_files = [f for f in files if f.startswith('matrix_')]
     if not all(os.path.exists(os.path.join(OUTPUT_DIR, f)) for f in matrix_files):

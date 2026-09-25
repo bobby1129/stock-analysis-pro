@@ -1,4 +1,30 @@
 
+## ✅ v3.14 新进TOP50升级：图片增强 + 动画视频 — 已完成 (2026-09-25)
+
+### 核心改动
+| 文件 | 改动 |
+|------|------|
+| `scripts/daily_content/generate_new_top50.py` | 图片升级：IP角标(Vol.N复用episode_counter)+自动研判句；新增量比/换手两列(腾讯批量接口，字段打印验证)；信号标注(⚠巨量绿柱=量比>2且下跌/🟢资金进场=量比>1.2且上涨)；上下padding提至90px安全区；新增`--prev-date`测试参数 |
+| `scripts/daily_content/generate_new_top50_video.py` | 新增：交易额新进TOP50动画视频(~21s mp4)，复用龙虎标尺管线(Playwright录屏+ffmpeg_static) |
+| `scripts/daily_content/run_all.py` | 步骤3b接入视频生成(失败不阻断)；产出清单动态插入mp4；总结改"11张图+2个动画视频" |
+| `DAILY_CONTENT.md` / `README.md` / `USAGE.md` | 文档同步(11图+2视频，新增3b章节) |
+
+### 动画结构（用户定稿）
+1. 标题只有「日期+交易额新进TOP50」，先居中放大1.55倍展示；标题折两行(width 400px)，缩回顶部时width动画展开到800px恢复一行
+2. 条目依次飞入中央放大，只显示名称/涨幅/成交额(+「新进榜·No.N」小字)，停留0.7s
+3. 落位后显示完整7列(排名/名称+信号徽章/现价/涨幅/量比/换手/成交额)
+4. 全部落位footer淡入，定格3s
+- 行数自适应：行高=(1810-340)/n限幅[78,150]px，字号三档；空榜跳过(exit 0)
+- 时间参数：TITLE_HOLD 1600 / TITLE_MOVE 900 / ROWS_START 2900 / STEP 1150 / FLY_HOLD 700 / SEAT 800 / TAIL 3000 ms
+
+### 数据链路
+- 图片与视频同源：视频脚本直接import图片脚本的 fetch_stock_amount / fetch_yesterday_top50_codes / fetch_tencent_extras / classify_signal，只读缓存
+- 腾讯量比字段 parts[49]、换手 parts[38]（与anomaly已验证映射一致，本次再打印验证13/13只）
+- 腾讯接口失败时降级显示"—"不阻断出图
+- cron prompt(16:00抖音日更)已同步：新增mp4产出说明
+
+---
+
 ## ✅ v3.13 review命令节假日静默 — 已完成 (2026-09-25)
 
 ### 核心改动
