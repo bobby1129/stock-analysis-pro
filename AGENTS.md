@@ -1,0 +1,31 @@
+# stock-analysis-pro Agent备忘
+
+项目核心文档。Agent 动本项目前先读此文件；改动代码必须同步更新此文档。
+相关文档: DESIGN.md(设计)、USAGE.md(用法)、DAILY_CONTENT.md / DAILY_CONTENT_PROJECT.md(抖音内容)、PROGRESS.md。
+
+## 数据源与接口
+
+- industry_screener.py: 新浪行情 + 同花顺F10主营业务；剔除北交所；成交额 /10000 转亿。
+- 概念资金流: akshare `stock_fund_flow_concept("即时")` = 全量387概念（同花顺 gnzjl 网页只返回涨幅TOP50，有采样偏差，弃用）。资金榜需过滤宽基桶(融资融券/股通/国企改革等)，但"国家大基金持股"是真题材不可误杀。
+- 个股全市场资金流用新浪。
+- 同花顺/东财字段映射必须打印验证，不可假设。
+- 服务器为 ARM(aarch64)，akshare 同花顺接口依赖 py_mini_racer 软链修复（venv 重装后需重建软链）。
+
+## 报告要求
+
+- 行业筛选报告必须包含: 催化新闻(带日期) + 行情回顾时间线 + 有价值环节分梯队；目标是可操作(入场时机)。
+- 行业分析模块放每个行业卡片之后(循环内 if 匹配)，不集中到报告末尾；排名总览只列 top15，其余归"其它"；每个 top5 行业都要分析。
+- 行业分类到二级(主营业务)，不用概念板块。
+- 新闻搜索: Google News RSS (curl --proxy http://127.0.0.1:10809) 最稳定；百度易触发验证码；Bing国际版 curl 无法解析需浏览器。
+- cron 复盘报告输出: `cache/review_report_YYYYMMDD_HHMM.html`。
+
+## 抖音内容 (daily_content)
+
+- 竖屏 1080×1920，上下留白 200px+（手机遮挡），大字号(40px+)，金色高级感风格。
+- 新进TOP50分页规则: ≤10 单页大字；11-15 单页小字；>15 分页每页10只大字。
+- UI迭代原则: 小改动优先，保留内容元素，一张图一张图改。
+- 中文文字渲染只能靠 HTML→截图，AI生图不可靠。
+- 可视化必须有信息价值，拒绝"为了好看而好看"（全市场5000只热力图、无红绿对抗的热力图为反例）。
+- 文本歧义: 写"约10亿"不写"~10亿"。
+- ffmpeg: 系统 /usr/bin/ffmpeg 无 libx264（仅rkmpp硬编，init失败）；用静态版 `scripts/daily_content/ffmpeg_static`（imageio-ffmpeg，阿里云镜像 uv 安装；pip/uv 默认源和 johnvansickle.com 下载均超时）。
+- 动画视频已下线（v3.18，2026-09-27）。若日后重做：弃用 Playwright 实时录屏（帧率/时序不可控），改用帧精确管线——HTML内暴露 `window.__render(t)` 同步渲染 → 逐帧截图(30fps) → ffmpeg_static 合成 mp4。
