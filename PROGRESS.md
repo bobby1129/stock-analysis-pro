@@ -1,4 +1,30 @@
 
+## ✅ v3.18 抖音动画视频全部下线 — 已完成 (2026-09-27)
+
+### 原因
+用户评估：v3.12~v3.17 的11个动画视频内容粗糙（纯排版动画、信息价值低于图片版），决定退回纯图片流程。图片侧的增强（v3.14 IP角标/研判句/量比换手/信号标注、交易日检查、compute_quadrants/zone_content同源重构）全部保留。
+
+另（同日）：TOP10/新进TOP50 的「盘后情报局 · Vol.N」角标去掉期号，只保留「盘后情报局」——期号纯顺序计数无信息价值，且计数器易被测试运行推高造成错乱。episode_counter.json 停用（文件保留），`get_episode_vol()` 保留备用。
+
+### 核心改动
+| 文件 | 改动 |
+|------|------|
+| `scripts/daily_content/generate_{ruler,p0,zone,new_top50,anomaly}_video.py` | 删除（5个视频脚本） |
+| `scripts/daily_content/run_all.py` | 移除步骤1b/2b/2c/3b/4b视频调用与产出清单视频插入逻辑；总结恢复"11张图" |
+| `scripts/daily_content/generate_anomaly.py` | 移除v3.17加的anomaly_cache写入钩子（纯为视频服务，图片流程不依赖） |
+| `scripts/daily_content/generate_stock_amount.py` / `generate_new_top50.py` | kicker去掉「· Vol.N」期号只留「盘后情报局」；停用get_episode_vol()调用（函数保留），episode_counter.json不再更新 |
+| `DAILY_CONTENT.md` / `README.md` / `USAGE.md` | 移除视频章节，恢复11图口径；DAILY_CONTENT.md顶部留下线备忘；IP角标描述同步去Vol |
+
+### 保留不动
+- `scripts/daily_content/prototype_ruler3_top10.py`（0ba2a3a带入的动画原型，暂留档，不在run_all流程内）
+- `scripts/daily_content/ffmpeg_static`（未入库，AGENTS.md有引用）
+- generate_matrix.py 的 `compute_quadrants()`/`zone_content()` 共享函数（图片同源使用）
+
+### 若日后重做视频
+弃用 Playwright 实时录屏（帧率/时序不可控），改用帧精确管线：HTML内暴露 `window.__render(t)` 同步渲染 → 逐帧截图(30fps) → 静态ffmpeg合成mp4。实践验证见 2026-09-27 期权策略科普视频任务。
+
+---
+
 ## ✅ v3.17 异常信号捕捉四张动画视频 — 已完成 (2026-09-26)
 
 ### 核心改动

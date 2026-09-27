@@ -8,7 +8,9 @@
 
 **重要**：除非用户明确要求"重做"，否则所有修改都只在现有基础上进行增量改动，不要推翻重来。
 
-## 四张图 + 7视频（共11张PNG + 7个MP4）
+## 四张图（共11张PNG）
+
+> **2026-09-27 视频功能下线**：原1b/2b/2c/3b/4b共11个动画视频（龙虎标尺/全景图/四榜/新进TOP50/异常信号）因内容质量粗糙已全部移除，回到纯图片流程。相关脚本已删除，run_all.py 恢复11图口径。若日后重做视频，采用帧精确渲染管线（HTML + window.__render(t) 逐帧截图 + 静态ffmpeg合成），参考 skill `dashscope-video-generation` 期间的实践经验，不再用 Playwright 实时录屏。
 
 ### 1. 个股成交额TOP10（1张）
 - **脚本**: `scripts/daily_content/generate_stock_amount.py`
@@ -37,26 +39,6 @@
 - **NEW标记**: 新进入TOP10的股票显示金色NEW标签 + NEW箭头
 - **注意**: 新浪接口返回全市场数据，可按成交额排序，不受50条限制
 - **状态**: ✅ 已完成
-
-### 1b. 交易额TOP10 龙虎标尺动画视频（1个MP4）
-- **脚本**: `scripts/daily_content/generate_ruler_video.py`
-- **数据源**: 与个股成交额TOP10完全同源（新浪实时 + `stock_amount_cache_YYYYMMDD.json` 昨日对比）
-- **不写缓存**（缓存由 generate_stock_amount.py 负责保存，本脚本只读，run_all.py 中排在其后运行）
-- **形态**: 1080×1920 竖屏动画视频（约18秒，H.264 MP4）
-- **布局**: 中央垂直排名标尺（No.1~No.10等距），左右各5只（奇数名左、偶数名右）
-  - 每支大卡片从侧边飞入中央舞台放大展示6项（名称/现价/涨幅/成交额/环比/箭头）
-  - 落到自己排名的y位置后缩小定格为双行结构：第一行「名称+排名箭头」，第二行「成交额居左、环比居右」
-  - NEW股：金色NEW徽章钉在名称框左上角，行内不再显示箭头
-- **定稿布局参数**（v3.2，勿轻动）: PLOT_TOP=380, PLOT_BOTTOM=1622, ROW_H=260, CARD_W=430,
-  名称/成交额58px、环比40px、箭头44px、刻度No.N 34px；标题只保留「日期+交易额TOP10」；
-  Vol期号在页脚（与图片版共用 episode_counter.json，每交易日+1）
-- **超宽保护**: 名称或数据行超过框宽时JS自动逐档缩小字号（58→34px），边框不动
-- **转码**: 系统ffmpeg无libx264，使用 `scripts/daily_content/ffmpeg_static`（imageio-ffmpeg静态版，51MB已gitignore不入库）。
-  重装方法：`uv venv /tmp/ffv && uv pip install --python /tmp/ffv/bin/python --index-url https://mirrors.aliyun.com/pypi/simple/ imageio-ffmpeg`，
-  然后复制 `/tmp/ffv/lib/python3.11/site-packages/imageio_ffmpeg/binaries/ffmpeg-linux-aarch64-v7.0.2` 到 `scripts/daily_content/ffmpeg_static` 并 chmod +x。
-  Playwright录屏webm(vp8) → libx264 mp4（crf 20）。Playwright自带ffmpeg仅vp8编码，不能用。
-- **测试**: `--cache-date YYYYMMDD` 可强制指定对比缓存日期（演示/回测用）
-- **状态**: ✅ 已完成（2026-09-25 接入 run_all.py 步骤1b）
 
 ### 2. 概念板块资金意图矩阵（5张）
 
@@ -102,42 +84,6 @@
 - **旧版概念2图**: `generate_concept_html.py` 保留（提供 `is_bucket_concept` 宽基桶过滤函数被矩阵脚本复用），但已从 run_all.py 移除，不再生成 concept_p1/p2
 - **状态**: ✅ 已转正（2026-09-24，run_all.py 总图数 8→11）
 
-### 2b. 板块资金全景图 动画视频（1个MP4）
-- **脚本**: `scripts/daily_content/generate_p0_video.py`
-- **数据源**: 与图片p0完全同源（import `generate_matrix.py` 的 `fetch_data` / `compute_quadrants`，四象限统计逻辑单一来源），不写缓存
-- **形态**: 1080×1920 竖屏动画视频（约14秒，H.264 MP4），管线复用龙虎标尺（Playwright录屏 → ffmpeg_static转码）
-- **动画结构**（用户定稿 2026-09-25）:
-  1. 标题区只有「日期 + 板块资金全景图」两部分，先在屏幕中央放大1.5倍展示（1.6s），缩回顶部
-  2. 四张象限卡片依次飞到屏幕中央放大1.35倍展示（完整卡片：图标+计数+标签+副注+之最），再飞落到2×2四宫格位置。顺序：健康上涨(左上)→涨但流出(右上)→跌却流入(左下)→跌且流出(右下)
-  3. 全部落座后，说明行（N个活跃板块…分四象限）+ 研判句 **一起淡入**，位于标题与四宫格之间（用户指定：研判不放底部，放中间填补空间）
-- **时间参数**: TITLE_HOLD=1600ms, TITLE_MOVE=900ms, CARDS_START=2900ms, STEP=1700ms, FLY_HOLD=700ms, SEAT=800ms, VERDICT_GAP=600ms, TAIL=3000ms
-- **布局参数**: GRID_TOP=560, CARD_W≈481, CARD_H=430, STAGE_Y=1010, FLY_SCALE=1.35；说明+研判块 top=290
-- **前端不展示**（用户要求，规则仅存档于此）:
-  - 「盘后情报局」kicker角标、页脚brand 均去掉（图片版p0仍保留）
-  - 象限判据规则：涨跌幅±0.3% × 净额正负分界；活跃板块门槛=总成交>20亿；净额为全口径（含散户）
-- **输出**: `output/daily_content/p0_panorama_video_YYYYMMDD.mp4`（文件名带交易日后缀，与matrix图片一致）
-- **测试**: `--html-only` 只生成HTML不录屏（调试用）
-- **状态**: ✅ 已完成（2026-09-25 接入 run_all.py 步骤2b，失败不阻断图片流程）
-
-### 2c. 资金意图矩阵四榜 动画视频（4个MP4）
-- **脚本**: `scripts/daily_content/generate_zone_video.py`
-- **对象**: p1资金失血榜 / p2对倒嫌疑榜 / p3主攻方向榜 / p4潜伏吸筹榜，四个视频同一动画逻辑
-- **数据源**: 与图片p1-p4完全同源（import `generate_matrix.py` 的 `fetch_data` / `select_zones` / `load_yesterday_zones` / `zone_content`；`zone_content` 为2026-09-26抽取的共享函数，返回 title/sub/verdict/section，图片与视频单一来源），只读缓存不写
-- **形态**: 1080×1920 竖屏动画视频（每条约7秒，H.264 MP4），管线复用龙虎标尺（Playwright录屏 → ffmpeg_static转码）
-- **动画结构**（用户定稿 2026-09-26）:
-  1. 开场：标题区只有「日期 + 榜名」（保留黑/绿/红/金配色），居中放大1.5倍展示（1.6s）→ 落座顶部
-  2. 落座后其余内容**轻微先后淡入**（各间隔300ms）：副标题说明行 → 💡研判 → 榜单section（不逐行飞入）
-  3. 尾部定格3s
-- **时间参数**: TITLE_HOLD=1600ms, TITLE_MOVE=900ms, CONTENT_START=2800ms, FADE_STEP=300ms, FADE=600ms, TAIL=3000ms
-- **副标题去日期前缀**: 视频版标题区已有日期，sub 中「X月X日收盘 ｜」前缀自动剥离
-- **前端不展示**（用户要求，规则仅存档于此；图片版p1-p4仍保留kicker/页脚）:
-  - 「盘后情报局 · 资金意图矩阵 N/4」kicker角标、门槛规则页脚 均去掉
-  - 四榜门槛规则存档：失血榜=成交≥50亿·净流出≥3亿·按抽血率(净流出/成交额)排序；对倒榜=成交≥100亿·涨幅>0.8%·净流入为正但留存率<1.5%·按成交排序；主攻榜=涨幅≥0.5%·净流入≥3亿·留存率≥3%·能量≥全市场中位·按留存率排序；潜伏榜=涨幅<0.5%·净流入≥3亿·留存率≥4%·按留存率排序。留存率=净额/总成交；能量=总成交/公司家数（亿/只）；净额为全口径（含散户）；空榜诚实显示"暂无"不放宽门槛
-- **QA**: 内置程序化溢出检查（内容底边>1830或scrollWidth超宽即警告）；已知误报：`.emeta` 龙头名过长时 nowrap+ellipsis 截7px属图片版同款行为，非缺陷
-- **输出**: `output/daily_content/matrix_p{1..4}_video_YYYYMMDD.mp4`（交易日后缀与matrix图片一致）
-- **测试**: `--html-only` 只生成HTML不录屏（调试用）
-- **状态**: ✅ 已完成（2026-09-26 接入 run_all.py 步骤2c，失败不阻断图片流程）
-
 ### 3. 新进成交额TOP50（1张或多张）
 - **脚本**: `scripts/daily_content/generate_new_top50.py`
 - **数据源**: 新浪财经（全市场成交额）+ 腾讯行情（量比 parts[49]/换手 parts[38]，字段映射已打印验证 2026-09-25）
@@ -147,7 +93,7 @@
   - 11-15只：单页，小字体
   - \>15只：分页，每页10只，大字体
 - **显示列**: 排名、股票、现价、涨幅、量比、换手、成交额（7列）
-- **IP角标+研判句**: 「盘后情报局 · Vol.N」（与TOP10共用 episode_counter.json）；研判句自动生成（新进家数+红绿对比+信号股点名），每日必不同
+- **IP角标+研判句**: 「盘后情报局」（2026-09-28去掉Vol.N期号——纯顺序计数无信息价值，episode_counter.json停用、`get_episode_vol()`保留备用）；研判句自动生成（新进家数+红绿对比+信号股点名），每日必不同
 - **信号标注**（衔接"巨量+绿柱→75%次日低开"回测）:
   - ⚠巨量绿柱：量比>2 且下跌 → 绿色徽章 + 整行淡绿底
   - 🟢资金进场：量比>1.2 且上涨 → 红色徽章
@@ -156,22 +102,6 @@
 - **缓存依赖**: `cache/daily_content/stock_amount_cache_YYYYMMDD.json`（与TOP10共用，本脚本只读不写）
 - **测试**: `--prev-date YYYYMMDD` 可强制指定对比缓存日期（演示/回测用）
 - **状态**: ✅ 已完成（2026-09-25 升级：IP角标/研判句/量比换手列/信号标注）
-
-### 3b. 交易额新进TOP50 动画视频（1个MP4）
-- **脚本**: `scripts/daily_content/generate_new_top50_video.py`
-- **数据源**: 与图片版完全同源（直接 import generate_new_top50.py 的采集/信号函数），不写缓存
-- **形态**: 1080×1920 竖屏动画视频（约21秒@13只，H.264 MP4），管线复用龙虎标尺（Playwright录屏 → ffmpeg_static转码）
-- **动画结构**（用户定稿）:
-  1. 标题区只有「日期 + 交易额新进TOP50」两部分，先在屏幕中央放大1.55倍展示；标题折成两行（「交易额新进/TOP50」，容器width 400px），缩回顶部时width动画展开到800px恢复一行
-  2. 条目依次飞入：每张卡片先到屏幕中间放大，只显示 名称/涨幅/成交额 三项（另有「新进榜 · No.N」小字），停留0.7s
-  3. 落位后展示完整7列信息（排名/名称+信号徽章/现价/涨幅/量比/换手/成交额）
-  4. 全部落位后footer淡入，定格3s
-- **时间参数**: TITLE_HOLD=1600ms, TITLE_MOVE=900ms, ROWS_START=2900ms, STEP=1150ms, FLY_HOLD=700ms, SEAT=800ms, TAIL=3000ms
-- **行数自适应**: 新进数量不定（1~20+），行高=（1810-340)/n 限幅[78,150]px，字号按行高自动分三档
-- **空榜处理**: 当日无新进榜时跳过生成（exit 0）
-- **输出**: `output/daily_content/new_top50_video_YYYYMMDD.mp4`
-- **测试**: `--prev-date YYYYMMDD` 同图片版
-- **状态**: ✅ 已完成（2026-09-25 接入 run_all.py 步骤3b，失败不阻断图片流程）
 
 ### 4. 异常信号捕捉（4张）
 - **脚本**: `scripts/daily_content/generate_anomaly.py`
@@ -187,26 +117,7 @@
   - 放量急拉（量比>2 且 涨幅>5%）
 - **连板梯队**: 按连板数分组显示，超过5个显示"等N家"（无省略号）
 - **拆分为4张独立图片**: 放量滞涨、缩量新高、放量急拉、连板梯队各1张
-- **数据缓存**（2026-09-26新增）: 出图后写 `cache/daily_content/anomaly_cache_YYYYMMDD.json`（signals + lb_dist/lb_names + 日期），供4b视频脚本只读复用，避免重新抓全市场（约2分钟）
 - **状态**: ✅ 已完成
-
-### 4b. 异常信号捕捉 动画视频（4个MP4）
-- **脚本**: `scripts/daily_content/generate_anomaly_video.py`
-- **对象**: p1放量滞涨 / p2缩量新高 / p3放量急拉 / p4连板梯队，四个视频同一动画逻辑
-- **数据源**: 只读 `anomaly_cache_YYYYMMDD.json`（由 generate_anomaly.py 写入，图片与视频同源）；当日缓存缺失自动回退最近一份（节假日演示用）；`--date YYYYMMDD` 可指定
-- **形态**: 1080×1920 竖屏动画视频（每条约7秒，H.264 MP4），管线复用龙虎标尺（Playwright录屏 → ffmpeg_static转码）
-- **动画结构**（用户定稿 2026-09-26）:
-  1. 「日期 + 异常信号捕捉」标题区**固定顶部全程展示**（不动画）
-  2. 栏目名（图标+名称，如「🚀 缩量新高」，**不含**括号说明）开场屏幕中央放大1.6倍展示（1.6s）→ 飞向榜单卡片标题位置落位（落位瞬间fly层隐藏、真标题显现，Range测文字中心对齐，无重影）
-  3. 落位后内容轻微先后淡入（间隔300ms）：卡片+榜单行 → 页脚免责行
-  4. 尾部定格3s
-- **时间参数**: TITLE_HOLD=1600ms, TITLE_MOVE=900ms, 落位后+300ms榜单淡入, +600ms页脚淡入, FADE=600ms, TAIL=3000ms
-- **页脚保留**: 「数据来源：沪深A股 | 仅供参考，不构成投资建议」（用户确认保留，与四榜视频去页脚的决定不同）
-- **暂不补**: IP角标/研判句（用户决定 2026-09-26：还没有明确导向，图片与视频均维持现状）
-- **QA**: 内置程序化溢出检查（内容底边>1840或scrollWidth超宽即警告）
-- **输出**: `output/daily_content/anomaly_p{1..4}_video_YYYYMMDD.mp4`
-- **测试**: `--html-only` 只生成HTML不录屏（调试用）
-- **状态**: ✅ 已完成（2026-09-26 接入 run_all.py 步骤4b，失败不阻断图片流程）
 
 ## 运行方式
 

@@ -459,7 +459,7 @@ body {{
 </head>
 <body>
     <div class="header">
-        <div class="kicker">盘后情报局 · Vol.{vol}</div>
+        <div class="kicker">盘后情报局</div>
         <div class="date">{date_str}</div>
         <div class="title">个股成交额 TOP10</div>
     </div>
@@ -509,7 +509,7 @@ if __name__ == '__main__':
     
     print("生成成交额TOP10...")
     verdict = build_verdict(stocks, yesterday_amount, yesterday_top10_codes)
-    vol = get_episode_vol()
+    vol = 0  # 角标已去掉Vol期号(2026-09-28)，计数器停用；get_episode_vol()保留备用
     html = generate_html(stocks, yesterday_amount, yesterday_top10_codes, yesterday_ranks, verdict, vol)
     output_file = os.path.join(output_dir, f'stock_amount_top10_{date_str}.html')
     with open(output_file, 'w', encoding='utf-8') as f:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """生成新进成交额TOP50 HTML - 首次进入TOP50的股票
-含: IP角标(盘后情报局 Vol.N) + 自动研判句 + 量比/换手列(腾讯源) + 巨量绿柱⚠信号标注
+含: IP角标(盘后情报局) + 自动研判句 + 量比/换手列(腾讯源) + 巨量绿柱⚠信号标注
 """
 
 import sys, os
@@ -483,7 +483,7 @@ body {{
 </head>
 <body>
     <div class="header">
-        <div class="kicker">盘后情报局 · Vol.{vol}</div>
+        <div class="kicker">盘后情报局</div>
         <div class="date">{date_str}</div>
         <div class="title">新进成交额TOP50</div>
         <div class="subtitle">首次进入成交额前50 · 共{count}只 {page_info}</div>
@@ -544,7 +544,7 @@ if __name__ == '__main__':
               f"量比{ex.get('volume_ratio', 0):.2f} 换手{ex.get('turnover', 0):.1f}%{sig_txt}")
 
     verdict = build_verdict(new_stocks, extras)
-    vol = get_episode_vol()
+    vol = 0  # 角标已去掉Vol期号(2026-09-28)，计数器停用
     print(f"研判: {verdict}")
 
     output_dir = os.path.expanduser('~/stock-analysis-pro/output/daily_content')

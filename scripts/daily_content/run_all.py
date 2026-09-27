@@ -105,16 +105,10 @@ def main():
         return 1
     if not html_to_png(f'stock_amount_top10_{date_str}'):
         return 1
-    # 1b. 交易额TOP10 龙虎标尺动画视频（mp4，数据同源）
-    run_script('generate_ruler_video.py')
     
     # 2. 概念板块资金意图矩阵（5张: p0全景+p1失血+p2对倒+p3主攻+p4潜伏，脚本自带截图）
     if not run_script('generate_matrix.py'):
         return 1
-    # 2b. 板块资金全景图动画视频（mp4，数据同源generate_matrix，失败不阻断）
-    run_script('generate_p0_video.py')
-    # 2c. 资金意图矩阵四榜动画视频（mp4 x4，数据同源generate_matrix，失败不阻断）
-    run_script('generate_zone_video.py')
     
     # 3. 新进成交额TOP50（1张或多张）
     if not run_script('generate_new_top50.py'):
@@ -131,8 +125,6 @@ def main():
                 return 1
         else:
             break
-    # 3b. 交易额新进TOP50 动画视频（mp4，数据同源，失败不阻断）
-    run_script('generate_new_top50_video.py')
     
     # 4. 异常信号捕捉（4张：放量滞涨/缩量新高/放量急拉/连板梯队）
     if not run_script('generate_anomaly.py'):
@@ -140,18 +132,15 @@ def main():
     for i in range(1, 5):
         if not html_to_png(f'anomaly_p{i}_{date_str}'):
             return 1
-    # 4b. 异常信号捕捉四张动画视频（mp4 x4，只读anomaly缓存，失败不阻断）
-    run_script('generate_anomaly_video.py')
     
     print("\n" + "="*60)
-    print("✓ 全部完成，共生成11张图 + 11个动画视频")
+    print("✓ 全部完成，共生成11张图")
     print("="*60)
     
     # 列出输出文件
     print(f"\n输出文件 ({OUTPUT_DIR}):")
     files = [
         f'stock_amount_top10_{date_str}.png',
-        f'ruler_top10_{date_str}.mp4',
         f'matrix_p0_{date_str}.png',
         f'matrix_p1_{date_str}.png',
         f'matrix_p2_{date_str}.png',
@@ -162,22 +151,16 @@ def main():
         f'anomaly_p3_{date_str}.png',
         f'anomaly_p4_{date_str}.png',
     ]
-    # 动态添加new_top50文件（单页或多页）+ 动画视频
+    # 动态添加new_top50文件（单页或多页）
     if os.path.exists(os.path.join(OUTPUT_DIR, f'new_top50_{date_str}.png')):
         files.insert(6, f'new_top50_{date_str}.png')
-        if os.path.exists(os.path.join(OUTPUT_DIR, f'new_top50_video_{date_str}.mp4')):
-            files.insert(7, f'new_top50_video_{date_str}.mp4')
     else:
-        inserted = 0
         for p in range(1, 10):
             png_name = f'new_top50_p{p}_{date_str}.png'
             if os.path.exists(os.path.join(OUTPUT_DIR, png_name)):
                 files.insert(5 + p, png_name)
-                inserted = p
             else:
                 break
-        if os.path.exists(os.path.join(OUTPUT_DIR, f'new_top50_video_{date_str}.mp4')):
-            files.insert(6 + inserted, f'new_top50_video_{date_str}.mp4')
     # matrix文件名带交易日后缀（15:30前运行=上一交易日，与run_all的date_str可能不同），动态补入
     matrix_files = [f for f in files if f.startswith('matrix_')]
     if not all(os.path.exists(os.path.join(OUTPUT_DIR, f)) for f in matrix_files):
@@ -191,24 +174,6 @@ def main():
         mdate = td.strftime('%Y%m%d')
         for i in range(5):
             files.insert(1 + i, f'matrix_p{i}_{mdate}.png')
-    # 全景图动画视频与matrix同交易日后缀，插到matrix_p0之后；四榜视频插到各自png之后
-    matrix_p0 = next((f for f in files if f.startswith('matrix_p0_')), None)
-    if matrix_p0:
-        mdate = matrix_p0.split('_')[-1].split('.')[0]
-        vname = f'p0_panorama_video_{mdate}.mp4'
-        if os.path.exists(os.path.join(OUTPUT_DIR, vname)):
-            files.insert(files.index(matrix_p0) + 1, vname)
-        for i in range(1, 5):
-            png_i = f'matrix_p{i}_{mdate}.png'
-            vid_i = f'matrix_p{i}_video_{mdate}.mp4'
-            if png_i in files and os.path.exists(os.path.join(OUTPUT_DIR, vid_i)):
-                files.insert(files.index(png_i) + 1, vid_i)
-    # 异常信号视频插到各自anomaly png之后
-    for i in range(1, 5):
-        png_i = f'anomaly_p{i}_{date_str}.png'
-        vid_i = f'anomaly_p{i}_video_{date_str}.mp4'
-        if png_i in files and os.path.exists(os.path.join(OUTPUT_DIR, vid_i)):
-            files.insert(files.index(png_i) + 1, vid_i)
     for name in files:
         png_path = os.path.join(OUTPUT_DIR, name)
         if os.path.exists(png_path):
