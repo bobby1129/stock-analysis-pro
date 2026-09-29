@@ -44,3 +44,6 @@ config/config.yaml
 
 # 本地工具二进制（体积大，不入库；安装方法见 DAILY_CONTENT.md）
 scripts/daily_content/ffmpeg_static
+
+# 数据产物输出（图片/HTML/视频等，永不入库）
+output/
