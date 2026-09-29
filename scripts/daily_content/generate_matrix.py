@@ -8,7 +8,9 @@ p3「主攻方向榜」: 三共振TOP5 (寻宝)
 p4「潜伏吸筹榜」: 钱进价未动TOP5 (寻宝)
 指标: 留存率=净额/总成交(决心), 能量=总成交/公司家数(活跃度,亿/只)
 空区诚实显示, 不放宽门槛凑数
-数据源: akshare同花顺全量概念资金流(全口径)
+数据源: 净额/留存率=同花顺主力资金流(超大单+大单, 与APP同口径, collectors/ths_mainforce);
+        总额/能量/涨跌幅=akshare同花顺全量概念资金流(全口径);
+        主动净额=全口径净额(主动买-主动卖), 与主力背离时标注派发/吸筹嫌疑
 """
 import os, sys, json
 for k in ['HTTPS_PROXY','https_proxy','HTTP_PROXY','http_proxy']: os.environ.pop(k, None)
@@ -19,6 +21,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 from generate_concept_html import is_bucket_concept
+from collectors.ths_mainforce import fetch_concept_main_force
 
 OUT_DIR = os.path.expanduser('~/stock-analysis-pro/output/daily_content')
 CACHE_DIR = os.path.expanduser('~/stock-analysis-pro/cache/daily_content')
@@ -39,13 +42,38 @@ def trading_date():
 
 
 def fetch_data():
+    """全量概念: 主力四单资金(同花顺官方口径) + 全口径总额/主动净额(akshare gnzjl)
+    净额/留存率 = 主力口径(超大单+大单); 总额/能量 = 全口径(活跃度基准);
+    主动净额 = 全口径净额(主动买-主动卖), 用于背离信号"""
     df = ak.stock_fund_flow_concept(symbol="即时")
     for c in ['流入资金','流出资金','净额','行业-涨跌幅','公司家数','领涨股-涨跌幅']:
         df[c] = pd.to_numeric(df[c], errors='coerce')
     df = df[~df['行业'].apply(is_bucket_concept)].copy()
     df['总额'] = df['流入资金'] + df['流出资金']
-    df['留存率'] = df['净额'] / df['总额'] * 100
     df['能量'] = df['总额'] / df['公司家数']
+    df['主动净额'] = df['净额']          # 全口径=主动买-主动卖(与主力口径正交, 不可相加)
+
+    mf = fetch_concept_main_force()
+    n_miss = 0
+    mf_rows = []
+    for name in df['行业']:
+        m = mf.get(name)
+        if m:
+            mf_rows.append(m)
+        else:
+            n_miss += 1
+            mf_rows.append({k: None for k in ['super_net','big_net','medium_net','small_net','main_net','main_in','main_out']})
+    mfdf = pd.DataFrame(mf_rows, index=df.index)
+    df['净额'] = mfdf['main_net']                 # 主力净额(亿) = 超大单+大单
+    df['超大单'] = mfdf['super_net']
+    df['大单'] = mfdf['big_net']
+    df['中单'] = mfdf['medium_net']
+    df['小单'] = mfdf['small_net']
+    df['主力总额'] = mfdf['main_in'] + mfdf['main_out']
+    df['留存率'] = df['净额'] / df['主力总额'] * 100   # 主力决心: 主力净额/主力总成交
+    # 无主力数据的概念(映射缺失/接口失败)剔除, 避免NaN参与排序
+    df = df[df['净额'].notna()].copy()
+    print(f'✓ 主力口径合并: {len(df)}概念 (缺失剔除{n_miss})')
     return df
 
 
@@ -83,16 +111,17 @@ body { width:1080px; height:1920px; overflow:hidden;
 .erank { width:64px; font-size:52px; font-weight:900; color:#d4af37; text-align:center; }
 .emain { flex:1; min-width:0; padding-right:14px; }
 .eline { display:flex; align-items:baseline; gap:14px; }
-.ename { font-size:50px; font-weight:800; color:#1a1a1a; }
+.ename { font-size:44px; font-weight:800; color:#1a1a1a; }
 .ebadge { font-size:24px; font-weight:800; border-radius:6px; padding:3px 11px; white-space:nowrap; }
 .badge-fire { color:#fff; background:linear-gradient(90deg,#e67e22,#c0392b); }
 .badge-calm { color:#7a5c00; background:#f4e9c8; border:1px solid #e0cd90; }
 .badge-dv { color:#fff; background:#c0392b; }
+.badge-absorb { color:#fff; background:linear-gradient(90deg,#27ae60,#1d7a2f); }
 .badge-new { color:#fff; background:linear-gradient(90deg,#d4af37,#b8860b); }
 .echg { font-size:34px; font-weight:700; margin-left:auto; white-space:nowrap; }
 .etrack { height:16px; background:#f4efe2; border-radius:8px; margin:14px 0 11px; overflow:hidden; }
 .ebar { height:100%; border-radius:7px; }
-.emeta { font-size:28px; color:#999; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.emeta { font-size:22px; color:#999; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .eval { width:210px; text-align:right; font-size:60px; font-weight:900; letter-spacing:-1px; }
 .eval .unit { font-size:30px; font-weight:700; margin-left:2px; }
 .quad { margin:24px 46px 0; display:flex; gap:14px; }
@@ -106,8 +135,8 @@ body { width:1080px; height:1920px; overflow:hidden;
 
 def energy_badge(e, med):
     if e >= med * 1.6:
-        return f'<span class="ebadge badge-fire">🔥能量{e:.1f}</span>'
-    return f'<span class="ebadge badge-calm">能量{e:.1f}亿/只</span>'
+        return f'<span class="ebadge badge-fire">🔥能量{e:.1f}亿</span>'
+    return f'<span class="ebadge badge-calm">能量{e:.1f}亿</span>'
 
 
 # ---------- 四区选择 + 缓存 ----------
@@ -160,35 +189,58 @@ def load_yesterday_zones(date_key):
     return None
 
 
+def divergence_badge(r):
+    """主力口径(超大单+大单)与全口径主动净额(主动买-主动卖)背离信号
+    主力流出≥0.5亿+主动流入≥2亿 => 派发嫌疑(散户抢筹主力出货); 反向 => 吸筹嫌疑"""
+    mn, an = r.get('净额', 0), r.get('主动净额', 0)
+    if pd.isna(mn) or pd.isna(an):
+        return ''
+    if mn <= -0.5 and an >= 2:
+        return '<span class="ebadge badge-dv">⚠派发</span>'
+    if mn >= 0.5 and an <= -2:
+        return '<span class="ebadge badge-absorb">吸筹</span>'
+    return ''
+
+
+def active_meta(r):
+    """主动净额小注: 全口径主动买卖方向"""
+    an = r.get('主动净额', None)
+    if an is None or pd.isna(an):
+        return ''
+    return f" · 主动{an:+.1f}亿"
+
+
 def build_row(i, r, med, mode, is_new=False):
-    """mode: bleed(失血,绿条) / fake(对倒,红条) / firm(主攻,金条) / lurk(潜伏,金条)"""
+    """mode: bleed(失血,绿条) / fake(对倒,红条) / firm(主攻,金条) / lurk(潜伏,金条)
+    净额=主力口径(超大单+大单); meta附主动净额(全口径)"""
     name = r['行业']
     chg = r['行业-涨跌幅']
     chg_color = '#dc143c' if chg > 0 else '#228b22'
     badge = energy_badge(r['能量'], med)
     new_badge = '<span class="ebadge badge-new">NEW</span>' if is_new else ''
+    dv_main = divergence_badge(r)
 
     if mode == 'bleed':
-        dv = '<span class="ebadge badge-dv">⚠背离</span>' if chg > 0.3 else ''
+        dv = dv_main or ('<span class="ebadge badge-dv">⚠背离</span>' if chg > 0.3 else '')
         bar_pct = min(abs(r['留存率']) / 30 * 100, 100)
         bar = 'linear-gradient(90deg,#5cb87a,#1d7a2f)'
         val_color = '#1d7a2f'
         val = f"-{abs(r['留存率']):.1f}<span class='unit'>%</span>"
-        meta = f"净流出{abs(r['净额']):.1f}亿 · 成交{r['总额']:.0f}亿 · 龙头{r['领涨股']} {r['领涨股-涨跌幅']:+.1f}%"
+        meta = f"主力{r['净额']:+.1f}亿 · 成交{r['总额']:.0f}亿{active_meta(r)} · {r['领涨股']}{r['领涨股-涨跌幅']:+.1f}%"
     elif mode == 'fake':
-        dv = ''
+        dv = dv_main
         bar_pct = min(r['总额'] / 2000 * 100, 100)
         bar = 'linear-gradient(90deg,#e08573,#a04030)'
         val_color = '#a04030'
         val = f"{r['留存率']:.1f}<span class='unit'>%</span>"
-        meta = f"成交{r['总额']:.0f}亿 · 流入+{r['净额']:.1f}亿 · 龙头{r['领涨股']} {r['领涨股-涨跌幅']:+.1f}%"
+        meta = f"成交{r['总额']:.0f}亿 · 主力{r['净额']:+.1f}亿{active_meta(r)} · {r['领涨股']}{r['领涨股-涨跌幅']:+.1f}%"
     else:  # firm / lurk
-        dv = ''
+        dv = dv_main
         bar_pct = min(r['留存率'] / 12 * 100, 100)
         bar = 'linear-gradient(90deg,#e6c762,#b8860b)'
         val_color = '#b8860b'
         val = f"+{r['留存率']:.1f}<span class='unit'>%</span>"
-        meta = f"净流入+{r['净额']:.1f}亿 · 成交{r['总额']:.0f}亿 · 龙头{r['领涨股']} {r['领涨股-涨跌幅']:+.1f}%"
+        meta = f"主力{r['净额']:+.1f}亿 · 成交{r['总额']:.0f}亿{active_meta(r)} · {r['领涨股']}{r['领涨股-涨跌幅']:+.1f}%"
 
     return f'''
     <div class="erow">
@@ -256,7 +308,6 @@ def compute_quadrants(df):
         mood = f"资金面恶劣：{len(q4)}/{total} 板块价跌钱出，普跌行情，轻仓观望"
     else:
         mood = f"资金面分化：健康上涨仅{len(q1)}个，跌且流出{len(q4)}个，结构性行情"
-
     return {
         'active': active, 'q1': q1, 'q2': q2, 'q3': q3, 'q4': q4,
         'total': total, 'mood': mood,
@@ -288,10 +339,10 @@ def gen_p0(df, date_cn, med):
     </div>'''
 
     cards = (
-        qcard('h', '📈', '健康上涨', '价涨 + 资金流入', q1, '净额', False, '+') +
-        qcard('w', '⚠️', '涨但流出', '价涨 + 资金撤离（背离）', q2, '净额', True, '') +
-        qcard('l', '🕵️', '跌却流入', '价跌 + 资金逆势进场', q3, '净额', False, '+') +
-        qcard('b', '📉', '跌且流出', '价跌 + 资金撤离（回避）', q4, '净额', True, '')
+        qcard('h', '📈', '健康上涨', '价涨 + 主力流入', q1, '净额', False, '+') +
+        qcard('w', '⚠️', '涨但流出', '价涨 + 主力撤离（背离）', q2, '净额', True, '') +
+        qcard('l', '🕵️', '跌却流入', '价跌 + 主力逆势进场', q3, '净额', False, '+') +
+        qcard('b', '📉', '跌且流出', '价跌 + 主力撤离（回避）', q4, '净额', True, '')
     )
 
     total = qs['total']
@@ -321,11 +372,11 @@ def gen_p0(df, date_cn, med):
   <div class="header">
     <span class="kicker">盘后情报局 · 资金意图矩阵 0/4</span>
     <div class="title">资金<span class="gold">全景图</span></div>
-    <div class="sub">{date_cn} 收盘 ｜ {total}个活跃板块（成交&gt;20亿）按 价格×资金 分四象限</div>
+    <div class="sub">{date_cn} 收盘 ｜ {total}个活跃板块（成交&gt;20亿）按 价格×主力资金 分四象限</div>
   </div>
   <div class="verdict">💡 {mood}</div>
   <div class="qgrid">{cards}</div>
-  <div class="footer">象限判据：涨跌幅±0.3% × 净额正负 ｜ 全口径（含散户）｜ <span class="brand">盘后情报局</span> 每日16:00</div>
+  <div class="footer">象限判据：涨跌幅±0.3% × 主力净额正负 ｜ 主力口径（超大单+大单，同花顺）｜ <span class="brand">盘后情报局</span> 每日16:00</div>
 </body></html>'''
     return html
 
@@ -398,10 +449,10 @@ def zone_content(zkey, zones, date_cn, med, prev_zones):
 
 # 各榜图片版页脚规则（前端图片保留；视频版不展示，规则存档DAILY_CONTENT.md）
 ZONE_FOOTERS = {
-    'bleed': '门槛：成交≥50亿·净流出≥3亿 ｜ 全口径净额（含散户）｜ <span class="brand">盘后情报局</span> 每日16:00',
-    'fake': '门槛：成交≥100亿·涨幅&gt;0.8%·留存&lt;1.5% ｜ 全口径（含散户）｜ <span class="brand">盘后情报局</span> 每日16:00',
-    'firm': '全口径净额（含散户）｜ <span class="brand">盘后情报局</span> 每日16:00',
-    'lurk': '门槛：净流入≥3亿·留存≥4% ｜ 全口径净额（含散户）｜ <span class="brand">盘后情报局</span> 每日16:00',
+    'bleed': '门槛：成交≥50亿·主力净流出≥3亿 ｜ 主力口径（超大单+大单）｜ <span class="brand">盘后情报局</span> 每日16:00',
+    'fake': '门槛：成交≥100亿·涨幅&gt;0.8%·留存&lt;1.5% ｜ 主力口径（超大单+大单）｜ <span class="brand">盘后情报局</span> 每日16:00',
+    'firm': '主力口径（超大单+大单）｜ <span class="brand">盘后情报局</span> 每日16:00',
+    'lurk': '门槛：主力净流入≥3亿·留存≥4% ｜ 主力口径（超大单+大单）｜ <span class="brand">盘后情报局</span> 每日16:00',
 }
 ZONE_KICKERS = {'bleed': '盘后情报局 · 资金意图矩阵 1/4', 'fake': '盘后情报局 · 资金意图矩阵 2/4',
                 'firm': '盘后情报局 · 资金意图矩阵 3/4', 'lurk': '盘后情报局 · 资金意图矩阵 4/4'}

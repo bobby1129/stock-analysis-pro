@@ -128,6 +128,7 @@ collectors/          analysis/           plans/
 | 东财 guba | 股吧热帖 (Playwright) | Playwright拦截 | ✅ |
 | 东财 search-api | 概念新闻 | 直连 | ✅ |
 | 东财 push2 | 概念资金流 | HTTP API + Cookie (主链路, 1s间隔) / Playwright (F10辅助) | ✅ |
+| 同花顺 stockpage funds | 概念主力资金(超大单+大单, 与APP同口径) | 直连, 885码映射, 无需hexin-v | ✅ |
 | 东财 行情页 | 涨跌家数 | HTTP API + Cookie | ✅ |
 | akshare THS | 财务/分红/预测 | 需代理 | ✅ |
 | akshare 涨停池 | 涨跌停统计 | 需代理 | ✅ |

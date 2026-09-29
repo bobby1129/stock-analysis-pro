@@ -6,7 +6,11 @@
 ## 数据源与接口
 
 - industry_screener.py: 新浪行情 + 同花顺F10主营业务；剔除北交所；成交额 /10000 转亿。
-- 概念资金流: akshare `stock_fund_flow_concept("即时")` = 全量387概念（同花顺 gnzjl 网页只返回涨幅TOP50，有采样偏差，弃用）。资金榜需过滤宽基桶(融资融券/股通/国企改革等)，但"国家大基金持股"是真题材不可误杀。
+- 概念资金流(两套口径, 2026-09-30主力口径上线):
+  - **主力口径**(默认): 同花顺官方 `stockpage.10jqka.com.cn/stock_page/api/v1/stockpage/funds/?code=<885码>&marketId=48` = 超大单/大单/中单/小单四档，与同花顺APP"主力资金"同口径(用户对照APP验证一致)。主力净额=超大单+大单。四单净额之和恒为0(按委托单大小双侧记账)。封装在 `collectors/ths_mainforce.py`，无需hexin-v，375概念约70秒，当日缓存 `cache/ths_mainforce_YYYYMMDD.json`(仅15:05后生成的缓存有效)。
+  - **全口径**(gnzjl): akshare `stock_fund_flow_concept("即时")` = 全量387概念，净额=主动买-主动卖(主动口径)。网页版只返回涨幅TOP50有采样偏差(弃用)。资金榜需过滤宽基桶(融资融券/股通/国企改革等)，但"国家大基金持股"是真题材不可误杀。
+  - **两口径不可相加**：主力=按委托单大小分档("谁在买")，主动=按成交方向("买方急不急")。背离信号: 主力流出≥0.5亿+主动流入≥2亿=⚠派发嫌疑；反向=吸筹嫌疑。
+  - 概念名→885码映射: `data/ths_concept_885_mapping.json`，由 `scripts/build_ths_885_mapping.py` 生成(概念详情页隐藏域clid，375概念约4分钟)，季度刷新(挂concept-mapping-check cron)。
 - 个股全市场资金流用新浪。
 - 同花顺/东财字段映射必须打印验证，不可假设。
 - 服务器为 ARM(aarch64)，akshare 同花顺接口依赖 py_mini_racer 软链修复（venv 重装后需重建软链）。

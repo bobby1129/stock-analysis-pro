@@ -48,12 +48,16 @@
 > ③ 纯结果搬运，无判断价值。
 
 - **脚本**: `scripts/daily_content/generate_matrix.py`（自带Playwright截图，run_all.py只需run_script）
-- **数据源**: akshare 同花顺全量概念资金流 `stock_fund_flow_concept("即时")`
-  - 全量387概念（无采样偏差），依赖 `py_mini_racer` 生成 hexin-v token（ARM机器需软链修复，见SKILL pitfall）
-  - akshare失败时降级到 `fetch_ths_concept_fund_flow`（涨幅前50页）
+- **数据源**(2026-09-30起主力口径):
+  - **主力净额/留存率**: 同花顺官方主力资金接口(超大单+大单, 与APP同口径, 用户对照验证) — `collectors/ths_mainforce.py`; 概念名→885码映射 `data/ths_concept_885_mapping.json`(`scripts/build_ths_885_mapping.py`季度刷新); 当日缓存`cache/ths_mainforce_YYYYMMDD.json`(仅15:05后生成有效)
+  - **总额/能量/涨跌幅**: akshare 同花顺全量概念资金流 `stock_fund_flow_concept("即时")`
+    - 全量387概念（无采样偏差），依赖 `py_mini_racer` 生成 hexin-v token（ARM机器需软链修复，见SKILL pitfall）
+    - akshare失败时降级到 `fetch_ths_concept_fund_flow`（涨幅前50页）
+  - **主动净额**(全口径净额=主动买-主动卖): meta行展示; 与主力背离时badge标注(主力流出≥0.5亿+主动流入≥2亿=⚠派发; 反向=吸筹)
+  - ⚠️ 两口径不可相加: 主力按委托单大小分档(四单和恒为0), 主动按成交方向; 历史教训: 粮食概念全口径+5.35亿但主力-2.57亿(散户抢筹主力派发), 全口径会误导(2026-09-30修复)
 - **宽基桶过滤**: 融资融券/沪深股通/国企改革/次新股/预增等资金属性桶（非题材概念）用 `BUCKET_KEYWORDS` 过滤；"国家大基金持股"是真题材不可误杀
 - **字段映射**（akshare列名）:
-  - `行业`: 概念名称 ｜ `行业-涨跌幅`: 涨幅% ｜ `流入资金`/`流出资金`/`净额`: 亿
+  - `行业`: 概念名称 ｜ `行业-涨跌幅`: 涨幅% ｜ `流入资金`/`流出资金`: 亿 ｜ `净额`: 全口径主动净额亿(已改名"主动净额", "净额"列被主力净额覆盖)
   - `公司家数`: 成分股数 ｜ `领涨股`/`领涨股-涨跌幅`: 龙头
 
 #### 核心指标体系（三层，全部同花顺现有字段可算）

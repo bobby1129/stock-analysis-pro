@@ -126,7 +126,8 @@ Agent 会自动调用本工具并给你解读结果。
 
 数据源：
 - 个股成交额：新浪财经（全市场）
-- 概念板块：akshare同花顺全量概念资金流（`stock_fund_flow_concept("即时")`）
+- 概念板块主力资金：同花顺官方funds接口（超大单+大单，与APP同口径，`collectors/ths_mainforce.py`）
+- 概念板块行情/全口径资金流：akshare同花顺全量概念资金流（`stock_fund_flow_concept("即时")`）
 - 异常信号：腾讯行情（量比）+ akshare（涨停池）
 
 详细文档：[DAILY_CONTENT.md](DAILY_CONTENT.md)

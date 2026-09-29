@@ -27,19 +27,27 @@ def is_bucket_concept(name):
 
 def fetch_full_concept_flow():
     """akshare全量概念资金流(387个) - 同花顺源, 依赖py_mini_racer生成hexin-v
-    返回与fetch_ths_concept_fund_flow相同的dict结构; 失败抛异常由调用方降级"""
+    返回与fetch_ths_concept_fund_flow相同的dict结构; 失败抛异常由调用方降级
+    2026-09-30: net改为主力净额(超大单+大单, stockpage funds接口, 与同花顺APP同口径);
+    active_net保留全口径净额(主动买-主动卖), 用于派发/吸筹背离信号"""
     import akshare as ak
+    from collectors.ths_mainforce import fetch_concept_main_force
     df = ak.stock_fund_flow_concept(symbol="即时")
+    mf = fetch_concept_main_force()
     results = []
     for _, r in df.iterrows():
         name = str(r['行业']).strip()
         if is_bucket_concept(name):
             continue
+        m = mf.get(name)
+        if not m:
+            continue  # 无主力数据的概念不进榜
         try:
             results.append({
                 'name': name,
                 'change_pct': float(r['行业-涨跌幅']),
-                'net': float(r['净额']),
+                'net': float(m['main_net']),            # 主力净额(亿)
+                'active_net': float(r['净额']),          # 全口径主动净额(亿)
                 'leader': str(r['领涨股']).strip(),
                 'leader_pct': float(r['领涨股-涨跌幅']),
             })
@@ -65,7 +73,8 @@ def analyze_concepts():
         results.append({
             'name': c.get('name', ''),
             'change_today': c.get('change_pct', 0),
-            'flow_in': c.get('net', 0),  # 净流入(亿)
+            'flow_in': c.get('net', 0),  # 主力净流入(亿)
+            'active_net': c.get('active_net', None),  # 全口径主动净额(亿), 降级路径为None
             'leader': c.get('leader', ''),
             'leader_pct': c.get('leader_pct', 0),
         })
@@ -233,22 +242,33 @@ body {
 
 
 def generate_flow_html(data, yesterday_top10_names=None):
-    """生成净流入排行HTML（10条）"""
+    """生成主力净流入排行HTML（10条）
+    flow_in=主力净额(超大单+大单); active_net=全口径主动净额, 背离时亮派发/吸筹badge"""
     if yesterday_top10_names is None:
         yesterday_top10_names = set()
-    
+
     flow_concepts = sorted(data, key=lambda x: x['flow_in'], reverse=True)[:10]
-    
+
     rows_html = ''
     for i, c in enumerate(flow_concepts, 1):
         flow_color = "#dc143c" if c['flow_in'] > 0 else "#228b22"
         change_color = "#dc143c" if c['change_today'] > 0 else "#228b22"
         is_new = c['name'] not in yesterday_top10_names
         new_badge = '<span class="new-badge">NEW</span>' if is_new else ''
+        # 主动净额小注 + 派发/吸筹背离badge
+        an = c.get('active_net')
+        if an is not None:
+            sub_note = f"主动{an:+.1f}亿"
+            if c['flow_in'] <= -0.5 and an >= 2:
+                sub_note += ' <span class="dv-badge">⚠派发</span>'
+            elif c['flow_in'] >= 0.5 and an <= -2:
+                sub_note += ' <span class="absorb-badge">吸筹</span>'
+        else:
+            sub_note = ''
         rows_html += f'''
         <div class="flow-row">
             <div class="flow-rank">{i}</div>
-            <div class="flow-name">{c['name']}{new_badge}</div>
+            <div class="flow-name">{c['name']}{new_badge}<div class="flow-sub">{sub_note}</div></div>
             <div class="flow-change" style="color:{change_color}">{c['change_today']:+.2f}%</div>
             <div class="flow-value" style="color:{flow_color}">{c['flow_in']:.1f}亿</div>
         </div>
@@ -304,6 +324,9 @@ body {
 }
 .flow-rank { font-size: 36px; font-weight: 800; color: #b8860b; width: 50px; }
 .flow-name { font-size: 34px; font-weight: 600; color: #1a1a1a; flex: 1; }
+.flow-sub { font-size: 22px; color: #999; font-weight: 500; margin-top: 4px; }
+.dv-badge { color:#fff; background:#c0392b; border-radius:5px; padding:1px 7px; font-size:20px; font-weight:800; }
+.absorb-badge { color:#fff; background:#1d7a2f; border-radius:5px; padding:1px 7px; font-size:20px; font-weight:800; }
 .flow-change { font-size: 34px; font-weight: 700; width: 130px; text-align: right; }
 .flow-value { font-size: 36px; font-weight: 800; width: 150px; text-align: right; }
 .new-badge {
@@ -335,16 +358,16 @@ body {
         <div class="title">概念板块表现</div>
     </div>
     <div class="section">
-        <div class="section-title">💰 净流入排行（亿元）</div>
+        <div class="section-title">💰 主力净流入排行（亿元）</div>
         <div class="flow-header">
             <div class="flow-rank">排名</div>
             <div class="flow-name">概念名称</div>
             <div class="flow-change">涨跌幅</div>
-            <div class="flow-value">净流入</div>
+            <div class="flow-value">主力净流入</div>
         </div>
         {rows_html}
     </div>
-    <div class="footer">数据来源：同花顺概念板块 | 仅供参考，不构成投资建议</div>
+    <div class="footer">主力口径：超大单+大单（同花顺）｜ 仅供参考，不构成投资建议</div>
 </body>
 </html>'''
     

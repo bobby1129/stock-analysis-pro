@@ -1,4 +1,41 @@
 
+## ✅ v3.19 概念资金切主力口径 — 已完成 (2026-09-30)
+
+### 原因
+用户发现16点矩阵与18:30复盘的概念资金用的是全口径（主动买-主动卖，含散户），无法反映主力动向。实例：9/30推的粮食概念全口径+5.35亿，但同花顺APP主力-2.5亿（散户抢筹主力派发），全口径误导决策。
+
+### 数据源攻坚（全部打印验证）
+- ❌ 东财push2 f62主力字段: 首次探测成功后IP被限频封禁(TLS握手完成→HTTP层Empty reply)，cookie/UA/代理/多镜像均无效，放弃
+- ❌ 同花顺data.10jqka gnzjl网页: 只有全口径字段，无主力拆分；zlzjl 404
+- ❌ 新浪板块资金流: 板块级无分单字段；个股r0/r1聚合被用户否决(口径偏差大)
+- ❌ 问财pywencai: 接口403(Nginx forbidden)
+- ✅ **同花顺stockpage funds接口**: `stockpage.10jqka.com.cn/stock_page/api/v1/stockpage/funds/?code=<885码>&marketId=48`，返回超大/大/中/小四单流入流出净额。从 stockpage money-flow 页面网络抓包发现。无需hexin-v、无验证码。用户对照APP确认粮食概念主力-2.5亿一致
+- 概念名→885码: 概念详情页 `q.10jqka.com.cn/gn/detail/code/<30xxxx>/` 隐藏域 `id="clid"`；375概念映射表零失败，构建约4分钟，全量资金抓取约70秒(0.1s间隔)
+
+### 口径要点
+- 主力净额 = 超大单+大单；四单净额之和恒为0（按委托单大小双侧记账），与全口径主动净额（主动买-主动卖）是两个正交切面，**不可相加**
+- 背离信号: 主力流出≥0.5亿+主动流入≥2亿 = ⚠派发嫌疑；反向 = 吸筹嫌疑
+- 主力缓存守卫: `cache/ths_mainforce_YYYYMMDD.json` 仅当日15:05后生成的有效（防盘前抓到旧交易日数据）
+
+### 核心改动
+| 文件 | 改动 |
+|------|------|
+| `collectors/ths_mainforce.py` | 新增: 主力资金采集(fetch_concept_main_force含缓存) + fetch_concept_flow_combined(主力/主动双口径+背离标记+宽基桶过滤) |
+| `scripts/build_ths_885_mapping.py` | 新增: 概念名→885码映射表生成(输出data/ths_concept_885_mapping.json) |
+| `scripts/daily_content/generate_matrix.py` | fetch_data净额/留存率改主力口径(留存率=主力净额/主力总额)；meta行加"主动±X亿"；派发/吸筹badge；页脚/象限文案改"主力"；ename 50→44px、emeta 28→22px防溢出；能量badge统一带"亿" |
+| `scripts/daily_content/generate_concept_html.py` | fetch_full_concept_flow net改主力净额+active_net字段；p2改"主力净流入排行"带主动小注和背离badge |
+| `plans/daily_report.py` | concepts_fund/concepts_change 改用fetch_concept_flow_combined(降级链: 主力→gnzjl全口径标注fallback)；format_report文本版双口径 |
+| `templates/review_report.html` | 主力净流入TOP10四列(+主动净额列+badge+口径注释)；涨幅TOP10表头改"主力净额" |
+| cron concept-mapping-check | 季度任务追加: 重建885映射表+主力接口验证 |
+| `AGENTS.md`/`DESIGN.md`/`DAILY_CONTENT.md`/`USAGE.md`/`SKILL.md` | 数据源文档同步(双口径说明+背离规则+缓存守卫+历史教训) |
+
+### 验证（9/29真实数据端到端）
+- 矩阵5页溢出检测通过，vision质检meta无截断
+- 复盘报告主力TOP10正确(华为概念主力+45.5/主动+75.5)；粮食概念diverge='distribution'✅
+- 发现并修复模板bug: 涨幅榜表头"主动净额"实为主力净额数据(拼多多-0.27亿暴露)
+
+---
+
 ## ✅ v3.18 抖音动画视频全部下线 — 已完成 (2026-09-27)
 
 ### 原因

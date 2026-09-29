@@ -383,7 +383,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 </div>
 {% endif %}
 
-{# ── 概念资金净流入 TOP10 ── #}
+{# ── 概念主力资金净流入 TOP10 ── #}
 {% set concepts_fund = data.concepts_fund|default([]) %}
 {% set concepts_change = data.concepts_change|default([]) %}
 {% if concepts_fund or concepts_change %}
@@ -392,20 +392,24 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 
 {% if concepts_fund %}
 <div style="margin-top: 20px; margin-bottom: 24px;">
-<div style="font-size: 14px; font-weight: 600; color: #333; margin-bottom: 12px; text-align: center;">📊 资金净流入 TOP10</div>
-<div style="display: grid; grid-template-columns: 1fr 80px 90px; gap: 8px; font-size: 12px; color: #999; padding: 8px 12px; border-bottom: 1px solid #e0e0e0; font-weight: 500;">
+<div style="font-size: 14px; font-weight: 600; color: #333; margin-bottom: 4px; text-align: center;">📊 主力净流入 TOP10{% if data.concepts_fund_fallback %}（⚠️主力数据不可用，降级为全口径）{% endif %}</div>
+<div style="font-size: 11px; color: #aaa; margin-bottom: 12px; text-align: center;">主力=超大单+大单（同花顺口径）｜ 主动=全口径主动买卖净额 ｜ 背离: 主力流出+主动流入=派发嫌疑</div>
+<div style="display: grid; grid-template-columns: 1fr 70px 85px 85px; gap: 8px; font-size: 12px; color: #999; padding: 8px 12px; border-bottom: 1px solid #e0e0e0; font-weight: 500;">
 <div>概念名称</div>
 <div style="text-align: right;">涨幅</div>
-<div style="text-align: right;">净流入</div>
+<div style="text-align: right;">主力净额</div>
+<div style="text-align: right;">主动净额</div>
 </div>
 {% for item in concepts_fund %}
 {% set cp = item.change_pct|default(0) %}
 {% set net = item.net|default(0) %}
+{% set anet = item.active_net %}
 {% set leader = item.leader|default('') %}
-<div style="display: grid; grid-template-columns: 1fr 80px 90px; gap: 8px; padding: 10px 12px; border-bottom: 1px solid #f5f5f5; align-items: center;">
-<div style="font-size: 14px; color: #333;">{{ item.name }}<div style="font-size: 11px; color: #999; margin-top: 2px;">领涨: {{ leader }}</div></div>
+<div style="display: grid; grid-template-columns: 1fr 70px 85px 85px; gap: 8px; padding: 10px 12px; border-bottom: 1px solid #f5f5f5; align-items: center;">
+<div style="font-size: 14px; color: #333;">{{ item.name }}{% if item.diverge == 'distribution' %} <span style="font-size:11px;color:#fff;background:#c0392b;border-radius:4px;padding:1px 6px;font-weight:700;">⚠派发</span>{% elif item.diverge == 'absorb' %} <span style="font-size:11px;color:#fff;background:#1d7a2f;border-radius:4px;padding:1px 6px;font-weight:700;">吸筹</span>{% endif %}<div style="font-size: 11px; color: #999; margin-top: 2px;">领涨: {{ leader }}</div></div>
 <div style="text-align: right; font-size: 13px; font-weight: 500; color: {{ '#e74c3c' if cp > 0 else '#27ae60' if cp < 0 else '#999' }};">{{ "{:+.2f}%".format(cp) }}</div>
-<div style="text-align: right; font-size: 13px; font-weight: 500; color: {{ '#e74c3c' if net > 0 else '#27ae60' if net < 0 else '#999' }};">{{ "{:+.2f}亿".format(net) }}</div>
+<div style="text-align: right; font-size: 13px; font-weight: 600; color: {{ '#e74c3c' if net > 0 else '#27ae60' if net < 0 else '#999' }};">{{ "{:+.2f}亿".format(net) }}</div>
+<div style="text-align: right; font-size: 12px; font-weight: 500; color: {% if anet is none %}#ccc{% elif anet > 0 %}#e74c3c{% elif anet < 0 %}#27ae60{% else %}#999{% endif %};">{% if anet is none %}—{% else %}{{ "{:+.2f}亿".format(anet) }}{% endif %}</div>
 </div>
 {% endfor %}
 </div>
@@ -417,7 +421,7 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 <div style="display: grid; grid-template-columns: 1fr 80px 90px; gap: 8px; font-size: 12px; color: #999; padding: 8px 12px; border-bottom: 1px solid #e0e0e0; font-weight: 500;">
 <div>概念名称</div>
 <div style="text-align: right;">涨幅</div>
-<div style="text-align: right;">净流入</div>
+<div style="text-align: right;">主力净额</div>
 </div>
 {% for item in concepts_change %}
 {% set cp = item.change_pct|default(0) %}

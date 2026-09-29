@@ -29,6 +29,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import load_config
 from collectors.ths_concept import fetch_ths_concept_fund_flow, fetch_ths_concept_by_change
+from collectors.ths_mainforce import fetch_concept_flow_combined
 
 # ── 全局请求会话 ──
 SESSION = requests.Session()
@@ -862,25 +863,45 @@ def run(date=None, verbose=True):
         result['breadth'] = {"up": 0, "down": 0, "flat": 0, "limit_up": 0, "limit_down": 0}
 
     # 3. 概念资金流 Top10 + 涨幅 Top10 (同花顺)
+    # 主力净流入榜: 超大单+大单口径(与同花顺APP一致), 附全口径主动净额识别派发/吸筹背离
     if verbose:
-        print("💰 采集概念资金流...", file=sys.stderr)
+        print("💰 采集概念主力资金流...", file=sys.stderr)
     try:
-        concepts_fund = fetch_ths_concept_fund_flow(top_n=10)
+        concepts_fund = fetch_concept_flow_combined(top_n=10)
         result['concepts_fund'] = concepts_fund
     except Exception as e:
         if verbose:
-            print(f"  ⚠️ 概念资金流异常: {e}", file=sys.stderr)
-        result['concepts_fund'] = []
+            print(f"  ⚠️ 概念主力资金流异常: {e}, 降级全口径gnzjl前50", file=sys.stderr)
+        try:
+            concepts_fund = fetch_ths_concept_fund_flow(top_n=10)
+            for c in concepts_fund:
+                c['active_net'] = None  # 降级路径无主力数据, 模板显示"—"
+                c['diverge'] = ''
+            result['concepts_fund'] = concepts_fund
+            result['concepts_fund_fallback'] = True
+        except Exception as e2:
+            if verbose:
+                print(f"  ⚠️ 概念资金流降级也失败: {e2}", file=sys.stderr)
+            result['concepts_fund'] = []
     
     if verbose:
         print("📈 采集概念涨幅榜...", file=sys.stderr)
     try:
-        concepts_change = fetch_ths_concept_by_change(top_n=10)
+        # 涨幅榜复用主力合并数据(同一数据源, 主力/主动两口径齐全), 全量按涨幅取前10
+        concepts_change_all = fetch_concept_flow_combined(top_n=None, verbose=False)
+        concepts_change = sorted(concepts_change_all, key=lambda x: x['change_pct'], reverse=True)[:10]
         result['concepts_change'] = concepts_change
     except Exception as e:
         if verbose:
             print(f"  ⚠️ 概念涨幅榜异常: {e}", file=sys.stderr)
-        result['concepts_change'] = []
+        try:
+            concepts_change = fetch_ths_concept_by_change(top_n=10)
+            for c in concepts_change:
+                c['active_net'] = c.get('net')  # 降级路径net为全口径
+                c['diverge'] = ''
+            result['concepts_change'] = concepts_change
+        except Exception:
+            result['concepts_change'] = []
 
     time.sleep(0.5)
 
@@ -990,25 +1011,32 @@ def format_report(data: dict) -> str:
         lines.append(f"  上涨: {breadth['up']}  下跌: {breadth['down']}  平盘: {breadth.get('flat', 0)}")
         lines.append(f"  涨停: {breadth.get('limit_up', 0)}  跌停: {breadth.get('limit_down', 0)}")
 
-    # 概念资金流 Top10
+    # 概念主力资金流 Top10
     concepts_fund = data.get('concepts_fund', [])
     if concepts_fund:
-        lines.append(f"\n【概念资金净流入 Top10】")
+        fb = '（⚠️降级全口径）' if data.get('concepts_fund_fallback') else ''
+        lines.append(f"\n【概念主力净流入 Top10】{fb}")
         for i, c in enumerate(concepts_fund, 1):
             net = c.get('net', 0)
+            anet = c.get('active_net')
             pct = c.get('change_pct', 0)
             leader = c.get('leader', '')
-            lines.append(f"  {i:2d}. {c['name']:<10s} 净流入{net:>6.2f}亿 涨跌{pct:>5.2f}% 领涨:{leader}")
-    
+            dv = c.get('diverge', '')
+            dv_tag = ' ⚠派发嫌疑' if dv == 'distribution' else (' 吸筹' if dv == 'absorb' else '')
+            anet_s = f"主动{anet:+6.2f}亿" if anet is not None else "主动  —   "
+            lines.append(f"  {i:2d}. {c['name']:<10s} 主力{net:>6.2f}亿 {anet_s} 涨跌{pct:>5.2f}% 领涨:{leader}{dv_tag}")
+
     # 概念涨幅 Top10
     concepts_change = data.get('concepts_change', [])
     if concepts_change:
         lines.append(f"\n【概念涨幅 Top10】")
         for i, c in enumerate(concepts_change, 1):
             net = c.get('net', 0)
+            anet = c.get('active_net')
             pct = c.get('change_pct', 0)
             leader = c.get('leader', '')
-            lines.append(f"  {i:2d}. {c['name']:<10s} 涨跌{pct:>5.2f}% 净流入{net:>6.2f}亿 领涨:{leader}")
+            anet_s = f"主动{anet:+6.2f}亿" if anet is not None else ""
+            lines.append(f"  {i:2d}. {c['name']:<10s} 涨跌{pct:>5.2f}% 主力{net:>6.2f}亿 {anet_s} 领涨:{leader}")
 
     # 指数短线指引
     indices_with_ti = [idx for idx in indices if idx.get('technical_indicators')]

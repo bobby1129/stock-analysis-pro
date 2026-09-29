@@ -562,12 +562,16 @@ HTTP requests (push2.eastmoney.com/api/qt/clist/get)
 - **文件**: `scripts/daily_content/generate_stock_amount.py`
 - **缓存路径**: `cache/daily_content/stock_amount_cache_YYYYMMDD.json`
 
-#### 概念板块资金意图矩阵（v3.11, 2026-09-24转正）
+#### 概念板块资金意图矩阵（v3.11, 2026-09-24转正; v3.19主力口径, 2026-09-30）
 - **功能**: 替代旧版概念2图（涨幅榜/净流入榜），5张图从"价格×资金"二维矩阵识别主力意图
-- **数据源**: akshare `stock_fund_flow_concept("即时")` 同花顺全量概念资金流（373个，无采样偏差）
-- **核心指标**: 留存率=净额/总成交（决心，归一化跨板块可比）；能量=总成交/公司家数（活跃度，亿/只）
-- **四区筛选**: bleed失血（净额≤-3亿+成交≥50亿）/ fake对倒（涨幅>0.8%+留存<1.5%+成交≥100亿）/ firm主攻（三共振）/ lurk潜伏（涨幅<0.5%+留存≥4%），空区诚实显示不凑数
+- **数据源**(v3.19起):
+  - 净额/留存率 = **主力口径**(超大单+大单, 同花顺官方stockpage funds接口, 与APP同口径已验证), `collectors/ths_mainforce.py`, 885码映射 `data/ths_concept_885_mapping.json`
+  - 总额/能量/涨跌幅/领涨股 = akshare `stock_fund_flow_concept("即时")` 同花顺全量概念(373个, 无采样偏差)
+  - 主动净额 = 全口径净额(主动买-主动卖), meta行展示; 主力流出≥0.5亿+主动流入≥2亿 → ⚠派发badge, 反向 → 吸筹badge
+  - 两口径不可相加(记账方式正交): 主力按委托单大小分档, 主动按成交方向; 四单净额和恒为0
+- **核心指标**: 留存率=主力净额/主力总成交（主力决心，归一化跨板块可比）；能量=总成交/公司家数（活跃度，亿/只）
+- **四区筛选**: bleed失血（主力净额≤-3亿+成交≥50亿）/ fake对倒（涨幅>0.8%+主力留存<1.5%+成交≥100亿）/ firm主攻（三共振）/ lurk潜伏（涨幅<0.5%+主力留存≥4%），空区诚实显示不凑数
 - **宽基桶过滤**: 复用 `generate_concept_html.is_bucket_concept`（融资融券/沪深股通等资金属性桶）
 - **文件**: `scripts/daily_content/generate_matrix.py`（自带Playwright截图+溢出检测）
-- **缓存路径**: `cache/daily_content/matrix_zone_cache_YYYYMMDD.json`（四区各top10名单，次日NEW标记对比）
+- **缓存路径**: `cache/daily_content/matrix_zone_cache_YYYYMMDD.json`（四区各top10名单，次日NEW标记对比）；主力数据当日缓存 `cache/ths_mainforce_YYYYMMDD.json`（仅15:05后生成有效, 防盘前旧数据误用）
 - **注意**: 文件名后缀是交易日（15:30前运行=上一交易日），run_all.py清单动态匹配
