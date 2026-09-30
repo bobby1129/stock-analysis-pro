@@ -12,6 +12,7 @@
   - **两口径不可相加**：主力=按委托单大小分档("谁在买")，主动=按成交方向("买方急不急")。背离信号: 主力流出≥0.5亿+主动流入≥2亿=⚠派发嫌疑；反向=吸筹嫌疑。
   - 概念名→885码映射: `data/ths_concept_885_mapping.json`，由 `scripts/build_ths_885_mapping.py` 生成(概念详情页隐藏域clid，375概念约4分钟)，季度刷新(挂concept-mapping-check cron)。
 - 个股全市场资金流用新浪。
+- 涨跌家数(collectors/breadth.py fetch_breadth): 新浪Market_Center.getHQNodeData全量翻页(hs_a~56页,约15秒)优先——2026-09-30与同花顺APP对照验证一致(涨2566/跌2824/平181 vs APP 2567/2824/170)；东财push2兜底(同日返回2393/2730与APP偏差大,口径存疑,且时好时坏)；腾讯getBoardRankList弃用(aStock板块仅4606只覆盖不全)。涨跌停用akshare涨停池(fetch_limit_stats)。同花顺无直接家数接口(zdfb页chameleon反爬,iwencai本机DNS不通)。plans/daily_report.py的fetch_market_breadth已委托collector,勿再重复实现。
 - 同花顺/东财字段映射必须打印验证，不可假设。
 - 服务器为 ARM(aarch64)，akshare 同花顺接口依赖 py_mini_racer 软链修复（venv 重装后需重建软链）。
 

@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 """市场宽度采集 — 涨跌家数 + 涨跌停统计
 
-数据源:
-  1. 东财 push2 API (上证+深证合并) — 带Cookie防限流
-  2. akshare 涨跌停池
+数据源(优先级):
+  1. 东财 push2 API (上证+深证合并) — 带Cookie防限流; 2026-09-30 本机返回全0(封禁), 不可靠
+  2. 新浪 Market_Center.getHQNodeData 全量翻页 (hs_a, ~56页) — 2026-09-30 与同花顺APP对照验证通过:
+     新浪 涨2566/平181/跌2824 (5571只) vs APP 涨2567/平170/跌2824 (5561只), 仅时点/边缘差异
+     ⚠️ 腾讯 proxy.finance.qq.com getBoardRankList 已验证弃用: aStock板块仅4606只, 覆盖不全(缺~955只)
+  3. akshare 涨跌停池
 
 用法:
     from collectors.breadth import fetch_breadth, fetch_limit_stats
-    breadth = fetch_breadth()  # {up, down, flat, limit_up, limit_down}
+    breadth = fetch_breadth()  # {up, down, flat, limit_up, limit_down}  (东财失败自动降级新浪)
     limits = fetch_limit_stats(date='20260716')
 """
 
@@ -16,6 +19,51 @@ import time
 import requests
 from datetime import datetime
 from typing import Optional
+
+_SINA_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+    'Referer': 'https://vip.stock.finance.sina.com.cn/',
+}
+
+
+def _sina_breadth(node: str = 'hs_a', max_pages: int = 70) -> dict:
+    """新浪全量翻页统计涨跌家数。返回 {up, down, flat, total}; 失败返回 {}"""
+    up = down = flat = total = 0
+    page = 1
+    try:
+        while page <= max_pages:
+            r = requests.get(
+                'https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/'
+                'Market_Center.getHQNodeData',
+                params={'page': page, 'num': 100, 'sort': 'symbol', 'asc': 1,
+                        'node': node, 'symbol': '', '_s_r_a': 'init'},
+                headers=_SINA_HEADERS, timeout=15)
+            txt = r.text.strip()
+            if not txt or txt == 'null':
+                break
+            data = json.loads(txt)
+            if not data:
+                break
+            for it in data:
+                try:
+                    c = float(it['changepercent'])
+                except (KeyError, ValueError, TypeError):
+                    continue
+                total += 1
+                if c > 0:
+                    up += 1
+                elif c < 0:
+                    down += 1
+                else:
+                    flat += 1
+            page += 1
+            time.sleep(0.08)
+        if total > 0:
+            return {'up': up, 'down': down, 'flat': flat, 'total': total}
+    except Exception as e:
+        print(f"[breadth] 新浪家数统计异常: {e}")
+    return {}
+
 
 # 复用config中的cookie
 def _get_cookie():
@@ -67,19 +115,30 @@ def _east_breadth(secid, retries=3):
 
 
 def fetch_breadth() -> dict:
-    """获取涨跌家数 (东财HTTP API, 带Cookie)"""
-    result = {'up': 0, 'down': 0, 'flat': 0, 'limit_up': 0, 'limit_down': 0}
+    """获取涨跌家数。新浪全量翻页优先(2026-09-30与同花顺APP对照一致), 东财push2兜底。
+    东财同日返回 涨2393/跌2730 与APP(2567/2824)偏差大, 口径存疑, 仅作兜底。
+    新浪源不含涨跌停字段, 涨跌停由 fetch_limit_stats(akshare涨停池) 单独提供。"""
+    result = {'up': 0, 'down': 0, 'flat': 0, 'limit_up': 0, 'limit_down': 0, 'source': ''}
 
+    sb = _sina_breadth()
+    if sb:
+        result.update({'up': sb['up'], 'down': sb['down'], 'flat': sb['flat'],
+                       'total': sb['total'], 'source': 'sina'})
+        return result
+
+    print("[breadth] 新浪统计失败, 降级东财push2")
     sh = _east_breadth("1.000001")
     time.sleep(0.5)
     sz = _east_breadth("0.399001")
 
-    result['up'] = sh.get('up', 0) + sz.get('up', 0)
-    result['down'] = sh.get('down', 0) + sz.get('down', 0)
-    result['flat'] = sh.get('flat', 0) + sz.get('flat', 0)
-    result['limit_up'] = sh.get('limit_up', 0) + sz.get('limit_up', 0)
-    result['limit_down'] = sh.get('limit_down', 0) + sz.get('limit_down', 0)
-
+    result.update({
+        'up': sh.get('up', 0) + sz.get('up', 0),
+        'down': sh.get('down', 0) + sz.get('down', 0),
+        'flat': sh.get('flat', 0) + sz.get('flat', 0),
+        'limit_up': sh.get('limit_up', 0) + sz.get('limit_up', 0),
+        'limit_down': sh.get('limit_down', 0) + sz.get('limit_down', 0),
+        'source': 'eastmoney',
+    })
     return result
 
 

@@ -300,49 +300,19 @@ def fetch_stock_news(name, max_items=3):
         return []
 
 
-# ── 涨跌家数 (HTTP API) ──
+# ── 涨跌家数 ──
 
 def fetch_market_breadth():
-    """获取涨跌家数（东财HTTP接口）及涨跌停家数（AKShare）"""
-    result = {"up": 0, "down": 0, "flat": 0, "limit_up": 0, "limit_down": 0}
+    """涨跌家数+涨跌停。委托 collectors.breadth:
+    家数=新浪全量翻页优先(2026-09-30与同花顺APP对照验证一致), 东财push2兜底(口径存疑);
+    涨跌停=akshare涨停池(更精确, 覆盖家数结果中push2的limit字段)。"""
+    from collectors.breadth import fetch_breadth, fetch_limit_stats
 
-    # 涨跌家数
-    for secid in ["1.000001", "0.399001"]:
-        url = (f"https://push2.eastmoney.com/api/qt/ulist.np/get?"
-               f"fltt=2&fields=f104,f105,f106,f107,f108&secids={secid}")
-        raw = safe_request(url, timeout=10, headers=eastmoney_headers())
-        if raw:
-            try:
-                data = json.loads(raw)
-                items = data.get("data", {}).get("diff", [])
-                if items:
-                    i = items[0]
-                    result["up"] += i.get("f104", 0) or 0
-                    result["down"] += i.get("f105", 0) or 0
-                    result["flat"] += i.get("f106", 0) or 0
-                    result["limit_up"] += i.get("f107", 0) or 0
-                    result["limit_down"] += i.get("f108", 0) or 0
-            except:
-                pass
-        time.sleep(0.5)
-
-    # 涨跌停 (akshare 更精确)
-    today = datetime.now().strftime("%Y%m%d")
-    try:
-        import akshare as ak
-        df_zt = ak.stock_zt_pool_em(date=today)
-        if df_zt is not None and not df_zt.empty:
-            result["limit_up"] = len(df_zt)
-    except:
-        pass
-    try:
-        import akshare as ak
-        df_dt = ak.stock_zt_pool_dtgc_em(date=today)
-        if df_dt is not None and not df_dt.empty:
-            result["limit_down"] = len(df_dt)
-    except:
-        pass
-
+    result = fetch_breadth()
+    # 涨跌停统一用 akshare 涨停池(新浪/东财家数源都不带或不准)
+    limits = fetch_limit_stats()
+    result["limit_up"] = limits.get("zt_count", result.get("limit_up", 0))
+    result["limit_down"] = limits.get("dt_count", result.get("limit_down", 0))
     return result
 
 
