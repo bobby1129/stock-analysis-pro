@@ -163,11 +163,13 @@ def build_event_page(idx, event, catalysts, date_str):
     if not rows:
         rows = '<div style="text-align:center;font-size:32px;color:#888;padding:20px;">暂无</div>'
 
-    # 催化
-    cats = catalysts.get(event['name'], [])
+    # 催化 (LLM汇总排序, items=[{'source','text'}])
+    cat = catalysts.get(event['name']) or {}
+    cats = cat.get('items') or []
     if cats:
         cat_html = '<div style="font-size:32px;color:#555;line-height:1.7;">' + \
-            '<br>'.join(f'· {c[:38]}' for c in cats[:2]) + '</div>'
+            '<br>'.join(f'· <span style="color:#b8860b;font-weight:700;">{c["source"]}</span>｜{c["text"][:26]}'
+                        for c in cats[:3]) + '</div>'
         cat_title = '📰 当日催化'
     else:
         cat_html = '<div style="font-size:34px;color:#8a7440;font-weight:700;">无公开催化 — 纯资金聚集，留意"暗流"埋伏</div>'

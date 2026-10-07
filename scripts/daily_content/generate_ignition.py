@@ -338,35 +338,114 @@ def l3_enrich(members):
         time.sleep(0.6)
 
 
-def l4_catalyst(event_names):
-    """L4 催化: Google News RSS (走本地代理)"""
+def _rss_titles(query, proxies, limit=5):
+    """Google News RSS 搜索当日新闻标题 (走本地代理), 去频道名/查询回显/来源后缀"""
+    from urllib.parse import quote as _quote
+    url = (f'https://news.google.com/rss/search?q={_quote(query)}+when:1d'
+           f'&hl=zh-CN&gl=CN&ceid=CN:zh-Hans')
+    r = requests.get(url, proxies=proxies, timeout=10,
+                     headers={'User-Agent': 'Mozilla/5.0'})
+    titles = re.findall(r'<title><!\[CDATA\[(.*?)\]\]></title>', r.text)
+    if not titles:
+        titles = re.findall(r'<title>(.*?)</title>', r.text)
+    items = []
+    for t in titles:
+        ts = t.strip()
+        if ts in ('Google 新闻', 'Google News') or ts == query or 'when:1d' in ts or ts.startswith('"'):
+            continue
+        t2 = re.sub(r'\s*-\s*[^-]+$', '', ts).strip()
+        if t2:
+            items.append(t2)
+        if len(items) >= limit:
+            break
+    return items
+
+
+_CAT_PROMPT = '''你是A股短线研究员。板块"{name}"今日放量异动，成员股: {members}。
+下面是当日检索到的新闻标题(方括号前缀标注来源: 行业=板块名检索, 个股=成员股名检索)。
+请筛选与该板块今日异动可能相关的催化，去重合并后按重要性排序，输出最多3条。
+
+重要性排序: 成员个股直接催化(订单/中标/业绩/并购/产品) > 行业政策或行业事件 > 泛板块观点
+规则:
+1. 剔除明显无关、旧闻复述、广告软文
+2. 每条输出 source(催化所属成员股名; 行业级催化填"行业") 和 text(≤26字, 说清事实, 保留关键数字; text中不要重复source名称)
+3. 无相关催化则输出空数组 []
+4. 严格输出JSON数组, 无其他文字
+
+新闻标题:
+{lines}
+
+输出格式:
+[{{"source":"力勤资源","text":"中标印尼钴镍项目23亿"}}]'''
+
+
+def _llm_summarize_catalyst(name, member_names, titled):
+    """LLM汇集排序催化 (复用llm_industry的qwen3.6-flash链路), 失败返回[]"""
+    from llm_industry import _call_llm
+    lines = '\n'.join(f'[{src}] {t}' for src, t in titled[:40])
+    prompt = _CAT_PROMPT.format(name=name,
+                                members='、'.join(member_names[:8]),
+                                lines=lines)
+    for attempt in range(2):
+        out = ''
+        try:
+            out = _call_llm(prompt, max_tokens=800).strip()
+            if '```' in out:
+                out = out.split('```')[1]
+                if out.startswith('json'):
+                    out = out[4:]
+            arr = json.loads(out[out.index('['):out.rindex(']') + 1])
+            items = []
+            for it in arr[:3]:
+                src = str(it.get('source', '行业'))[:12] or '行业'
+                txt = str(it.get('text', '')).strip()[:30]
+                if txt:
+                    items.append({'source': src, 'text': txt})
+            return items
+        except Exception as ex:
+            print(f'  ⚠ 催化LLM失败({attempt + 1}/2): {ex}; 输出前120字: {out[:120]}')
+            time.sleep(2)
+    return []
+
+
+def l4_catalyst(events):
+    """L4 催化: 行业+个股(主属前5)双层RSS检索 → LLM汇集按重要性排序
+    返回 {event_name: {'items': [{'source','text'}], 'raw': {...}, 'llm': bool}}
+    LLM失败时降级为原始标题罗列(items仍可用, llm=False)。"""
     catalysts = {}
     proxies = {'http': 'http://127.0.0.1:10809', 'https': 'http://127.0.0.1:10809'}
-    for name in event_names:
+    for e in events:
+        name = e['name']
+        # 个股检索对象: 主属成员按卡片展示序(首放优先,涨幅降序)取前5
+        ms = sorted(e['main_members'],
+                    key=lambda s: (0 if s.get('vol_tag') == '首放' else 1,
+                                   -(s.get('change_pct') or 0)))[:5]
+        raw = {'industry': [], 'stocks': {}}
         try:
-            from urllib.parse import quote as _quote
-            q = _quote(name)
-            url = (f'https://news.google.com/rss/search?q={q}+when:1d&hl=zh-CN&gl=CN&ceid=CN:zh-Hans')
-            r = requests.get(url, proxies=proxies, timeout=10,
-                             headers={'User-Agent': 'Mozilla/5.0'})
-            titles = re.findall(r'<title><!\[CDATA\[(.*?)\]\]></title>', r.text)
-            if not titles:
-                titles = re.findall(r'<title>(.*?)</title>', r.text)
-            # 去掉频道名(Google 新闻/RSS名)和来源后缀
-            items = []
-            for t in titles:
-                ts = t.strip()
-                # 跳过频道名/查询回显(形如 "XXX when:1d" 或 Google 新闻)
-                if ts in ('Google 新闻', 'Google News', name) or 'when:1d' in ts or ts.startswith('"'):
-                    continue
-                t = re.sub(r'\s*-\s*[^-]+$', '', ts).strip()
-                if t:
-                    items.append(t)
-                if len(items) >= 3:
-                    break
-            catalysts[name] = items
-        except Exception:
-            catalysts[name] = []
+            raw['industry'] = _rss_titles(name, proxies, 5)
+        except Exception as ex:
+            print(f'  ⚠ {name} 行业新闻检索失败: {ex}')
+        for s in ms:
+            try:
+                ts = _rss_titles(s['name'], proxies, 5)
+                if ts:
+                    raw['stocks'][s['name']] = ts
+            except Exception:
+                pass
+            time.sleep(0.3)
+        titled = [(f'行业', t) for t in raw['industry']] + \
+                 [(n, t) for n, tl in raw['stocks'].items() for t in tl]
+        items, llm_ok = [], False
+        if titled:
+            items = _llm_summarize_catalyst(name, [s['name'] for s in e['main_members']], titled)
+            llm_ok = bool(items)
+            if not items:
+                # 降级: 原始标题罗列(行业优先, 各取前2), 保持旧行为不断链
+                items = [{'source': '行业', 'text': t[:26]} for t in raw['industry'][:2]]
+                items += [{'source': n, 'text': tl[0][:26]} for n, tl in list(raw['stocks'].items())[:1]]
+        catalysts[name] = {'items': items, 'raw': raw, 'llm': llm_ok}
+        print(f"  {name}: 行业{len(raw['industry'])}条 个股{sum(len(v) for v in raw['stocks'].values())}条"
+              f" → {'LLM汇总' if llm_ok else ('降级罗列' if items else '无催化')}")
     return catalysts
 
 
@@ -411,9 +490,10 @@ def main():
         l3_enrich(e['members'])
 
     print("\n=== L4 催化 ===")
-    catalysts = l4_catalyst([e['name'] for e in events])
+    catalysts = l4_catalyst(events)
     for n, c in catalysts.items():
-        print(f"  {n}: {c[:2]}")
+        for it in c['items']:
+            print(f"  {n}: [{it['source']}] {it['text']}")
 
     # ── 结论标签 ──
     for e in events:
@@ -427,7 +507,7 @@ def main():
             e['verdict'] = '🔥点火确认'
         elif bad > len(ms) / 2:
             e['verdict'] = '⚠高位勿追'
-        elif not catalysts.get(e['name']) and good >= 1:
+        elif not (catalysts.get(e['name']) or {}).get('items') and good >= 1:
             e['verdict'] = '👁暗流观察'
         else:
             e['verdict'] = '👁观察'
@@ -450,6 +530,7 @@ def main():
         'overview': overview,
         'pool_size': len(pool),
         'events': [{k: v for k, v in e.items()} for e in events],
+        'catalysts': catalysts,
         'isolated': [{'symbol': s['symbol'], 'name': s['name'],
                       'change_pct': s['change_pct'], 'volume_ratio': s['volume_ratio']}
                      for s in isolated[:20]],

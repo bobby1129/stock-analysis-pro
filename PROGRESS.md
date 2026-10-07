@@ -1,4 +1,23 @@
 
+## ✅ v3.21 点火雷达催化层升级：双层检索+LLM汇集 — 已完成 (2026-10-07)
+
+### 原因
+用户指出：只搜行业名（LLM标签偏泛）时催化未必清晰准确，事件常由个股公告（中标/并购/业绩）带起，应加个股新闻并汇总排序。
+
+### 实现
+- L4 双层检索：事件名 + 主属前5只个股名（用户决策：前5足够，有催化前5就能体现），各取Google News RSS当日标题前5条
+- LLM汇集（复用 qwen3.6-flash 链路）：过滤软文/名单稿/错配稿 → 去重合并 → 按重要性排序（个股直接催化>行业政策>泛观点）→ 输出≤3条 {source, text≤26字}；text不重复source名
+- 降级：LLM两次失败回退原始标题罗列；全部原始标题存 ignition_data_*.json 的 catalysts 字段（Phase 2 回测催化质量用）
+- 卡片催化区改版式：`· 来源｜摘要`，来源金色高亮，3条封顶不撑高卡片
+- 09-30数据实跑验证：5事件全走LLM汇总；蓝丰生化收购/上海洗霸亿元大单等个股催化被正确选中排第一；导购软文、港股通名单稿、张冠李戴营销稿均被LLM过滤（"只有行业催化"=当天确无个股级公开催化，非搜索缺失）
+
+### 核心改动
+| 文件 | 改动 |
+|------|------|
+| `scripts/daily_content/generate_ignition.py` | l4_catalyst 重写（_rss_titles提取 + _CAT_PROMPT + _llm_summarize_catalyst）；catalysts存JSON |
+| `scripts/daily_content/generate_ignition_html.py` | 催化区渲染 source｜text 格式 |
+| `IGNITION_RADAR_DESIGN.md` / `DAILY_CONTENT.md` | §6催化层 / 第4节L4 同步 |
+
 ## ✅ v3.20 点火雷达替代异常信号 — 已完成 (2026-10-07)
 
 ### 原因
