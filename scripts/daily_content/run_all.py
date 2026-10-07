@@ -126,15 +126,28 @@ def main():
         else:
             break
     
-    # 4. 异常信号捕捉（4张：放量滞涨/缩量新高/放量急拉/连板梯队）
+    # 4. 点火雷达（P0概览 + 事件卡片, 2026-10-07 替代原异常信号3张）
+    if not run_script('generate_ignition.py'):
+        print("⚠ 点火雷达失败, 继续连板梯队")
+    if os.path.exists(os.path.join(OUTPUT_DIR, f'ignition_p0_{date_str}.html')):
+        if not html_to_png(f'ignition_p0_{date_str}'):
+            return 1
+    for p in range(1, 10):
+        html_name = f'ignition_p{p}_{date_str}'
+        if os.path.exists(os.path.join(OUTPUT_DIR, f'{html_name}.html')):
+            if not html_to_png(html_name):
+                return 1
+        else:
+            break
+
+    # 5. 连板梯队（1张, 原anomaly P4保留）
     if not run_script('generate_anomaly.py'):
         return 1
-    for i in range(1, 5):
-        if not html_to_png(f'anomaly_p{i}_{date_str}'):
-            return 1
+    if not html_to_png(f'anomaly_p4_{date_str}'):
+        return 1
     
     print("\n" + "="*60)
-    print("✓ 全部完成，共生成11张图")
+    print("✓ 全部完成")
     print("="*60)
     
     # 列出输出文件
@@ -146,11 +159,17 @@ def main():
         f'matrix_p2_{date_str}.png',
         f'matrix_p3_{date_str}.png',
         f'matrix_p4_{date_str}.png',
-        f'anomaly_p1_{date_str}.png',
-        f'anomaly_p2_{date_str}.png',
-        f'anomaly_p3_{date_str}.png',
-        f'anomaly_p4_{date_str}.png',
     ]
+    # 点火雷达 (P0 + 事件卡片, 数量动态)
+    if os.path.exists(os.path.join(OUTPUT_DIR, f'ignition_p0_{date_str}.png')):
+        files.append(f'ignition_p0_{date_str}.png')
+    for p in range(1, 10):
+        png_name = f'ignition_p{p}_{date_str}.png'
+        if os.path.exists(os.path.join(OUTPUT_DIR, png_name)):
+            files.append(png_name)
+        else:
+            break
+    files.append(f'anomaly_p4_{date_str}.png')
     # 动态添加new_top50文件（单页或多页）
     if os.path.exists(os.path.join(OUTPUT_DIR, f'new_top50_{date_str}.png')):
         files.insert(6, f'new_top50_{date_str}.png')

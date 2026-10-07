@@ -1,7 +1,7 @@
 # stock-analysis-pro Agent备忘
 
 项目核心文档。Agent 动本项目前先读此文件；改动代码必须同步更新此文档。
-相关文档: DESIGN.md(设计)、USAGE.md(用法)、DAILY_CONTENT.md / DAILY_CONTENT_PROJECT.md(抖音内容)、PROGRESS.md。
+相关文档: DESIGN.md(设计)、USAGE.md(用法)、DAILY_CONTENT.md / DAILY_CONTENT_PROJECT.md(抖音内容)、IGNITION_RADAR_DESIGN.md(点火雷达)、PROGRESS.md。
 
 ## 数据源与接口
 
@@ -26,7 +26,8 @@
 
 ## 抖音内容 (daily_content)
 
-- 竖屏 1080×1920，上下留白 200px+（手机遮挡），大字号(40px+)，金色高级感风格。
+- 竖屏 1080×1920，大字号(40px+)，金色高级感风格。
+- **左右安全边距 ≥130px（强制，2026-09-30教训）**: 9:16视频在更窄长的手机屏(19.5:9~21:9)上，抖音"填满屏幕"会按高度撑满、左右对称裁切(每侧裁97~128px)。卡片/内容容器 left/right 必须 ≥130px(内容区≤820px宽)，60~70px 边距会导致卡片两侧被切。上下被抖音UI遮挡可接受(用户确认无所谓)，顶部仍留白 200px+。
 - 新进TOP50分页规则: ≤10 单页大字；11-15 单页小字；>15 分页每页10只大字。
 - UI迭代原则: 小改动优先，保留内容元素，一张图一张图改。
 - 中文文字渲染只能靠 HTML→截图，AI生图不可靠。
@@ -34,3 +35,11 @@
 - 文本歧义: 写"约10亿"不写"~10亿"。
 - ffmpeg: 系统 /usr/bin/ffmpeg 无 libx264（仅rkmpp硬编，init失败）；用静态版 `scripts/daily_content/ffmpeg_static`（imageio-ffmpeg，阿里云镜像 uv 安装；pip/uv 默认源和 johnvansickle.com 下载均超时）。
 - 动画视频已下线（v3.18，2026-09-27）。若日后重做：弃用 Playwright 实时录屏（帧率/时序不可控），改用帧精确管线——HTML内暴露 `window.__render(t)` 同步渲染 → 逐帧截图(30fps) → ffmpeg_static 合成 mp4。
+- **点火雷达（2026-10-07，替代异常信号3张）**: 全市场放量股概览 + LLM行业聚类事件卡片。脚本 `generate_ignition.py`/`llm_industry.py`，设计文档 `IGNITION_RADAR_DESIGN.md`。LLM归类用 qwen3.6-flash（3.8-max批量超时），批20只，缓存 `data/llm_industry_cache.json`（数据文件，git不提交）。
+
+## 概念成分股数据源风控备忘（2026-10-07实测，反向索引方案弃用原因）
+
+- 东财 push2 HTTP直连: 时好时坏(当日全断, Empty reply)；Playwright链路拉成分股触发滑块(需人工)。
+- 同花顺 q.10jqka.com.cn/gn/detail 成分股页: 非ajax完整页+v cookie(py_mini_racer ths.js)可用, 但约20次请求后403, IP封锁>25min, 全量375概念爬不动; ajax接口直接被chameleon拦。
+- **basic.10jqka.com.cn (F10主营业务) 不受上述风控影响**, industry_screener链路正常。
+- 结论: 个股→行业归类不要再走"全量成分股反向索引", 用LLM多标签归类(点火雷达方案)或F10逐票查询(量小时)。

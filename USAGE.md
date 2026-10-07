@@ -105,16 +105,17 @@ Agent 会自动调用本工具并给你解读结果。
 - 🔥 **赚钱效应** — 涨停数、连板高度、热门方向
 - 🎯 **综合研判** — 操作建议(积极看多/谨慎/防守)
 
-### 6. 抖音日更内容（v3.11）
+### 6. 抖音日更内容
 
 **一句话触发：** `生成日更内容` 或 `做今天的抖音图片`
 
-自动生成11张竖屏图片（1080×1920），适合抖音发布：
+自动生成竖屏图片（1080×1920），适合抖音发布：
 
 1. **个股成交额TOP10**（1张）— 全市场成交额最高的10只股票，含排名变化箭头、IP角标、今日研判
 2. **概念板块资金意图矩阵**（5张）— 全量概念四象限：p0全景/p1失血榜/p2对倒嫌疑榜/p3主攻方向榜/p4潜伏吸筹榜
 3. **新进成交额TOP50**（1张或多张）— 首次进入成交额前50的股票，含量比/换手/信号标注/研判句
-4. **异常信号捕捉**（4张）— 放量滞涨/缩量新高/放量急拉 + 连板梯队
+4. **资金点火雷达**（P0概览 + 最多5张事件卡片）— 全市场放量股涨幅分布 + LLM行业聚类点火事件（位置分位/首放/K柱形态/催化新闻），见 `IGNITION_RADAR_DESIGN.md`
+5. **连板梯队**（1张）— akshare涨停池连板分布
 
 > 非交易日（周末/节假日）自动跳过，不生成内容。
 
@@ -122,13 +123,14 @@ Agent 会自动调用本工具并给你解读结果。
 - `output/daily_content/stock_amount_top10_YYYYMMDD.png`
 - `output/daily_content/matrix_p0~p4_YYYYMMDD.png`（YYYYMMDD=交易日，15:30前运行为上一交易日）
 - `output/daily_content/new_top50_YYYYMMDD.png`
-- `output/daily_content/anomaly_p1~p4_YYYYMMDD.png`
+- `output/daily_content/ignition_p0~p5_YYYYMMDD.png` + `ignition_data_YYYYMMDD.json`（回测用中间数据）
+- `output/daily_content/anomaly_p4_YYYYMMDD.png`（连板梯队）
 
 数据源：
 - 个股成交额：新浪财经（全市场）
 - 概念板块主力资金：同花顺官方funds接口（超大单+大单，与APP同口径，`collectors/ths_mainforce.py`）
 - 概念板块行情/全口径资金流：akshare同花顺全量概念资金流（`stock_fund_flow_concept("即时")`）
-- 异常信号：腾讯行情（量比）+ akshare（涨停池）
+- 点火雷达：腾讯行情（OHLC/量比/换手）+ 腾讯K线（250日）+ LLM行业归类（qwen3.6-flash，缓存）+ akshare涨停池 + Google News RSS（催化）
 
 详细文档：[DAILY_CONTENT.md](DAILY_CONTENT.md)
 

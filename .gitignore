@@ -35,6 +35,8 @@ env/
 config/user.yaml
 data/watchlist.json
 data/concept_cache.json
+data/llm_industry_cache.json
+data/stock_concept_index.json*
 cache/
 
 # OS

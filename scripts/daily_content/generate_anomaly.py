@@ -306,51 +306,23 @@ def generate_lianban_page(lb_dist, lb_names):
 
 
 if __name__ == '__main__':
-    print("获取全市场数据（腾讯源）...")
-    stocks = fetch_all_stocks_tencent()
-    print(f"总计: {len(stocks)} 只")
-    
-    print("\n检测异常信号...")
-    signals = detect_signals(stocks)
-    
-    print(f"放量滞涨: {len(signals['vol_high_stagnant'])}")
-    print(f"缩量新高: {len(signals['vol_low_surge'])}")
-    print(f"放量急拉: {len(signals['vol_surge'])}")
-    
-    print("\n获取连板梯队数据...")
+    # 2026-10-07: 放量滞涨/缩量新高/放量急拉3张已下线(被点火雷达generate_ignition.py替代,
+    # 原信号未排除涨停污染、缺乏板块语境, 见IGNITION_RADAR_DESIGN.md)。
+    # 本脚本只保留连板梯队P4; 全市场腾讯行情扫描移至generate_ignition.py, 此处不再抓取。
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--date', default=datetime.now().strftime('%Y%m%d'))
+    args = parser.parse_args()
+    date_str = args.date
+
+    print("获取连板梯队数据...")
     lb_dist, lb_names, limit_stats = fetch_lianban_data()
     print(f"涨停: {limit_stats['zt_count']} 跌停: {limit_stats['dt_count']}")
     print(f"连板分布: {lb_dist}")
-    
+
     output_dir = os.path.expanduser('~/stock-analysis-pro/output/daily_content')
     os.makedirs(output_dir, exist_ok=True)
-    
-    date_str = datetime.now().strftime("%Y%m%d")
-    
-    # 生成4张独立HTML
-    print("\n生成HTML（4张）...")
-    
-    # P1: 放量滞涨
-    html = generate_signal_page("⚠️ 放量滞涨（量比&gt;3 涨幅&lt;1%）", signals['vol_high_stagnant'])
-    output_file = os.path.join(output_dir, f'anomaly_p1_{date_str}.html')
-    with open(output_file, 'w', encoding='utf-8') as f:
-        f.write(html)
-    print(f"✓ {output_file}")
-    
-    # P2: 缩量新高
-    html = generate_signal_page("🚀 缩量新高（量比&lt;0.8 涨幅&gt;5%）", signals['vol_low_surge'])
-    output_file = os.path.join(output_dir, f'anomaly_p2_{date_str}.html')
-    with open(output_file, 'w', encoding='utf-8') as f:
-        f.write(html)
-    print(f"✓ {output_file}")
-    
-    # P3: 放量急拉
-    html = generate_signal_page("⚡ 放量急拉（量比&gt;2 涨幅&gt;5%）", signals['vol_surge'])
-    output_file = os.path.join(output_dir, f'anomaly_p3_{date_str}.html')
-    with open(output_file, 'w', encoding='utf-8') as f:
-        f.write(html)
-    print(f"✓ {output_file}")
-    
+
     # P4: 连板梯队
     html = generate_lianban_page(lb_dist, lb_names)
     output_file = os.path.join(output_dir, f'anomaly_p4_{date_str}.html')
