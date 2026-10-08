@@ -12,6 +12,8 @@ import requests
 import json
 from datetime import datetime, timedelta
 
+from cache_dates import get_prev_cache_date, get_cache_file, record_cache_date
+
 
 def fetch_stock_amount():
     """新浪行情接口 - 全市场按成交额排序"""
@@ -62,72 +64,58 @@ def fetch_stock_amount():
 
 def fetch_yesterday_amount(codes):
     """从本地缓存文件读取昨日成交额"""
-    cache_dir = os.path.expanduser('~/stock-analysis-pro/cache/daily_content')
     yesterday_amount = {}
-    
-    # 获取最近的交易日（简单回退，跳过周末）
-    today = datetime.now()
-    for delta in range(1, 5):
-        d = today - timedelta(days=delta)
-        date_key = d.strftime("%Y%m%d")
-        cache_file = os.path.join(cache_dir, f'stock_amount_cache_{date_key}.json')
-        if os.path.exists(cache_file):
-            try:
-                with open(cache_file, 'r', encoding='utf-8') as f:
-                    cached = json.load(f)
-                for item in cached:
-                    if item['code'] in codes:
-                        yesterday_amount[item['code']] = item['amount']
-                print(f"✓ 读取昨日缓存: {date_key}, {len(yesterday_amount)} 只匹配")
-                return yesterday_amount
-            except Exception as e:
-                print(f"读取缓存失败: {e}")
-    
+
+    # 通过缓存日期指针定位上一交易日（长假后仍可靠，2026-10-08改造）
+    date_key = get_prev_cache_date()
+    if date_key:
+        cache_file = get_cache_file(date_key)
+        try:
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                cached = json.load(f)
+            for item in cached:
+                if item['code'] in codes:
+                    yesterday_amount[item['code']] = item['amount']
+            print(f"✓ 读取昨日缓存: {date_key}, {len(yesterday_amount)} 只匹配")
+            return yesterday_amount
+        except Exception as e:
+            print(f"读取缓存失败: {e}")
+
     print("⚠ 未找到昨日缓存文件")
     return yesterday_amount
 
 
 def fetch_yesterday_top10_codes():
     """从本地缓存文件读取昨日top10的代码集合"""
-    cache_dir = os.path.expanduser('~/stock-analysis-pro/cache/daily_content')
-    today = datetime.now()
-    for delta in range(1, 5):
-        d = today - timedelta(days=delta)
-        date_key = d.strftime("%Y%m%d")
-        cache_file = os.path.join(cache_dir, f'stock_amount_cache_{date_key}.json')
-        if os.path.exists(cache_file):
-            try:
-                with open(cache_file, 'r', encoding='utf-8') as f:
-                    cached = json.load(f)
-                # 取前10个（按成交额排序，缓存已是排序后的）
-                top10_codes = set(item['code'] for item in cached[:10])
-                print(f"✓ 读取昨日top10: {date_key}, {len(top10_codes)} 只")
-                return top10_codes
-            except Exception as e:
-                print(f"读取昨日top10失败: {e}")
+    date_key = get_prev_cache_date()
+    if date_key:
+        try:
+            with open(get_cache_file(date_key), 'r', encoding='utf-8') as f:
+                cached = json.load(f)
+            # 取前10个（按成交额排序，缓存已是排序后的）
+            top10_codes = set(item['code'] for item in cached[:10])
+            print(f"✓ 读取昨日top10: {date_key}, {len(top10_codes)} 只")
+            return top10_codes
+        except Exception as e:
+            print(f"读取昨日top10失败: {e}")
     print("⚠ 未找到昨日top10缓存")
     return set()
 
 
 def fetch_yesterday_ranks():
     """从缓存读取昨日每只股票的排名（code -> rank，1-indexed）"""
-    cache_dir = os.path.expanduser('~/stock-analysis-pro/cache/daily_content')
-    today = datetime.now()
-    for delta in range(1, 5):
-        d = today - timedelta(days=delta)
-        date_key = d.strftime("%Y%m%d")
-        cache_file = os.path.join(cache_dir, f'stock_amount_cache_{date_key}.json')
-        if os.path.exists(cache_file):
-            try:
-                with open(cache_file, 'r', encoding='utf-8') as f:
-                    cached = json.load(f)
-                ranks = {}
-                for idx, item in enumerate(cached):
-                    ranks[item['code']] = idx + 1
-                print(f"✓ 读取昨日排名: {date_key}, {len(ranks)} 只")
-                return ranks
-            except Exception as e:
-                print(f"读取昨日排名失败: {e}")
+    date_key = get_prev_cache_date()
+    if date_key:
+        try:
+            with open(get_cache_file(date_key), 'r', encoding='utf-8') as f:
+                cached = json.load(f)
+            ranks = {}
+            for idx, item in enumerate(cached):
+                ranks[item['code']] = idx + 1
+            print(f"✓ 读取昨日排名: {date_key}, {len(ranks)} 只")
+            return ranks
+        except Exception as e:
+            print(f"读取昨日排名失败: {e}")
     print("⚠ 未找到昨日排名缓存")
     return {}
 
@@ -143,6 +131,8 @@ def save_amount_cache(stocks):
     with open(cache_file, 'w', encoding='utf-8') as f:
         json.dump(cache_data, f, ensure_ascii=False)
     print(f"✓ 缓存已保存: {cache_file}")
+    # 登记到缓存日期指针（供次日定位上一交易日）
+    record_cache_date(date_key)
 
 
 def format_amount(amount):

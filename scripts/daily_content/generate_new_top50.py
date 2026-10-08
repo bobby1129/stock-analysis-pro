@@ -16,6 +16,7 @@ import json
 from datetime import datetime, timedelta
 from stock_short_names import get_short_name
 from generate_stock_amount import get_episode_vol
+from cache_dates import get_prev_cache_date, get_cache_file
 
 
 def fetch_stock_amount():
@@ -65,15 +66,13 @@ def fetch_stock_amount():
 
 def fetch_yesterday_top50_codes(prev_date=None):
     """从本地缓存文件读取昨日top50的代码集合。prev_date可指定YYYYMMDD(测试用)"""
-    cache_dir = os.path.expanduser('~/stock-analysis-pro/cache/daily_content')
     if prev_date:
-        deltas = [None]
-        dates = [prev_date]
+        date_key = prev_date
     else:
-        today = datetime.now()
-        dates = [(today - timedelta(days=d)).strftime("%Y%m%d") for d in range(1, 5)]
-    for date_key in dates:
-        cache_file = os.path.join(cache_dir, f'stock_amount_cache_{date_key}.json')
+        # 通过缓存日期指针定位上一交易日（长假后仍可靠，2026-10-08改造）
+        date_key = get_prev_cache_date()
+    if date_key:
+        cache_file = get_cache_file(date_key)
         if os.path.exists(cache_file):
             try:
                 with open(cache_file, 'r', encoding='utf-8') as f:

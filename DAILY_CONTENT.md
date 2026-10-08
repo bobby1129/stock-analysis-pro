@@ -28,6 +28,7 @@
   - 每日运行后缓存当日成交额到 `cache/daily_content/stock_amount_cache_YYYYMMDD.json`
   - 次日运行时读取昨日缓存，计算环比 = (今日-昨日)/昨日×100%
   - 无昨日缓存时显示 N/A
+- **昨日缓存定位（日期指针）**: `scripts/daily_content/cache_dates.py` 维护 `cache/daily_content/amount_cache_dates.json`（所有已写入缓存的日期列表），读取"昨日"时取今天之前最近的缓存日期，而非固定天数回溯。长假（春节/国庆）休市后仍能正确定位（旧方案回溯4天，2026-10-08国庆休市8天导致 top10/top50 对比全空、新进榜误报50只）。指针缺失/损坏时自动扫描缓存目录重建。TOP10 与 新进TOP50 共用此机制。
 - **排名变化箭头**:
   - 从昨日缓存读取每只股票的排名（code → rank）
   - 对比今日排名，计算变化：
