@@ -181,6 +181,22 @@ def build_event_page(idx, event, catalysts, date_str):
         nc = '#dc143c' if net >= 0 else '#228b22'
         net_html = f'<div style="font-size:32px;color:#666;margin-top:10px;">概念当日主力净流入 <span style="color:{nc};font-weight:800;">{net:+.1f}亿</span></div>'
 
+    # 板块量比标签: 温和放量(1.1~2.0绿) / 板块爆量(>2.0橙,接力末端警惕) / 板块未动(<1.1灰,孤立异动)
+    bvr = event.get('board_vr')
+    bvr_html = ''
+    if bvr:
+        r = bvr['ratio']
+        if r > 2.0:
+            bvr_c, bvr_bg, bvr_note = '#c0392b', '#fdeeea', '板块爆量·已是明牌'
+        elif r >= 1.1:
+            bvr_c, bvr_bg, bvr_note = '#1d7a2f', '#eef7f0', '温和放量·板块刚启动'
+        else:
+            bvr_c, bvr_bg, bvr_note = '#888', '#f4f4f2', '板块未放量·个股孤立异动'
+        bvr_html = (f'<div style="display:inline-block;margin-top:12px;background:{bvr_bg};'
+                    f'border:1px solid {bvr_c}33;border-radius:14px;padding:8px 20px;'
+                    f'font-size:30px;color:{bvr_c};font-weight:700;">'
+                    f'📊 板块量比 {r:.1f}（{bvr["today_amt"]:.0f}亿 / 20日均{bvr["avg20"]:.0f}亿）· {bvr_note}</div>')
+
     reso = '<span style="font-size:30px;background:#b8860b;color:#fff;padding:6px 18px;border-radius:20px;margin-left:16px;">板块共振</span>' if event.get('resonance') else ''
     verdict = event.get('verdict', '')
     v_color = {'🔥点火确认': '#dc143c', '⚠高位勿追': '#8a4a9e'}.get(verdict, '#b8860b')
@@ -192,6 +208,7 @@ def build_event_page(idx, event, catalysts, date_str):
             <div style="font-size:34px;font-weight:800;color:{v_color};background:#faf6ec;padding:10px 22px;border-radius:16px;border:1px solid #e8dcc0;">{verdict}</div>
         </div>
         <div style="font-size:34px;color:#666;">触发 {event['score']:.0f} 只（加权）· 涨停 {sum(1 for s in event['members'] if s.get('is_limit_up'))} 只 · 首放 {sum(1 for s in event['members'] if s.get('vol_tag')=='首放')} 只</div>
+        {bvr_html}
         {net_html}
     </div>
     <div class="section">

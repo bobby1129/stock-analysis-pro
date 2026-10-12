@@ -455,6 +455,76 @@ def fetch_lianban():
     return fetch_limit_stats()
 
 
+# LLM标签→板块名 手工映射兜底(模糊规则搞不定的高频标签; 值为881行业名或885概念名)
+_BOARD_VR_ALIAS = {
+    # 881一级行业方向
+    '影视/动漫': '文化传媒',
+    '出版/教育': '文化传媒',
+    '文旅': '旅游及酒店',
+    '输配电设备': '电网设备',
+    '软件服务': '软件开发',
+    # 885概念方向
+    '算力': '东数西算(算力)',
+    'AIDC': '数据中心(AIDC)',
+    'CPO': '共封装光学(CPO)',
+    '光模块': '共封装光学(CPO)',
+    '谷子经济': 'IP经济(谷子经济)',
+    'eVTOL': '飞行汽车(eVTOL)',
+    '并购重组': '股权转让(并购重组)',
+    '折叠屏': '柔性屏(折叠屏)',
+}
+
+# 行业级宽词, 无单一对应板块, 禁止模糊匹配(宁缺勿假):
+# "电力设备"(储能+电机+风电混合)会误配"电力"(发电公用事业), 量比语义错误;
+# "商贸/文旅"实际多为零售股, 误配"贸易"(11亿小行业)语义错误 (2026-10-12实测教训)
+_BOARD_VR_SKIP = {'电力设备', '化工', '基础化工', '新材料', '机械', '医药', '消费',
+                  '商贸/文旅', '商贸', '科技', '制造'}
+
+
+def match_board_vr(event_name, ratios):
+    """事件名(LLM标签)→板块量比。匹配不到返回None(不硬凑, 宁缺勿假)。
+    LLM标签多为行业级宽词(化工/新材料/软件服务), 885概念多为题材级窄词, 因此
+    只接受 板块名⊆事件名 方向(板块同级或更窄的组成部分), 严禁 事件名⊂板块名
+    (如"化工"误匹配"磷化工"——以宽配窄是错的, 2026-10-12实测教训)。
+    规则: 跳过名单 > 精确 > 别名表 > "/、"拆分逐段精确 > 归一化板块⊆事件(取最长=最具体)"""
+    if not ratios or not event_name or event_name in _BOARD_VR_SKIP:
+        return None
+
+    def hit(name):
+        r = ratios.get(name)
+        if r:
+            return {'concept': name, 'ratio': r['ratio'], 'today_amt': r['today_amt'],
+                    'avg20': r['avg20'], 'date': r['date']}
+        return None
+
+    v = hit(event_name)
+    if v:
+        return v
+    v = hit(_BOARD_VR_ALIAS.get(event_name, ''))
+    if v:
+        return v
+
+    def norm(s):
+        return s.replace('概念', '').replace('板块', '').replace(' ', '')
+
+    # "/"拆分逐段: "锂电池/材料" → ["锂电池","材料"]
+    parts = [p.strip() for p in re.split(r'[/、]', event_name) if len(p.strip()) >= 2]
+    for p in parts:
+        v = hit(p) or hit(_BOARD_VR_ALIAS.get(p, ''))
+        if v:
+            return v
+
+    n_ev = norm(event_name)
+    if len(n_ev) < 2:
+        return None
+    # 概念⊆事件 方向: 归一化概念名是事件名的子串
+    cands = [n for n in ratios if len(norm(n)) >= 2 and norm(n) in n_ev]
+    if cands:
+        best = max(cands, key=lambda n: len(norm(n)))   # 取最长=最具体
+        return hit(best)
+    return None
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--date', default=None, help='默认取行情数据实际日期(节假日=上一交易日)')
@@ -522,6 +592,24 @@ def main():
         print(f"  (主力净流入不可用: {ex})")
     for e in events:
         e['main_net'] = mf.get(e['name'], {}).get('main_net')
+
+    # ── 板块量比 (LLM标签→行业881/概念885模糊匹配; 行业缓存幂等刷新约20秒) ──
+    try:
+        from collectors.ths_board_hist import (load_board_volume_ratio,
+                                               load_industry_volume_ratio,
+                                               ensure_industry_history_fresh)
+        ensure_industry_history_fresh(trade_date=date_str)
+        # 行业优先(LLM标签是行业级), 概念兜底
+        ratios = {**load_board_volume_ratio(), **load_industry_volume_ratio()}
+        for e in events:
+            vr = match_board_vr(e['name'], ratios)
+            e['board_vr'] = vr
+            if vr:
+                print(f"  {e['name']}: 板块量比{vr['ratio']} (匹配「{vr['concept']}」)")
+    except Exception as ex:
+        print(f"  (板块量比不可用: {ex})")
+        for e in events:
+            e.setdefault('board_vr', None)
 
     # ── 中间数据落盘(调试/回测) ──
     os.makedirs(_OUTPUT_DIR, exist_ok=True)

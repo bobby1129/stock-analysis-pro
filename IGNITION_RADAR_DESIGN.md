@@ -181,6 +181,17 @@
 ```
 - 概念当日主力净流入：复用 `collectors/ths_mainforce.py` 当日缓存（东财概念名→同花顺885码
   映射若缺则该字段省略，不阻塞出图）
+- **板块量比标签（2026-10-12, v3.22）**：事件名(LLM行业标签)→板块量比（今日K线额/自身20日均额），
+  三档判读：>2.0红「板块爆量·已是明牌」（个股放量=接力末端警惕）/ 1.1~2.0绿「温和放量·板块刚启动」
+  （配合成员股首放=最优信号）/ <1.1灰「板块未放量·个股孤立异动」。
+  - 匹配链：跳过名单(_BOARD_VR_SKIP, 行业级宽词如"电力设备/化工/新材料"无单一板块对应, 宁缺勿假)
+    > 精确 > 别名表(_BOARD_VR_ALIAS, 如"影视/动漫"→文化传媒881) > "/、"拆分逐段精确
+    > 归一化板块⊆事件名（**严禁反向**：事件名⊂板块名会"化工"误配"磷化工"，实测教训）
+  - 数据源：`collectors/ths_board_hist.py` 行业881（`load_industry_volume_ratio`，90板块约20秒，
+    generate_ignition 内 `ensure_industry_history_fresh` 幂等刷新）+ 概念885（复用matrix缓存），
+    行业优先概念兜底；映射表 `data/ths_industry_881_mapping.json`
+    （`scripts/build_ths_industry_mapping.py`，akshare直接返回881码无需爬页，季度刷新）
+  - 落盘：`ignition_data_*.json` 的 `board_vr` 字段（Phase 2 回测"温和放量板块首放股"vs"爆量板块接力股"次日胜率）
 - 触发股≤6只全列；>6只列前6（按 涨幅×首放优先 排序）+"等N只"
 
 ### P6 连板梯队（保留现有P4不变）

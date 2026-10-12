@@ -27,7 +27,9 @@ import requests
 
 _ROOT = os.path.expanduser('~/stock-analysis-pro')
 MAPPING_FILE = os.path.join(_ROOT, 'data', 'ths_concept_885_mapping.json')
+INDUSTRY_MAPPING_FILE = os.path.join(_ROOT, 'data', 'ths_industry_881_mapping.json')
 CACHE_FILE = os.path.join(_ROOT, 'cache', 'concept_amount_history.json')
+INDUSTRY_CACHE_FILE = os.path.join(_ROOT, 'cache', 'industry_amount_history.json')
 KEEP_DAYS = 70          # 保留最近N个交易日(20日均量+余量)
 UA = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
       '(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36')
@@ -84,17 +86,17 @@ def fetch_board_year(name, code_885, year, v_cookie, session=None):
     return out
 
 
-def refresh_history(verbose=True, max_concepts=None):
-    """全量刷新缓存: 每个概念拉当年+去年两个年文件, 增量合并进缓存"""
-    with open(MAPPING_FILE, encoding='utf-8') as f:
-        concepts = json.load(f)['concepts']
+def _refresh_mapping_history(mapping_file, cache_file, key, verbose=True, max_concepts=None):
+    """通用: 拉 mapping_file 中全部板块的当年+去年日K, 增量合并进 cache_file"""
+    with open(mapping_file, encoding='utf-8') as f:
+        concepts = json.load(f)[key]
     if max_concepts:
         concepts = dict(list(concepts.items())[:max_concepts])
 
     cache = {}
-    if os.path.exists(CACHE_FILE):
+    if os.path.exists(cache_file):
         try:
-            with open(CACHE_FILE, encoding='utf-8') as f:
+            with open(cache_file, encoding='utf-8') as f:
                 cache = json.load(f)
         except Exception:
             cache = {}
@@ -115,9 +117,8 @@ def refresh_history(verbose=True, max_concepts=None):
                     print(f'  ⚠ {name} {year}: {e}')
         if rows:
             amt = {r['date']: round(r['amount'], 2) for r in rows}
-            # 增量合并 + 截断保留最近KEEP_DAYS个交易日
-            ent = cache.get(name, {'885': code, 'amt': {}})
-            ent['885'] = code
+            ent = cache.get(name, {'code': code, 'amt': {}})
+            ent['code'] = code
             ent['amt'].update(amt)
             keys = sorted(ent['amt'].keys())
             if len(keys) > KEEP_DAYS:
@@ -132,23 +133,32 @@ def refresh_history(verbose=True, max_concepts=None):
             print(f'  {i+1}/{len(concepts)} ok={ok} fail={fail} {time.time()-t0:.0f}s')
         time.sleep(0.12)
 
-    os.makedirs(os.path.dirname(CACHE_FILE), exist_ok=True)
-    with open(CACHE_FILE, 'w', encoding='utf-8') as f:
+    os.makedirs(os.path.dirname(cache_file), exist_ok=True)
+    with open(cache_file, 'w', encoding='utf-8') as f:
         json.dump(cache, f, ensure_ascii=False, separators=(',', ':'))
     if verbose:
-        print(f'✓ 板块历史缓存: ok={ok} fail={fail} → {CACHE_FILE}')
+        print(f'✓ 板块历史缓存: ok={ok} fail={fail} → {cache_file}')
         if fails:
             print(f'  失败名单(前10): {fails[:10]}')
     return ok, fail, fails
 
 
-def load_board_volume_ratio(min_days=10):
-    """读缓存 → {概念名: {'today_amt': 今日额亿, 'avg20': 近20日均额亿(不含今日),
-                            'ratio': 板块量比, 'days': 可用天数}}
-    最新日期以缓存内最大日期为准(交易日收盘后生成时=今日)。"""
-    if not os.path.exists(CACHE_FILE):
+def refresh_history(verbose=True, max_concepts=None):
+    """概念板块(885)全量刷新"""
+    return _refresh_mapping_history(MAPPING_FILE, CACHE_FILE, 'concepts',
+                                    verbose, max_concepts)
+
+
+def refresh_industry_history(verbose=True, max_concepts=None):
+    """一级行业板块(881, 约90个)全量刷新"""
+    return _refresh_mapping_history(INDUSTRY_MAPPING_FILE, INDUSTRY_CACHE_FILE,
+                                    'industries', verbose, max_concepts)
+
+
+def _load_ratio_from_cache(cache_file, min_days=10):
+    if not os.path.exists(cache_file):
         return {}
-    with open(CACHE_FILE, encoding='utf-8') as f:
+    with open(cache_file, encoding='utf-8') as f:
         cache = json.load(f)
     out = {}
     for name, ent in cache.items():
@@ -169,13 +179,21 @@ def load_board_volume_ratio(min_days=10):
     return out
 
 
-def ensure_history_fresh(trade_date=None):
-    """generate_matrix 前置调用: 缓存最新日期 < 目标交易日才刷新(幂等, 重跑不重复拉)
-    trade_date: YYYYMMDD, 默认取缓存内最大日期无法判断时全量刷新"""
+def load_board_volume_ratio(min_days=10):
+    """概念板块(885)量比 → {概念名: {'today_amt','avg20','ratio','days','date'}}"""
+    return _load_ratio_from_cache(CACHE_FILE, min_days)
+
+
+def load_industry_volume_ratio(min_days=10):
+    """一级行业板块(881)量比 → {行业名: {...}} (点火雷达LLM标签匹配用)"""
+    return _load_ratio_from_cache(INDUSTRY_CACHE_FILE, min_days)
+
+
+def _cache_latest_date(cache_file):
     latest = None
-    if os.path.exists(CACHE_FILE):
+    if os.path.exists(cache_file):
         try:
-            with open(CACHE_FILE, encoding='utf-8') as f:
+            with open(cache_file, encoding='utf-8') as f:
                 cache = json.load(f)
             for ent in cache.values():
                 ks = ent.get('amt', {})
@@ -184,6 +202,12 @@ def ensure_history_fresh(trade_date=None):
                     latest = d if latest is None or d > latest else latest
         except Exception:
             latest = None
+    return latest
+
+
+def ensure_history_fresh(trade_date=None):
+    """generate_matrix 前置调用: 概念缓存最新日期 < 目标交易日才刷新(幂等, 重跑不重复拉)"""
+    latest = _cache_latest_date(CACHE_FILE)
     if trade_date and latest and latest >= trade_date:
         print(f'✓ 板块历史缓存已是最新({latest}), 跳过刷新')
         return False
@@ -192,6 +216,21 @@ def ensure_history_fresh(trade_date=None):
     return True
 
 
+def ensure_industry_history_fresh(trade_date=None):
+    """generate_ignition 前置调用: 行业缓存幂等刷新(90个板块约20秒)"""
+    latest = _cache_latest_date(INDUSTRY_CACHE_FILE)
+    if trade_date and latest and latest >= trade_date:
+        print(f'✓ 行业历史缓存已是最新({latest}), 跳过刷新')
+        return False
+    print(f'行业历史缓存过期(最新{latest}, 目标{trade_date}), 开始刷新...')
+    refresh_industry_history()
+    return True
+
+
 if __name__ == '__main__':
-    n = int(sys.argv[1]) if len(sys.argv) > 1 else None
-    refresh_history(max_concepts=n)
+    arg = sys.argv[1] if len(sys.argv) > 1 else None
+    if arg == 'industry':
+        refresh_industry_history()
+    else:
+        n = int(arg) if arg else None
+        refresh_history(max_concepts=n)
