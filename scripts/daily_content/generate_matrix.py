@@ -22,12 +22,17 @@ from datetime import datetime, timedelta
 
 from generate_concept_html import is_bucket_concept
 from collectors.ths_mainforce import fetch_concept_main_force
+from collectors.ths_board_hist import load_board_volume_ratio, ensure_history_fresh
 
 OUT_DIR = os.path.expanduser('~/stock-analysis-pro/output/daily_content')
 CACHE_DIR = os.path.expanduser('~/stock-analysis-pro/cache/daily_content')
 
 MIN_AMOUNT = 50     # 失血榜总成交门槛(亿)
 MIN_NET = 3         # |净额|门槛(亿)
+MIN_AMOUNT_LURK = 30    # 潜伏榜总成交门槛(亿, 防小板块单笔大单假信号)
+VR_FIRM = 1.2           # 主攻榜板块量比下限(温和放量以上)
+VR_LURK_LO = 1.1        # 潜伏榜板块量比区间下限(开始有资金注意)
+VR_LURK_HI = 3.0        # 潜伏榜板块量比区间上限(爆量滞涨=对倒嫌疑, 不是吸筹)
 N_PER_ZONE = 5      # 每区显示条数
 N_CACHE = 10        # 每区缓存条数(>10取top10, 不足全缓存)
 ZONE_NAMES = ['bleed', 'fake', 'firm', 'lurk']
@@ -139,20 +144,64 @@ def energy_badge(e, med):
     return f'<span class="ebadge badge-calm">能量{e:.1f}亿</span>'
 
 
+def vr_badge(vr):
+    """板块量比徽章: 今日总额/自身近20日均额 (时序自比, 免疫成分股数量/天生活跃度差异)"""
+    if vr is None or pd.isna(vr):
+        return ''
+    if vr >= 2.0:
+        return f'<span class="ebadge badge-fire">🔥板块量比{vr:.1f}</span>'
+    if vr >= 1.2:
+        return f'<span class="ebadge badge-absorb">量比{vr:.1f}</span>'
+    return f'<span class="ebadge badge-calm">量比{vr:.1f}</span>'
+
+
+def merge_volume_ratio(df):
+    """合并板块量比(概念日K历史缓存, collectors/ths_board_hist)
+    量比 = 今日额/自身20日均额, 分子分母同用 d.10jqka K线成交额, 内部自洽。
+    实测(2026-10-12): gnzjl流入+流出 ≈ 0.65×真实成交额(非双侧记账翻倍),
+    仅用于离群校验: K线今日额 < gnzjl总额×0.4 视为该板块K线数据异常 → 量比NaN降级。
+    缓存缺失/新概念历史不足时 量比20=NaN, 筛选逻辑自动降级"""
+    ratios = load_board_volume_ratio()
+    if not ratios:
+        print('⚠ 无板块历史缓存(先跑 collectors/ths_board_hist.py), 量比降级为空')
+        df['量比20'] = float('nan')
+        df['均额20'] = float('nan')
+        return df, 0
+    df['均额20'] = df['行业'].map(lambda n: ratios.get(n, {}).get('avg20'))
+    df['量比20'] = df['行业'].map(lambda n: ratios.get(n, {}).get('ratio'))
+    # 离群校验: K线今日额 vs gnzjl总额(≈0.65×真实额)
+    k_today = df['行业'].map(lambda n: ratios.get(n, {}).get('today_amt'))
+    bad = k_today < df['总额'] * 0.4
+    n_bad = int(bad.sum())
+    if n_bad:
+        print(f'⚠ {n_bad}个概念K线今日额与gnzjl严重不符(数据异常), 量比降级: '
+              f'{df.loc[bad, "行业"].head(5).tolist()}')
+        df.loc[bad, '量比20'] = float('nan')
+        df.loc[bad, '均额20'] = float('nan')
+    n_hit = int(df['量比20'].notna().sum())
+    print(f'✓ 板块量比合并: {n_hit}/{len(df)} 概念命中历史缓存')
+    return df, n_hit
+
+
 # ---------- 四区选择 + 缓存 ----------
 def select_zones(active, med):
-    """四区筛选, 每区按排序取前N_CACHE(10)条用于缓存, 显示时取前N_PER_ZONE(5)"""
+    """四区筛选, 每区按排序取前N_CACHE(10)条用于缓存, 显示时取前N_PER_ZONE(5)
+    firm/lurk 用板块量比(时序自比)衡量资金活跃; 量比缺失(缓存冷启动/新概念)时降级:
+      firm 退回旧口径 能量≥med, lurk 只用总额门槛"""
     zones = {}
     zones['bleed'] = active[(active['净额'] <= -MIN_NET) & (active['总额'] >= MIN_AMOUNT)] \
         .sort_values('留存率').head(N_CACHE)
     zones['fake'] = active[(active['行业-涨跌幅'] > 0.8) & (active['净额'] > 0) &
                            (active['留存率'] < 1.5) & (active['总额'] >= 100)] \
         .sort_values('总额', ascending=False).head(N_CACHE)
+    has_vr = active['量比20'].notna()
+    firm_energy_ok = (has_vr & (active['量比20'] >= VR_FIRM)) | (~has_vr & (active['能量'] >= med))
     zones['firm'] = active[(active['行业-涨跌幅'] >= 0.5) & (active['净额'] >= MIN_NET) &
-                           (active['留存率'] >= 3) & (active['能量'] >= med)] \
+                           (active['留存率'] >= 3) & firm_energy_ok] \
         .sort_values('留存率', ascending=False).head(N_CACHE)
+    lurk_vr_ok = (has_vr & (active['量比20'] >= VR_LURK_LO) & (active['量比20'] <= VR_LURK_HI)) | ~has_vr
     zones['lurk'] = active[(active['行业-涨跌幅'] < 0.5) & (active['净额'] >= MIN_NET) &
-                           (active['留存率'] >= 4)] \
+                           (active['留存率'] >= 4) & (active['总额'] >= MIN_AMOUNT_LURK) & lurk_vr_ok] \
         .sort_values('留存率', ascending=False).head(N_CACHE)
     return zones
 
@@ -217,6 +266,8 @@ def build_row(i, r, med, mode, is_new=False):
     chg = r['行业-涨跌幅']
     chg_color = '#dc143c' if chg > 0 else '#228b22'
     badge = energy_badge(r['能量'], med)
+    if mode in ('firm', 'lurk'):
+        badge = vr_badge(r.get('量比20')) or badge
     new_badge = '<span class="ebadge badge-new">NEW</span>' if is_new else ''
     dv_main = divergence_badge(r)
 
@@ -424,7 +475,7 @@ def zone_content(zkey, zones, date_cn, med, prev_zones):
             verdict = "今日无价涨+高留存+高能量的三共振板块，主线不明"
         section = f'''<div class="section">
     <div class="sec-title">💪 三共振主攻<span class="tag gold">价涨+钱进+锁仓</span></div>
-    <div class="sec-note">涨幅≥0.5% + 净流入≥3亿 + 留存率≥3% + 能量≥全市场中位（{med:.1f}亿/只）｜ 金条=留存率，越高越坚决</div>
+    <div class="sec-note">涨幅≥0.5% + 净流入≥3亿 + 留存率≥3% + 板块量比≥{VR_FIRM}（今日成交/自身20日均额，放量确认）｜ 金条=留存率，越高越坚决</div>
     {rows}
   </div>'''
         title_html = '主攻<span class="gold">方向榜</span>'
@@ -438,7 +489,7 @@ def zone_content(zkey, zones, date_cn, med, prev_zones):
             verdict = "今日无高留存潜伏板块，资金没有悄悄布局的动作"
         section = f'''<div class="section">
     <div class="sec-title">🕵️ 钱进价未动<span class="tag green">潜伏</span></div>
-    <div class="sec-note">涨幅&lt;0.5%但留存率≥4%进场：不等拉升才追，专找资金已埋伏、价格未启动的板块 ｜ 金条=留存率</div>
+    <div class="sec-note">涨幅&lt;0.5% + 留存率≥4% + 成交≥{MIN_AMOUNT_LURK}亿 + 板块量比{VR_LURK_LO}~{VR_LURK_HI}（温和放量=悄悄建仓；爆量滞涨剔除去对倒榜看）｜ 金条=留存率</div>
     {rows}
   </div>'''
         title_html = '潜伏<span class="green">吸筹榜</span>'
@@ -451,8 +502,8 @@ def zone_content(zkey, zones, date_cn, med, prev_zones):
 ZONE_FOOTERS = {
     'bleed': '门槛：成交≥50亿·主力净流出≥3亿 ｜ 主力口径（超大单+大单）｜ <span class="brand">盘后情报局</span> 每日16:00',
     'fake': '门槛：成交≥100亿·涨幅&gt;0.8%·留存&lt;1.5% ｜ 主力口径（超大单+大单）｜ <span class="brand">盘后情报局</span> 每日16:00',
-    'firm': '主力口径（超大单+大单）｜ <span class="brand">盘后情报局</span> 每日16:00',
-    'lurk': '门槛：主力净流入≥3亿·留存≥4% ｜ 主力口径（超大单+大单）｜ <span class="brand">盘后情报局</span> 每日16:00',
+    'firm': '门槛：板块量比≥1.2（今日成交/自身20日均额）｜ 主力口径（超大单+大单）｜ <span class="brand">盘后情报局</span> 每日16:00',
+    'lurk': '门槛：主力净流入≥3亿·留存≥4%·成交≥30亿·板块量比1.1~3.0 ｜ 主力口径（超大单+大单）｜ <span class="brand">盘后情报局</span> 每日16:00',
 }
 ZONE_KICKERS = {'bleed': '盘后情报局 · 资金意图矩阵 1/4', 'fake': '盘后情报局 · 资金意图矩阵 2/4',
                 'firm': '盘后情报局 · 资金意图矩阵 3/4', 'lurk': '盘后情报局 · 资金意图矩阵 4/4'}
@@ -481,10 +532,17 @@ def gen_p4(zones, date_cn, med, prev_zones):
 
 def main():
     date_cn, date_key = trading_date()
+    # 板块量比历史缓存: 目标交易日未入库才全量刷新(约2分钟, 幂等)
+    try:
+        ensure_history_fresh(trade_date=date_key)
+    except Exception as e:
+        print(f'⚠ 板块历史刷新失败({e}), 量比降级')
     df = fetch_data()
+    df, _ = merge_volume_ratio(df)
     active = df[df['总额'] > 20]
     med = float(active['能量'].median())
-    print(f'概念总数: {len(df)}, 活跃板块: {len(active)}, 能量中位数: {med:.2f}亿/只, 交易日 {date_cn}')
+    n_vr = int(active['量比20'].notna().sum()) if '量比20' in active.columns else 0
+    print(f'概念总数: {len(df)}, 活跃板块: {len(active)}(量比命中{n_vr}), 能量中位数: {med:.2f}亿/只, 交易日 {date_cn}')
 
     # 四区筛选 + 缓存 + NEW标记
     zones = select_zones(active, med)

@@ -11,6 +11,7 @@
   - **全口径**(gnzjl): akshare `stock_fund_flow_concept("即时")` = 全量387概念，净额=主动买-主动卖(主动口径)。网页版只返回涨幅TOP50有采样偏差(弃用)。资金榜需过滤宽基桶(融资融券/股通/国企改革等)，但"国家大基金持股"是真题材不可误杀。
   - **两口径不可相加**：主力=按委托单大小分档("谁在买")，主动=按成交方向("买方急不急")。背离信号: 主力流出≥0.5亿+主动流入≥2亿=⚠派发嫌疑；反向=吸筹嫌疑。
   - 概念名→885码映射: `data/ths_concept_885_mapping.json`，由 `scripts/build_ths_885_mapping.py` 生成(概念详情页隐藏域clid，375概念约4分钟)，季度刷新(挂concept-mapping-check cron)。
+- 概念板块日K历史(collectors/ths_board_hist.py): 直连 `d.10jqka.com.cn/v4/line/bk_<885码>/01/<year>.js`(hexin-v cookie, 与akshare同法生成), **不碰被风控的q.10jqka详情页**, 375概念全量约2分钟零封禁(2026-10-12实测)。缓存 `cache/concept_amount_history.json`(近70交易日成交额, git不提交), generate_matrix 前置 ensure_history_fresh 幂等刷新。用途: 板块量比=今日K线额/自身20日均额(时序自比, 免疫成分股数量/天生活跃度截面偏置)。口径坑: gnzjl流入+流出≈0.65×真实成交额, 与K线额不同口径, 量比统一用K线口径; gnzjl总额仅作离群校验(K线今日额<gnzjl总额×0.4→数据异常降级NaN)。
 - 个股全市场资金流用新浪。
 - 涨跌家数(collectors/breadth.py fetch_breadth): 新浪Market_Center.getHQNodeData全量翻页(hs_a~56页,约15秒)优先——2026-09-30与同花顺APP对照验证一致(涨2566/跌2824/平181 vs APP 2567/2824/170)；东财push2兜底(同日返回2393/2730与APP偏差大,口径存疑,且时好时坏)；腾讯getBoardRankList弃用(aStock板块仅4606只覆盖不全)。涨跌停用akshare涨停池(fetch_limit_stats)。同花顺无直接家数接口(zdfb页chameleon反爬,iwencai本机DNS不通)。plans/daily_report.py的fetch_market_breadth已委托collector,勿再重复实现。
 - 同花顺/东财字段映射必须打印验证，不可假设。
