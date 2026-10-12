@@ -122,7 +122,7 @@
   - 行情：腾讯批量 `https://qt.gtimg.cn/q=`（字段索引已验证：1名称 3现价 5开盘 32涨跌幅 33最高 34最低 37成交额万 38换手 49量比）
   - 股票代码列表：新浪 Market_Center 翻页（breadth.py 同口径）
   - 连板：akshare涨停池（`collectors/breadth.fetch_limit_stats`）
-  - K线：腾讯 `web.ifzq.gtimg.cn fqkline`（复用 industry_screener.tencent_kline，仅事件股拉取）
+  - K线：腾讯 `web.ifzq.gtimg.cn fqkline`（复用 industry_screener.tencent_kline，仅事件股拉取；2026-10-13起内置新浪备源自动兜底腾讯WAF拦截，复权/volume单位已对齐，详见 AGENTS.md 勿扩散红线）
   - 催化：Google News RSS（`--proxy http://127.0.0.1:10809`，过滤频道名/查询回显）
   - 行业归类：LLM（qwen3.6-flash，读 ~/.hermes/config.yaml；temperature=0；缓存 `data/llm_industry_cache.json` 跨日一致）
 - **管线（四层漏斗）**:

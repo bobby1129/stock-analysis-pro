@@ -103,7 +103,10 @@
 ## 5. L3 位置/形态层
 
 数据源：腾讯K线 `web.ifzq.gtimg.cn/appstock/app/fqkline/get`（250日前复权，
-`industry_screener.tencent_kline()` 已封装，直接复用）。只对**事件卡片内的股票**拉K线
+`industry_screener.tencent_kline()` 已封装，直接复用；2026-10-13起内置新浪备源
+自动兜底腾讯WAF拦截——备源用新浪qfq.js因子还原前复权(误差3.71%→0.38%)、
+volume股→手对齐，但只有volume无成交额，L3只吃close/volume故安全，
+详见 AGENTS.md 勿扩散红线）。只对**事件卡片内的股票**拉K线
 （每日约15~40只，1s间隔可接受），孤立异动不拉。
 
 ### 5.1 位置分位

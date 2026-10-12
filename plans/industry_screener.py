@@ -716,24 +716,124 @@ def tencent_detail(code):
     }
 
 
+def sina_qfq_factors(symbol):
+    """新浪前复权因子 (finance.sina.com.cn/realstock/company/{symbol}/qfq.js)
+
+    返回按日期升序的 [(生效日, 因子), ...]; 最新一条恒为今天锚定 f=1.0。
+    还原公式: qfq价 = 原始价 / 因子 (2026-10-13以茅台500根对照东财qfq实测:
+    raw误差3.71% → raw/f误差0.38%, raw*f方向错误7.99%)。
+    失败返回 [] (调用方退回不复权)。
+    """
+    url = f"https://finance.sina.com.cn/realstock/company/{symbol}/qfq.js"
+    try:
+        r = SESSION.get(url, headers={"User-Agent": UA,
+                                      "Referer": "https://finance.sina.com.cn"}, timeout=8)
+        m = re.search(r'=(\{.*\})', r.text)
+        if not m:
+            return []
+        data = json.loads(m.group(1))["data"]
+        return sorted((x["d"], float(x["f"])) for x in data)
+    except Exception:
+        return []
+
+
+def _sina_apply_qfq(klines, factors):
+    """对不复权K线套前复权因子: 每根取最后一个 生效日<=当日 的因子, 价/因子。
+
+    klines: [[date, open, close, high, low, volume], ...] (volume不动)
+    factors为空或全1.0时原样返回。
+    """
+    if not factors:
+        return klines
+    if all(abs(f - 1.0) < 1e-9 for _, f in factors):
+        return klines
+    out = []
+    for k in klines:
+        day = k[0]
+        f = 1.0
+        for d, ff in factors:
+            if d <= day:
+                f = ff
+        if f > 0 and abs(f - 1.0) > 1e-9:
+            out.append([day, round(k[1] / f, 3), round(k[2] / f, 3),
+                        round(k[3] / f, 3), round(k[4] / f, 3), k[5]])
+        else:
+            out.append(k)
+    return out
+
+
+def sina_kline_fallback(symbol, days=250):
+    """新浪K线备源 (2026-10-13上线, 腾讯web.ifzq被WAF拦截时自动切换)
+
+    symbol: 带前缀代码, 如 sz300006 / sh600519
+    返回与腾讯K线相同结构: [[date, open, close, high, low, volume], ...]
+    (注意腾讯结构index 2是close, 此处转换已对齐; volume已从新浪的"股"换算为
+    腾讯口径的"手"=股/100, 2026-10-13对照腾讯实测比值恰为100)
+
+    复权: 默认用新浪qfq.js因子还原前复权(raw/f), 与主源腾讯qfq口径对齐
+    (残留~0.4%算法差, 各家qfq对现金分红处理不同, 腾讯vs东财本身也对不齐);
+    因子接口失败时退回不复权并打印警告。
+
+    ⚠⚠ 使用限制 (勿扩散):
+    1. 新浪K线【只有volume(成交量/股), 没有成交额(元)】——历史上"市场情绪日报→
+       成交量趋势"曾误把volume当成交额导致单位错误而弃用新浪K线。
+       任何需要成交额的调用方严禁依赖本函数返回值。
+    当前合法用途: 点火雷达L3(价格分位/首放判定/K柱形态)与
+    fetch_stock_indicators(连涨天数/60日/250日分位)——全部只吃close和volume。
+    """
+    url = ("https://quotes.sina.cn/cn/api/jsonp_v2.php/var%20_=/CN_MarketDataService.getKLineData"
+           f"?symbol={symbol}&scale=240&ma=no&datalen={days}")
+    try:
+        r = SESSION.get(url, headers={"User-Agent": UA,
+                                      "Referer": "https://finance.sina.com.cn"}, timeout=8)
+        t = r.text
+        arr = json.loads(t[t.index('(') + 1: t.rindex(')')])
+    except Exception:
+        return []
+    out = []
+    for it in arr:
+        try:
+            out.append([it['day'], float(it['open']), float(it['close']),
+                        float(it['high']), float(it['low']),
+                        round(float(it['volume']) / 100, 1)])  # 股→手, 对齐腾讯K线volume单位
+        except Exception:
+            continue
+    if not out:
+        return out
+    factors = sina_qfq_factors(symbol)
+    if factors:
+        out = _sina_apply_qfq(out, factors)
+    else:
+        print(f"[警告] {symbol} 新浪复权因子获取失败, K线退回不复权口径")
+    return out
+
+
 def tencent_kline(code, days=250):
-    """获取腾讯K线数据"""
+    """获取K线数据 (主源腾讯qfq, 备源新浪)
+
+    返回: [[date, open, close, high, low, volume], ...]
+    ⚠ 备源生效时返回的新浪K线【无成交额字段】(详见sina_kline_fallback文档):
+      需要成交额的调用方不得依赖本函数, 成交额请走实时行情接口(qt.gtimg.cn
+      index 37, 单位万)或同花顺K线等其他源。
+    """
     prefix = "sh" if code.startswith("6") else "sz"
     url = f"https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={prefix}{code},day,,,{days},qfq"
     raw = safe_request(url, timeout=6)
-    if not raw:
-        return []
-    try:
-        data = json.loads(raw)
-    except:
-        return []
-    stock_data = data.get("data", {}).get(f"{prefix}{code}", {})
-    klines = stock_data.get("qfqday", stock_data.get("day", []))
+    klines = []
+    if raw:
+        try:
+            data = json.loads(raw)
+            stock_data = data.get("data", {}).get(f"{prefix}{code}", {})
+            klines = stock_data.get("qfqday", stock_data.get("day", []))
+            if not klines:
+                for k, v in stock_data.items():
+                    if isinstance(v, list) and len(v) > 0:
+                        klines = v
+                        break
+        except Exception:
+            klines = []  # WAF拦截时返回HTML(501页), json解析失败落到这里
     if not klines:
-        for k, v in stock_data.items():
-            if isinstance(v, list) and len(v) > 0:
-                klines = v
-                break
+        klines = sina_kline_fallback(f"{prefix}{code}", days)
     return klines
 
 

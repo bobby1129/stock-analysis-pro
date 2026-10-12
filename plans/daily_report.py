@@ -148,22 +148,33 @@ def tencent_detail(code):
 # ── 腾讯K线 ──
 
 def tencent_kline(code, days=30):
+    """K线 (主源腾讯qfq, 备源新浪)
+
+    返回: [[date, open, close, high, low, volume], ...]
+    ⚠ 备源生效时为新浪K线, 【无成交额字段且不复权】——本函数的下游
+    (calc_multi_day_change/calc_technical_indicators) 只吃close/volume, 安全;
+    新增调用方若需要成交额严禁走本函数 (详见
+    industry_screener.sina_kline_fallback 文档)。
+    """
     prefix = get_sina_prefix(code)
     url = f"https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={prefix}{code},day,,,{days},qfq"
     raw = safe_request(url, timeout=6, rate_limit=False)
-    if not raw:
-        return []
-    try:
-        data = json.loads(raw)
-    except:
-        return []
-    stock_data = data.get("data", {}).get(f"{prefix}{code}", {})
-    klines = stock_data.get("qfqday", stock_data.get("day", []))
+    klines = []
+    if raw:
+        try:
+            data = json.loads(raw)
+            stock_data = data.get("data", {}).get(f"{prefix}{code}", {})
+            klines = stock_data.get("qfqday", stock_data.get("day", []))
+            if not klines:
+                for k, v in stock_data.items():
+                    if isinstance(v, list) and len(v) > 0:
+                        klines = v
+                        break
+        except Exception:
+            klines = []  # WAF拦截时返回HTML, 解析失败走备源
     if not klines:
-        for k, v in stock_data.items():
-            if isinstance(v, list) and len(v) > 0:
-                klines = v
-                break
+        from plans.industry_screener import sina_kline_fallback
+        klines = sina_kline_fallback(f"{prefix}{code}", days)
     return klines
 
 
