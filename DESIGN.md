@@ -574,4 +574,4 @@ HTTP requests (push2.eastmoney.com/api/qt/clist/get)
 - **宽基桶过滤**: 复用 `generate_concept_html.is_bucket_concept`（融资融券/沪深股通等资金属性桶）
 - **文件**: `scripts/daily_content/generate_matrix.py`（自带Playwright截图+溢出检测）
 - **缓存路径**: `cache/daily_content/matrix_zone_cache_YYYYMMDD.json`（四区各top10名单，次日NEW标记对比）；主力数据当日缓存 `cache/ths_mainforce_YYYYMMDD.json`（仅15:05后生成有效, 防盘前旧数据误用）
-- **注意**: 文件名后缀是交易日（15:30前运行=上一交易日），run_all.py清单动态匹配
+- **注意**: 文件名后缀是交易日（15:30前运行=上一交易日，会污染标签——cron必须≥15:30启动，现为15:35），run_all.py清单动态匹配

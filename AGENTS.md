@@ -38,6 +38,7 @@
 - 可视化必须有信息价值，拒绝"为了好看而好看"（全市场5000只热力图、无红绿对抗的热力图为反例）。
 - 文本歧义: 写"约10亿"不写"~10亿"。
 - ffmpeg: 系统 /usr/bin/ffmpeg 无 libx264（仅rkmpp硬编，init失败）；用静态版 `scripts/daily_content/ffmpeg_static`（imageio-ffmpeg，阿里云镜像 uv 安装；pip/uv 默认源和 johnvansickle.com 下载均超时）。
+- **cron定时必须≥15:30启动**（2026-10-13教训）: generate_matrix.py 的 trading_date() 以15:30为交易日阈值——15:30前运行会把当日数据标成前一日标签（且与真文件同名互相覆盖）。cron现为15:35，调整时间不得早于15:30。全流程约8-12分钟（v3.22加板块量比后），cron提示词必须要求后台运行+等待完成，前台600秒会杀进程。
 - 动画视频已下线（v3.18，2026-09-27）。若日后重做：弃用 Playwright 实时录屏（帧率/时序不可控），改用帧精确管线——HTML内暴露 `window.__render(t)` 同步渲染 → 逐帧截图(30fps) → ffmpeg_static 合成 mp4。
 - **点火雷达（2026-10-07，替代异常信号3张）**: 全市场放量股概览 + LLM行业聚类事件卡片。脚本 `generate_ignition.py`/`llm_industry.py`，设计文档 `IGNITION_RADAR_DESIGN.md`。LLM归类用 qwen3.6-flash（3.8-max批量超时），批20只，缓存 `data/llm_industry_cache.json`（数据文件，git不提交）。催化层（2026-10-07升级）：事件名+主属前5只个股名双层RSS检索 → LLM汇集排序（个股直接催化>行业政策>泛观点），≤3条摘要，失败降级原始标题，原始数据存 ignition_data_*.json。
 
