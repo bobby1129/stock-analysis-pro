@@ -41,6 +41,7 @@
 - **cron定时必须≥15:30启动**（2026-10-13教训）: generate_matrix.py 的 trading_date() 以15:30为交易日阈值——15:30前运行会把当日数据标成前一日标签（且与真文件同名互相覆盖）。cron现为15:35，调整时间不得早于15:30。全流程约8-12分钟（v3.22加板块量比后），cron提示词必须要求后台运行+等待完成，前台600秒会杀进程。
 - 动画视频已下线（v3.18，2026-09-27）。若日后重做：弃用 Playwright 实时录屏（帧率/时序不可控），改用帧精确管线——HTML内暴露 `window.__render(t)` 同步渲染 → 逐帧截图(30fps) → ffmpeg_static 合成 mp4。
 - **点火雷达（2026-10-07，替代异常信号3张）**: 全市场放量股概览 + LLM行业聚类事件卡片。脚本 `generate_ignition.py`/`llm_industry.py`，设计文档 `IGNITION_RADAR_DESIGN.md`。LLM归类用 qwen3.6-flash（3.8-max批量超时），批20只，缓存 `data/llm_industry_cache.json`（数据文件，git不提交）。催化层（2026-10-07升级）：事件名+主属前5只个股名双层RSS检索 → LLM汇集排序（个股直接催化>行业政策>泛观点），≤3条摘要，失败降级原始标题，原始数据存 ignition_data_*.json。
+- **点火雷达v6标签净化（2026-10-13）**: 聚合前LLM按F10主营业务剔擦边概念标签（只筛不造，`llm_label_filter.py`；主营缓存 `data/stock_business_map.json` TTL 180天防新增业务误剔，净化缓存 `data/llm_label_filter_cache.json`，均git不提交）；排序改绝对触发家数（tiebreaker=板块量比>首放占比，v5渗透率加权退役但score仍落盘回测）。属性直通标签（专精特新/一带一路/自贸区/指数持仓类等，`ATTRIBUTE_CONCEPTS`名单）不交LLM判、不参与聚合排名——否则霸屏且去重误并（验证教训）。详见设计文档§12。
 
 ## 概念成分股数据源风控备忘（2026-10-07实测，反向索引方案弃用原因）
 

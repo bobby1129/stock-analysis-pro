@@ -26,6 +26,13 @@ _ROOT = os.path.expanduser('~/stock-analysis-pro')
 _INDEX_FILE = os.path.join(_ROOT, 'data', 'stock_concept_index.json')
 _OUTPUT_DIR = os.path.join(_ROOT, 'output', 'daily_content')
 
+# 概念名→885码 (v5概念聚合用; 加载失败不阻塞, 仅卡片少一个码字段)
+try:
+    with open(os.path.join(_ROOT, 'data', 'ths_concept_885_mapping.json'), encoding='utf-8') as _f:
+        _CONCEPT_885 = json.load(_f)['concepts']
+except Exception:
+    _CONCEPT_885 = {}
+
 # ── 触发层参数 (设计文档 §3) ──
 TRIGGER_VOL_RATIO = 2.0       # 量比阈值
 TRIGGER_CHANGE_PCT = 3.0      # 涨幅门槛%
@@ -174,6 +181,150 @@ def l1_trigger(stocks, zt_lianban_map):
     return pool, overview
 
 
+# ── v5 概念聚合 (2026-10-12, IGNITION_RADAR_DESIGN.md §11) ──
+CONCEPT_MIN_TRIGGER = 3     # 入围门槛: 同概念触发≥3只
+PEN_FULL = 0.10             # 渗透率满分线: 触发数/成分家数 ≥10%
+VR_LO, VR_HI = 0.8, 2.0     # 板块量比打分区间(0.8→0分, 2.0→满分)
+W_PEN, W_VR, W_BURST = 1.2, 1.0, 0.8   # 打分权重(Phase 2回测校准)
+
+
+def fetch_concept_member_counts():
+    """概念成分家数 (gnzjl全口径'公司家数'字段, 与885概念名同体系)
+    仅用于渗透率分母(全量口径), 与触发样本线严格分离(§11.1红线)"""
+    import akshare as ak
+    try:
+        df = ak.stock_fund_flow_concept(symbol="即时")
+        return {str(r['行业']): int(r['公司家数']) for _, r in df.iterrows()}
+    except Exception as e:
+        print(f'  ⚠ gnzjl成分家数不可用: {e}')
+        return {}
+
+
+def l2_concept_cluster(pool, member_counts, board_ratios):
+    """L2' 概念聚合: F10个股→概念缓存反向聚合, 事件=885概念
+    v6(2026-10-13, IGNITION_RADAR_DESIGN.md §12):
+      - 聚合前LLM标签净化(llm_label_filter.purify_labels): 按F10主营业务剔擦边标签,
+        只筛不造; 属性直通标签(专精特新/一带一路等)保留在个股标签但不参与聚合排名
+      - 排序改绝对数量: 主键=净化后触发家数, tiebreaker=板块量比>首放占比
+        (v5加权打分退役; score字段仍计算落盘供Phase2回测对比)
+    返回 (events, isolated, f10_failed)
+      events 含: name(=概念名)/concept_885/members/n_trigger/n_comp/penetration/
+                 vr/burst_ratio/score/secondary_concepts
+    """
+    from collectors.ths_stock_concept import get_or_fetch
+    from generate_concept_html import is_bucket_concept
+    from llm_label_filter import purify_labels, is_attribute_concept
+
+    cmap = get_or_fetch([s['code'] for s in pool])
+    covered, failed = [], []
+    for s in pool:
+        c = cmap.get(s['code'])
+        if c and c['names']:
+            s['concepts'] = [n for n in c['names'] if not is_bucket_concept(n)]
+            s['concept_source'] = c['source']
+            covered.append(s)
+        else:
+            s['concepts'] = []
+            failed.append(s)
+    print(f"  F10概念覆盖: {len(covered)}/{len(pool)} (未覆盖{len(failed)})")
+
+    # ── v6标签净化 (LLM按主营业务剔擦边标签, 带持久缓存) ──
+    stats = purify_labels(covered)
+    print(f"  标签净化: LLM{stats['llm']}只 缓存{stats['cached']}只 失败降级{stats['failed']}只")
+
+    # ── 概念桶聚合 (净化标签, 属性直通标签不参与) ──
+    buckets = {}   # 概念名 → [stocks]
+    for s in covered:
+        for cn in s.get('concepts_clean') or []:
+            if is_attribute_concept(cn):
+                continue
+            buckets.setdefault(cn, []).append(s)
+    cands = {cn: ms for cn, ms in buckets.items() if len(ms) >= CONCEPT_MIN_TRIGGER}
+    print(f"  概念桶(净化后): {len(buckets)}个, 入围(≥{CONCEPT_MIN_TRIGGER}只): {len(cands)}个")
+
+    # ── 首放占比需L3数据: 先对候选成员批量富化 ──
+    cand_syms = {s['symbol'] for ms in cands.values() for s in ms}
+    cand_stocks = [s for s in covered if s['symbol'] in cand_syms]
+    l3_enrich(cand_stocks)
+
+    # ── 打分 (v6: 排序用绝对数量, score仅落盘回测对比用) ──
+    events = []
+    for cn, ms in cands.items():
+        n_trig = len(ms)
+        n_comp = member_counts.get(cn)
+        pen = (n_trig / n_comp) if n_comp else None
+        pen_score = min((pen or 0.05) / PEN_FULL, 1.0)   # 家数缺失→中性0.05
+        vr = (board_ratios.get(cn) or {}).get('ratio')
+        vr_score = min(max(((vr if vr is not None else 1.0) - VR_LO) / (VR_HI - VR_LO), 0), 1)
+        n_burst = sum(1 for s in ms if s.get('vol_tag') == '首放')
+        burst = n_burst / n_trig
+        score = W_PEN * pen_score + W_VR * vr_score + W_BURST * burst
+        # 次级概念: ≥2只成员共同挂靠的其它概念(剔自身/属性标签), 按挂靠数取前2
+        sec_count = {}
+        for s in ms:
+            for c2 in s.get('concepts_clean') or []:
+                if c2 != cn and not is_attribute_concept(c2):
+                    sec_count[c2] = sec_count.get(c2, 0) + 1
+        secondary = sorted([c for c, n in sec_count.items() if n >= 2],
+                           key=lambda c: (-sec_count[c], c))[:2]
+        events.append({
+            'level': 'concept', 'name': cn,
+            'concept_885': _CONCEPT_885.get(cn),
+            'members': sorted(ms, key=lambda s: -s['change_pct']),
+            'n_trigger': n_trig, 'n_comp': n_comp,
+            'penetration': round(pen, 3) if pen else None,
+            'vr': vr, 'burst_ratio': round(burst, 2), 'n_burst': n_burst,
+            'score': round(score, 3),
+            'secondary_concepts': [{'name': c, 'n': sec_count[c],
+                                    'vr': (board_ratios.get(c) or {}).get('ratio')}
+                                   for c in secondary],
+        })
+
+    # v6排序: 绝对触发家数 > 板块量比 > 首放占比 (v5的score加权退役)
+    events.sort(key=lambda e: (-e['n_trigger'],
+                               -(e['vr'] if e['vr'] is not None else -1),
+                               -e['burst_ratio']))
+
+    # ── 重叠去重: 成员重叠率≥50%(交集/较小事件)视为同一事件簇, 只留分最高的 ──
+    # (概念反向聚合下强相关概念会各自成事件霸屏, 如 短剧游戏⊂文化传媒概念 15/16)
+    selected = []
+    for e in events:
+        syms = {s['symbol'] for s in e['members']}
+        dup_of = None
+        for k in selected:
+            ksyms = {s['symbol'] for s in k['members']}
+            inter = len(syms & ksyms)
+            if inter / min(len(syms), len(ksyms)) >= 0.5:
+                dup_of = k
+                break
+        if dup_of:
+            e['duplicate_of'] = dup_of['name']
+            # 被并事件的名字挂到主事件上作"兼"标注(信息不丢)
+            dup_of.setdefault('alias_concepts', []).append(
+                {'name': e['name'], 'score': e['score']})
+        else:
+            selected.append(e)
+        if len(selected) >= MAX_EVENTS:
+            break
+    events = selected
+
+    # ── 主属归一 / 共振 (沿用v4机制) ──
+    primary_of = {}
+    for e in events:
+        for s in e['members']:
+            if s['symbol'] not in primary_of:
+                primary_of[s['symbol']] = e['name']
+    for e in events:
+        e['main_members'] = [s for s in e['members'] if primary_of.get(s['symbol']) == e['name']]
+        e['aux_members'] = [s for s in e['members'] if primary_of.get(s['symbol']) != e['name']]
+        other_syms = {s['symbol'] for x in events if x is not e for s in x['members']}
+        e['resonance'] = sum(1 for s in e['main_members'] if s['symbol'] in other_syms) >= 2
+
+    event_syms = {s['symbol'] for e in events for s in e['members']}
+    isolated = [s for s in pool if s['symbol'] not in event_syms]
+    return events, isolated, failed
+
+
 def l2_cluster(pool):
     """L2 聚类层 (LLM多标签归类 + 三轮合并) → 事件列表 + 孤立异动
 
@@ -275,11 +426,67 @@ def l2_cluster(pool):
     return events, isolated
 
 
+def _llm_fallback_cluster(failed_stocks, events, isolated, member_counts, board_ratios):
+    """F10未覆盖股的兜底: LLM归类主标签作伪概念桶, ≥3只成事件(level=llm_fallback)
+    写回F10缓存(source=llm, 30天TTL)供次日聚合复用; 不成桶的归孤立"""
+    from llm_industry import classify_batch
+    from collectors.ths_stock_concept import save_llm_fallback
+    cls = classify_batch([{'code': s['code'], 'name': s['name']} for s in failed_stocks])
+    buckets = {}
+    for s in failed_stocks:
+        c = cls.get(s['code'], {})
+        labels = c.get('labels', [])
+        if labels:
+            s['concepts'] = [labels[0]['l2']]
+            s['concept_source'] = 'llm'
+            save_llm_fallback(s['code'], s['concepts'])
+            buckets.setdefault(labels[0]['l2'], []).append(s)
+        else:
+            s['concepts'] = []
+    fb_events = []
+    for cn, ms in buckets.items():
+        if len(ms) >= CONCEPT_MIN_TRIGGER:
+            l3_enrich(ms)
+            n_trig = len(ms)
+            n_comp = member_counts.get(cn)
+            pen = (n_trig / n_comp) if n_comp else None
+            pen_score = min((pen or 0.05) / PEN_FULL, 1.0)
+            vr = (board_ratios.get(cn) or {}).get('ratio')
+            vr_score = min(max(((vr if vr is not None else 1.0) - VR_LO) / (VR_HI - VR_LO), 0), 1)
+            n_burst = sum(1 for s in ms if s.get('vol_tag') == '首放')
+            score = (W_PEN * pen_score + W_VR * vr_score + W_BURST * n_burst / n_trig) * 0.8
+            fb_events.append({
+                'level': 'llm_fallback', 'name': cn, 'concept_885': None,
+                'members': sorted(ms, key=lambda s: -s['change_pct']),
+                'main_members': sorted(ms, key=lambda s: -s['change_pct']), 'aux_members': [],
+                'resonance': False,
+                'n_trigger': n_trig, 'n_comp': n_comp,
+                'penetration': round(pen, 3) if pen else None,
+                'vr': vr, 'burst_ratio': round(n_burst / n_trig, 2), 'n_burst': n_burst,
+                'score': round(score, 3), 'secondary_concepts': [],
+            })
+    # 兜底事件与概念事件合并竞争TOP5 (v6排序口径一致: 绝对家数>量比>首放; ×0.8折减保留在score字段供回测)
+    all_ev = sorted(events + fb_events,
+                    key=lambda e: (-e['n_trigger'],
+                                   -(e['vr'] if e['vr'] is not None else -1),
+                                   -e['burst_ratio']))[:MAX_EVENTS]
+    kept_syms = {s['symbol'] for e in all_ev for s in e['members']}
+    iso_syms = {x['symbol'] for x in isolated}
+    new_isolated = ([s for s in isolated if s['symbol'] not in kept_syms] +
+                    [s for s in failed_stocks
+                     if s['symbol'] not in kept_syms and s['symbol'] not in iso_syms])
+    if fb_events:
+        print(f"  LLM兜底事件: {[e['name'] for e in fb_events]}")
+    return all_ev, new_isolated
+
+
 def l3_enrich(members):
-    """L3 位置/首放/形态 — 腾讯250日K线"""
+    """L3 位置/首放/形态 — 腾讯250日K线 (已富化的跳过, v5概念聚合层已预富化候选)"""
     from plans.industry_screener import tencent_kline, calc_price_percentile
 
     for s in members:
+        if s.get('vol_tag') and s.get('vol_tag') != '?':
+            continue
         try:
             klines = tencent_kline(s['code'], days=260)
         except Exception:
@@ -547,17 +754,39 @@ def main():
     print("\n=== L1 触发层 ===")
     pool, overview = l1_trigger(stocks, zt_lianban_map)
 
-    print("\n=== L2 聚类层(LLM多标签) ===")
-    events, isolated = l2_cluster(pool)
+    # ── v5前置: 全量板块线数据 (概念885量比 + gnzjl成分家数) ──
+    print("\n=== 板块量比/成分家数(全量线) ===")
+    try:
+        from collectors.ths_board_hist import load_board_volume_ratio, ensure_history_fresh
+        ensure_history_fresh(trade_date=date_str)   # 幂等: matrix已刷过则秒回
+        board_ratios = load_board_volume_ratio()
+        print(f"  概念量比: {len(board_ratios)}个")
+    except Exception as ex:
+        print(f"  ⚠ 板块量比不可用: {ex}")
+        board_ratios = {}
+    member_counts = fetch_concept_member_counts()
+    print(f"  成分家数: {len(member_counts)}个概念")
+
+    print("\n=== L2' 概念聚合(F10反向索引) ===")
+    events, isolated, f10_failed = l2_concept_cluster(pool, member_counts, board_ratios)
+
+    # F10未覆盖兜底: LLM归类主标签作伪概念入桶(标注source=llm); 仍失败归孤立
+    if f10_failed:
+        events, isolated = _llm_fallback_cluster(f10_failed, events, isolated,
+                                                 member_counts, board_ratios)
+
     for e in events:
-        tag = '合并:' + '+'.join(e['merged_from']) if e['level'] == 'l1' else ''
-        print(f"  {e['name']}: score={e['score']:.1f} 成员{len(e['members'])} "
-              f"主属{len(e['main_members'])} 共振={e['resonance']} {tag}")
+        pen = f"{e['penetration']*100:.1f}%" if e.get('penetration') else '—'
+        vr = e.get('vr')
+        print(f"  {e['name']}: 触发{e['n_trigger']}/{e.get('n_comp') or '?'}家"
+              f" 渗透{pen} 量比{vr if vr else '—'} 首放{e['n_burst']}只"
+              f" (score={e['score']:.2f}回测用)"
+              f"{' [LLM兜底]' if e.get('level') == 'llm_fallback' else ''}")
     print(f"  孤立异动: {len(isolated)}")
 
     print("\n=== L3 位置/首放/形态 ===")
     for e in events:
-        l3_enrich(e['members'])
+        l3_enrich(e['members'])   # 已富化的自动跳过
 
     print("\n=== L4 催化 ===")
     catalysts = l4_catalyst(events)
@@ -593,19 +822,22 @@ def main():
     for e in events:
         e['main_net'] = mf.get(e['name'], {}).get('main_net')
 
-    # ── 板块量比 (LLM标签→行业881/概念885模糊匹配; 行业缓存幂等刷新约20秒) ──
+    # ── 板块量比: v5事件=概念, 直查自身885量比(全量线); LLM兜底事件走旧匹配链 ──
     try:
         from collectors.ths_board_hist import (load_board_volume_ratio,
-                                               load_industry_volume_ratio,
-                                               ensure_industry_history_fresh)
-        ensure_industry_history_fresh(trade_date=date_str)
-        # 行业优先(LLM标签是行业级), 概念兜底
-        ratios = {**load_board_volume_ratio(), **load_industry_volume_ratio()}
+                                               load_industry_volume_ratio)
+        ratios885 = load_board_volume_ratio()
         for e in events:
-            vr = match_board_vr(e['name'], ratios)
-            e['board_vr'] = vr
-            if vr:
-                print(f"  {e['name']}: 板块量比{vr['ratio']} (匹配「{vr['concept']}」)")
+            if e.get('level') == 'concept':
+                r = ratios885.get(e['name'])
+                e['board_vr'] = ({'concept': e['name'], 'ratio': r['ratio'],
+                                  'today_amt': r['today_amt'], 'avg20': r['avg20'],
+                                  'date': r['date']} if r else None)
+            else:   # llm_fallback事件: 沿用v3.22b模糊匹配链
+                all_ratios = {**ratios885, **load_industry_volume_ratio()}
+                e['board_vr'] = match_board_vr(e['name'], all_ratios)
+            if e.get('board_vr'):
+                print(f"  {e['name']}: 板块量比{e['board_vr']['ratio']}")
     except Exception as ex:
         print(f"  (板块量比不可用: {ex})")
         for e in events:

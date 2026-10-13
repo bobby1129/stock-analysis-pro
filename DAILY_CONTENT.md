@@ -117,35 +117,37 @@
 > 单股孤立无量价语境、无买卖指导价值），替换为自下而上的"点火雷达"。
 > 设计文档：`IGNITION_RADAR_DESIGN.md`（含方案演进：东财/同花顺反向索引均被风控 → LLM归类）。
 
-- **脚本**: `scripts/daily_content/generate_ignition.py`（主管线） + `generate_ignition_html.py`（页面构建） + `llm_industry.py`（LLM归类）
+- **脚本**: `scripts/daily_content/generate_ignition.py`（主管线） + `generate_ignition_html.py`（页面构建） + `llm_label_filter.py`（v6标签净化） + `llm_industry.py`（LLM归类，降级兜底）
 - **数据源**:
   - 行情：腾讯批量 `https://qt.gtimg.cn/q=`（字段索引已验证：1名称 3现价 5开盘 32涨跌幅 33最高 34最低 37成交额万 38换手 49量比）
   - 股票代码列表：新浪 Market_Center 翻页（breadth.py 同口径）
   - 连板：akshare涨停池（`collectors/breadth.fetch_limit_stats`）
   - K线：腾讯 `web.ifzq.gtimg.cn fqkline`（复用 industry_screener.tencent_kline，仅事件股拉取；2026-10-13起内置新浪备源自动兜底腾讯WAF拦截，复权/volume单位已对齐，详见 AGENTS.md 勿扩散红线）
   - 催化：Google News RSS（`--proxy http://127.0.0.1:10809`，过滤频道名/查询回显）
-  - 行业归类：LLM（qwen3.6-flash，读 ~/.hermes/config.yaml；temperature=0；缓存 `data/llm_industry_cache.json` 跨日一致）
+  - 个股→概念：同花顺F10概念页（`collectors/ths_stock_concept.py`，basic.10jqka不受风控，缓存 `data/stock_concept_map.json` 90天TTL；未覆盖股LLM兜底归类 `data/llm_industry_cache.json`）
+  - 个股主营业务：同花顺F10（`collectors/ths_stock_business.py`，缓存 `data/stock_business_map.json` **180天TTL**，超期重新核对防新增业务误剔）
 - **管线（四层漏斗）**:
   - L1 触发：量比>2 + 涨幅≥3% + 换手≥3%，剔ST/剔连板≥3天；涨停股保留（标"涨停"）
-  - L2 聚类：LLM多标签归类（1~3个二级行业标签，固定TAXONOMY清单防漂移）→ 三轮合并
-    （R1主标签桶权重1.0/次标签0.5加权和≥3成事件；R3未满桶按一级行业合并再判）；
-    一股多事件归主属其余标"(兼)"；≥2只跨事件=板块共振
+  - L2' 概念聚合（v5，2026-10-12）：F10个股→概念缓存反向聚合，事件=885概念；触发≥3只入围；一股多概念归主属其余标"(兼)"；≥2只跨事件=板块共振；重叠去重（成员交集/较小集≥50%只留一个，被并名挂"同簇概念"）
+    - **v6标签净化（2026-10-13）**：聚合前用LLM（qwen3.6-flash，temp=0，批20）按F10主营业务从个股概念里剔擦边标签（**只筛不造**=输出∩候选，保持885体系）；缓存 `data/llm_label_filter_cache.json`（标签集hash变了才重判）；LLM失败降级全保留（宁松勿严）。**属性直通标签**（`llm_label_filter.ATTRIBUTE_CONCEPTS`：专精特新/一带一路/自贸区/指数持仓/地缘事件等）不交LLM判、保留在个股标签但**不参与聚合排名**（否则绝对数量榜被大属性桶霸屏+去重误并）
+    - **排序（v6）**：主键=净化后绝对触发家数，tiebreaker=板块量比>首放占比（v5渗透率加权打分退役，score仍落盘供Phase2回测）。解决的问题：v5渗透率导向让500只大板块牛市外永远达不到满分线、泛概念被擦边票撑大失真（AIGC桶19→5只、人工智能桶33→3只）
   - L3 标注：60日价格分位（底部<30/中部/高位>70）、首放判定（前20日无放量日）、K柱形态（涨停/长阳点火/长上影/长下影/十字星）
   - L4 催化：双层检索（事件名+主属前5只个股名，Google News RSS当日）→ LLM汇集去重
     按重要性排序（个股直接催化>行业政策>泛观点），输出≤3条摘要（source｜text≤26字）；
     LLM失败降级原始标题；全部原始标题存JSON（Phase 2回测用）；无新闻=暗流（可能是提前埋伏）
-  - 板块量比（2026-10-12新增）：事件名→行业881/概念885板块量比（今日K线额÷自身20日均额），
+  - 板块量比（2026-10-12新增）：事件=885概念，直查自身概念量比（今日K线额÷自身20日均额），
     卡片头部三档标签：>2.0红「板块爆量·已是明牌」（个股放量=接力末端）/ 1.1~2.0绿
     「温和放量·板块刚启动」（配合成员股首放=最优）/ <1.1灰「板块未放量·个股孤立异动」。
-    匹配规则与实测教训见 `IGNITION_RADAR_DESIGN.md` §7；匹配不到诚实省略标签（宁缺勿假）
+    LLM兜底事件走模糊匹配链（跳过名单>精确>别名>拆分>归一化⊆事件名，严禁反向以宽配窄）；
+    详见 `IGNITION_RADAR_DESIGN.md` §7/§11；匹配不到诚实省略（宁缺勿假）
 - **结论标签**: 🔥点火确认（底部/中部+首放≥2只）/ ⚠高位勿追（高位+多次放量过半）/ 👁暗流观察 / 👁观察
 - **P0概览页**: 放量股总数（量比>2口径）四档涨幅分布条形图 + 上涨段占比情绪标签
   （>60%资金进攻 / 40~60%分歧 / <40%资金出逃）+ 事件/孤立异动计数
-- **中间数据**: `output/daily_content/ignition_data_YYYYMMDD.json`（保留，Phase 2回测用）
+- **中间数据**: `output/daily_content/ignition_data_YYYYMMDD.json`（保留，Phase 2回测用；含渗透率/成分家数/量比/首放占比/v5score对比字段）
 - **日期**: `--date` 缺省取行情实际日期（detect_quote_date），假期/盘前运行=上一交易日
 - **连板梯队**: 仍由 `generate_anomaly.py` 生成（anomaly_p4，触发信号3张已从其移除）
-- **已知限制**: 概念主力净流入字段依赖 LLM标签→885概念名映射，行业级宽词（新材料/化工/电力设备）无单一板块对应时省略
-- **状态**: ✅ 已完成（2026-10-07，09-30真实数据验证；2026-10-12 加板块量比标签）
+- **已知限制**: LLM净化漏筛真转型票（主业未更新）会被误剔——接受，点火雷达宁漏勿泛
+- **状态**: ✅ 已完成（2026-10-07初版；2026-10-12加板块量比；2026-10-13 v6标签净化+绝对数量排序，当日数据全流程验证通过）
 
 ## 运行方式
 

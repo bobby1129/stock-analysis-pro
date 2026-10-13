@@ -37,6 +37,8 @@ data/watchlist.json
 data/concept_cache.json
 data/llm_industry_cache.json
 data/stock_concept_index.json*
+data/stock_business_map.json
+data/llm_label_filter_cache.json
 cache/
 
 # OS

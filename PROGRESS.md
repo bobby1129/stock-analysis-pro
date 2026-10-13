@@ -1,4 +1,26 @@
 
+## ✅ v3.23 点火雷达v6：LLM标签净化 + 绝对数量排序 — 已完成 (2026-10-13)
+
+### 原因
+v5渗透率打分让小板块价值凸显，但两个新问题：①大板块（500只×10%=50只）牛市外永远达不到满分线；②泛概念被擦边票撑大（实测AIGC桶19只触发股混有水处理/染料中间体票，最大子概念覆盖率仅53%，事件名失真）。同花顺成分表静态粘性无法修分母，改分子侧净化。用户方案：LLM按主营业务筛标签（只筛不造）+净化后按绝对数量排序。
+
+### 实现
+- 新增 `collectors/ths_stock_business.py`：F10主营业务采集（basic.10jqka company.html，industry_screener同链路），缓存 `data/stock_business_map.json` **TTL 180天**（用户要求：超期重新核对，防公司新增业务后按旧主营误剔新标签）
+- 新增 `scripts/daily_content/llm_label_filter.py`：LLM净化（qwen3.6-flash temp=0 批20，prompt带正反例，只筛不造=输出强制∩候选），缓存 `data/llm_label_filter_cache.json`（标签集hash不变不重判），LLM失败降级全保留（宁松勿严）
+- **ATTRIBUTE_CONCEPTS属性直通名单**（全量过375概念定稿）：政策地域/资质身份/指数持仓/地缘事件类标签不交LLM判（防误杀）、保留在个股标签但**不参与聚合排名**——验证教训：含属性时绝对数量榜被专精特新23只/一带一路14只霸屏，且属性桶与谁都重叠导致去重把军工误并入专精特新
+- `generate_ignition.py`：L2'聚合前插净化、聚合/次级概念改用concepts_clean、排序改绝对触发家数（tiebreaker=板块量比>首放占比），v5加权score仍计算落盘供Phase2回测对比；LLM兜底事件合并排序同口径
+- 当日全流程验证：净化抽查12只全对（华骐环保只留污水处理、安诺其只留染料），AIGC桶19→5只、人工智能桶33→3只；事件由v5的染料/NFT/手机游戏/黑龙江自贸区/AI视频变为军工(8只,珠海航展催化)/文化传媒(6只,量比1.37)/数字经济/高端装备/智慧城市——真主线浮出且催化对得上；6批LLM 1次超时重试成功、1只降级全保留
+- 两个数据缓存文件已加.gitignore
+
+### 核心改动
+| 文件 | 改动 |
+|------|------|
+| `collectors/ths_stock_business.py` | 新增（主营采集+180天TTL缓存） |
+| `scripts/daily_content/llm_label_filter.py` | 新增（标签净化+属性直通名单+持久缓存） |
+| `scripts/daily_content/generate_ignition.py` | l2_concept_cluster插净化+绝对数量排序；_llm_fallback_cluster合并排序同口径；main打印口径 |
+| `IGNITION_RADAR_DESIGN.md` | §12 v6设计+实施验证记录 |
+| `AGENTS.md` / `PROGRESS.md` / `.gitignore` | 同步 |
+
 ## ✅ v3.22 资金矩阵引入板块量比（时序自比） — 已完成 (2026-10-12)
 
 ### 原因

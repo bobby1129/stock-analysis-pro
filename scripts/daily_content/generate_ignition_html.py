@@ -201,13 +201,46 @@ def build_event_page(idx, event, catalysts, date_str):
     verdict = event.get('verdict', '')
     v_color = {'🔥点火确认': '#dc143c', '⚠高位勿追': '#8a4a9e'}.get(verdict, '#b8860b')
 
+    # v5 统计行: 触发/成分/渗透率 (概念事件); LLM兜底事件退回旧口径
+    if event.get('level') == 'concept':
+        pen = event.get('penetration')
+        pen_str = f"{pen*100:.0f}%" if pen else '—'
+        comp = event.get('n_comp') or '?'
+        stat_line = (f"触发 {event['n_trigger']} 只 / 成分 {comp} 家 · "
+                     f"渗透率 <b style='color:#b8860b'>{pen_str}</b> · "
+                     f"涨停 {sum(1 for s in event['members'] if s.get('is_limit_up'))} 只 · "
+                     f"首放 {event.get('n_burst', 0)} 只")
+    else:
+        stat_line = (f"触发 {event['n_trigger']} 只 · "
+                     f"涨停 {sum(1 for s in event['members'] if s.get('is_limit_up'))} 只 · "
+                     f"首放 {sum(1 for s in event['members'] if s.get('vol_tag')=='首放')} 只"
+                     f'<span style="font-size:26px;color:#aaa;">（LLM兜底归类）</span>')
+
+    # v5 次级概念行: 成员共同挂靠的其它概念及其量比(全量线) + 重叠并入的别名概念
+    sec = event.get('secondary_concepts') or []
+    alias = event.get('alias_concepts') or []
+    sec_html = ''
+    if alias:
+        alias_names = '、'.join(a['name'] for a in alias[:3])
+        sec_html += (f'<div style="font-size:28px;color:#8a7440;margin-top:8px;">'
+                     f'同簇概念（成员重叠已并入）：{alias_names}</div>')
+    if sec:
+        parts = []
+        for c in sec[:2]:
+            vr = c.get('vr')
+            vr_s = f"量比{vr:.1f}" if vr else '量比—'
+            parts.append(f"{c['name']}（{c['n']}只·{vr_s}）")
+        sec_html += (f'<div style="font-size:28px;color:#888;margin-top:8px;">'
+                     f'成员共挂概念：{" · ".join(parts)}</div>')
+
     body = f'''
     <div class="section">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
             <div style="font-size:52px;font-weight:800;color:#b8860b;">{event['name']}{reso}</div>
             <div style="font-size:34px;font-weight:800;color:{v_color};background:#faf6ec;padding:10px 22px;border-radius:16px;border:1px solid #e8dcc0;">{verdict}</div>
         </div>
-        <div style="font-size:34px;color:#666;">触发 {event['score']:.0f} 只（加权）· 涨停 {sum(1 for s in event['members'] if s.get('is_limit_up'))} 只 · 首放 {sum(1 for s in event['members'] if s.get('vol_tag')=='首放')} 只</div>
+        <div style="font-size:34px;color:#666;">{stat_line}</div>
+        {sec_html}
         {bvr_html}
         {net_html}
     </div>
