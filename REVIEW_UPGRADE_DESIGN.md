@@ -125,6 +125,12 @@
 6. **S6 极端行情(F5)** ✅完成(2026-10-30)：analysis/extreme_mode.py（触发规则引擎→RSS归因LLM→结构拆解→历史对照(情绪库/日K兜底只用close)→持仓应对LLM）；daily_report 7e步接线+concepts_decline领跌榜；review_history落盘extreme；模板专区(宏观后情绪前, 触发才渲染)；mock测试37项全过；10-29真实大跌日回测（触发3条/归因命中"美股纳指大跌"实因/日K兜底10相似日/8票应对提示）浏览器vision质检通过。
 7. **S7 cron接线+全链路验证** ✅完成(2026-11-03)：job 6c7b513b6407提示词已更新（强制后台运行+时长预期8-12分钟+当日要点摘要+降级不阻塞交付）；5个新模块import全过；10-30(五)/11-02(一)/11-03(二) 连续3个交易日实跑观察通过——报告HTML正常生成(120-122KB)、JSON落盘完整(sentiment/guidance/verification/extreme字段齐全)、cron status=ok无delivery error。
 8. **文档同步**：每步完成即更新 AGENTS.md/DESIGN.md/PROGRESS.md；收尾时 REVIEW_UPGRADE_DRAFT.md 内容并入正式文档后删除草稿；THESIS_DRAFT.md 保留至thesis入config后删除。
+9. **S8 日K兜底升级：单日涨跌幅相似 → 多日形态相似** ✅完成(2026-11-03, 本地验证通过待commit)：
+   - 新模块 `analysis/similar_pattern.py`：特征=近5日收益率序列欧氏距离 + 位置过滤(60日区间分位差>30排除) + 相似日去重叠(间隔≥3交易日) + top10；窗口1000交易日(实测新浪datalen=1000可用/2000返回None, `_fetch_index_kline` 已加None容错)。
+   - `extreme_mode._history_from_kline` 改为委托新模块(函数名/调用点不变, source改名 `kline_pattern`, matches新增dist/cum5/pos字段)；最近邻距离>4 加 `weak=True`，模板/卡片显示"⚠近4年无高相似形态日"提示。模板与 generate_review_cards.py 均兼容旧落盘 source='kline'。
+   - 验证：`scripts/verify_similar_pattern.py`(数据自检4项+单元逻辑9项+6个历史极端日新旧对照)全过；`test_extreme_mode.py` mock套件全过；真实数据端到端(11-03收跌日)出10例、位置分位过滤生效。
+   - 对照发现旧口径三缺陷(已随替换消除)：前视偏差(取"最近10条"不限目标日之前)、自我匹配(只排除最后一根)、无区分度(不同市况返回同一组日子)。
+   - 红线遵守：只用close；情绪库主源逻辑未动。
 
 ## 七、红线清单（沿用项目规范）
 

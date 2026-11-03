@@ -70,6 +70,15 @@
 - 验证: `scripts/test_llm_interpret.py` 28项全过(mock LLM两段式/缓存命中与失效/无thesis跳过/无条目unchanged/LLM失败降级/历史注入prompt/PDF抓取/模板五要素渲染+computed style核对); 真实端到端run(10-29收盘数据) 8票全过零降级——瑞芯微/柯力/先导strengthened、天赐weakened(Q3环比-13%命中thesis预警线, 判定与人工认知一致)、4票unchanged; 落盘JSON thesis_checks/info_digest各8条; 浏览器质检警示区/徽章/解读行/档案渲染正常
 - 已知边界: run()不带date参数在盘前(0点后)会把当日数据标成今天——cron在18:30跑不受影响, 盘前手动补跑须显式传date
 
+### S8 日K兜底升级: 单日涨跌幅相似 → 近5日形态相似 — ✅ 完成 (2026-11-03, 本地待commit)
+- 起因: 用户指出单日涨跌幅相似无意义(丢位置/路径信息), 3-5日形态相似更有价值
+- 新增 `analysis/similar_pattern.py` find_similar_pattern: 近5日收益率序列欧氏距离 + 60日位置分位差≤30过滤 + 相似日间隔≥3交易日去重叠 + top10; 只用close(红线)
+- `analysis/extreme_mode.py` _history_from_kline 改为委托新模块: 窗口500→1000交易日, source改`kline_pattern`, matches新增dist/cum5/pos, 最近邻距离>4标weak=True; 情绪库主源不动
+- `plans/daily_report.py` _fetch_index_kline 加None容错(实测新浪datalen=2000返回null会崩, 1000可用)
+- 模板+`generate_review_cards.py` 卡片: kline_pattern分支新文案("近5日形态相似日·位置分位±30·近4年N例"), weak时红字提示"近4年无高相似形态日", 均兼容旧落盘source=kline
+- 验证: `scripts/verify_similar_pattern.py` 全过(数据自检4项/单元9项/6个历史极端日新旧对照——新口径低位破位日匹配分位0-26低位日、高位回落日匹配分位64-90高位日, 形态与位置双维度区分正确); test_extreme_mode.py mock套件全过; 真实端到端(11-03)出10例
+- 对照暴露旧口径三缺陷(已消除): 前视偏差(取"最近10条"不限目标日之前, 无法回测)、自我匹配(-7.34%极端日唯一命中是自己)、无区分度(2023-10-19与2024-11-14两个相反市况返回同一组日子)
+
 ---
 
 ## ✅ v3.23 点火雷达v6：LLM标签净化 + 绝对数量排序 — 已完成 (2026-10-13)

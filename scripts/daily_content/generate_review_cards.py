@@ -121,6 +121,13 @@ def card_history(d, date_str):
             f'<span class="hcell">{_fmt_pct(m["next1"])}</span>'
             f'<span class="hcell">{_fmt_pct(m["next5"])}</span></div>'
         )
+    if h.get("source") == "kline_pattern":
+        sub = f'上证近5日形态相似日（位置分位 {h.get("target_pos", "—")}±30，近4年 {stat["n"]} 例）'
+        weak_note = ('<div class="sub" style="color:#c0392b;">⚠ 近4年无高相似形态日，以下为最接近参考</div>'
+                     if h.get("weak") else '')
+    else:  # 旧落盘 source=kline 兼容
+        sub = f'上证日K相似涨跌幅日（今日 {h["target_pct"]:.2f}% ±1pct，近2年 {stat["n"]} 例）'
+        weak_note = ''
     return f"""<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
 {BASE_CSS}
 .sub {{ text-align: center; font-size: 30px; color: #8a6d1a; margin-bottom: 34px; }}
@@ -139,7 +146,8 @@ def card_history(d, date_str):
 <div class="kicker"><span>📚 复盘 · 极端行情</span></div>
 <div class="date">{date_str}</div>
 <div class="title">历史对照</div>
-<div class="sub">上证日K相似涨跌幅日（今日 {h["target_pct"]:.2f}% ±1pct，近2年 {stat["n"]} 例）</div>
+{weak_note}
+<div class="sub">{sub}</div>
 <div class="htable">
   <div class="hrow head"><span class="hdate">历史日</span><span class="hcell">当日</span><span class="hcell">次1日</span><span class="hcell">次5日</span></div>
   {rows}

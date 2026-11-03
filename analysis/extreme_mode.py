@@ -245,48 +245,28 @@ def _history_from_library(date_yyyymmdd, up_count, amount_dev):
     return out
 
 
-def _history_from_kline(target_pct, code="sh000001", days=500):
-    """库不足时兜底: 指数日K找历史相似涨跌幅日(±1pct内, 同向), 统计其后1/5日表现。
-    红线: 只用close, 严禁碰volume当成交额。"""
+def _history_from_kline(target_pct, code="sh000001", days=1000):
+    """库不足时兜底: 指数日K找历史相似形态日 (S8, 2026-11-03升级)。
+
+    旧版为单日涨跌幅±1pct匹配(丢失位置/路径信息, 且有前视/自我匹配缺陷),
+    现委托 analysis/similar_pattern.find_similar_pattern:
+    近5日收益率序列欧氏距离 + 60日位置分位过滤(差>30排除) + 相似日去重叠。
+    红线: 只用close, 严禁碰volume当成交额。
+    target_pct 参数保留(调用方兼容), 匹配本身不再依赖它;
+    最近邻距离>4 时加 weak=True(近4年无高相似形态日, 展示层需标注)。
+    """
     from plans.daily_report import _fetch_index_kline
+    from analysis.similar_pattern import find_similar_pattern
     klines = _fetch_index_kline(code, days=days)
     if not klines or len(klines) < 30:
         return None
-    closes = [k[2] for k in klines]
-    dates = [k[0] for k in klines]
-    pcts = [None] + [(closes[i] - closes[i - 1]) / closes[i - 1] * 100
-                     for i in range(1, len(closes))]
-    matches = []
-    for i in range(1, len(pcts) - 1):   # 排除今天(最后一根)
-        p = pcts[i]
-        if p is None:
-            continue
-        if target_pct < 0 and not (target_pct - 1.0 <= p <= target_pct + 0.5):
-            continue
-        if target_pct > 0 and not (target_pct - 0.5 <= p <= target_pct + 1.0):
-            continue
-        if target_pct == 0:
-            continue
-        row = {"date": dates[i], "sh_pct": round(p, 2),
-               "next1": round((closes[i + 1] - closes[i]) / closes[i] * 100, 2) if i + 1 < len(closes) else None,
-               "next5": round((closes[min(i + 5, len(closes) - 1)] - closes[i]) / closes[i] * 100, 2) if i + 5 < len(closes) else None}
-        matches.append(row)
-    matches = matches[-10:]
-    if not matches:
-        return None
-    n1 = [m["next1"] for m in matches if m["next1"] is not None]
-    n5 = [m["next5"] for m in matches if m["next5"] is not None]
-    return {
-        "source": "kline", "code": code, "target_pct": target_pct,
-        "matches": matches,
-        "stat": {
-            "n": len(matches),
-            "next1_avg": round(sum(n1) / len(n1), 2) if n1 else None,
-            "next1_up_rate": round(sum(1 for x in n1 if x > 0) / len(n1) * 100) if n1 else None,
-            "next5_avg": round(sum(n5) / len(n5), 2) if n5 else None,
-            "next5_up_rate": round(sum(1 for x in n5 if x > 0) / len(n5) * 100) if n5 else None,
-        },
-    }
+    r = find_similar_pattern(klines, target_idx=len(klines) - 1)
+    if r:
+        r["code"] = code
+        # 弱相似标注: 所有匹配距离都>4 → 近4年无高相似形态
+        if r["matches"] and min(m["dist"] for m in r["matches"]) > 4:
+            r["weak"] = True
+    return r
 
 
 def _history(date_yyyymmdd, result, verbose=False):

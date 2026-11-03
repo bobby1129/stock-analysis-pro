@@ -114,12 +114,13 @@ check("持仓应对: overall+per_stock(过滤非持仓码)", hh and "603893" in 
 check("持仓应对: 名称映射", "瑞芯微" in str(hh["per_stock"]))
 check("持仓应对: 免责声明", hh["disclaimer"])
 
-# 历史对照: 情绪库空 → 日K兜底
+# 历史对照: 情绪库空 → 日K兜底(S8: 5日形态相似)
 hist = a.get("history")
-check("历史对照走日K兜底", hist and hist.get("source") == "kline", str(hist)[:100] if hist else "None")
-if hist and hist.get("source") == "kline":
+check("历史对照走日K兜底", hist and hist.get("source") == "kline_pattern", str(hist)[:100] if hist else "None")
+if hist and hist.get("source") == "kline_pattern":
     check("日K兜底统计字段齐全", all(k in hist["stat"] for k in ("n", "next1_avg", "next5_avg")) and hist["stat"]["n"] >= 2,
           json.dumps(hist["stat"], ensure_ascii=False))
+    check("匹配含形态距离/位置字段", all("dist" in m and "pos" in m for m in hist["matches"]))
 
 # 缓存命中: 重跑0次LLM
 llm_calls["n"] = 0

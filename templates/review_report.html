@@ -272,7 +272,8 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 {% endfor %}
 </table>
 <div class="ex-stat">情绪库相似日(上涨家数/量能相近)，共{{ hi.days|length }}条</div>
-{% elif hi.source == 'kline' and hi.matches %}
+{% elif hi.source in ('kline', 'kline_pattern') and hi.matches %}
+{% if hi.weak %}<div class="ex-stat" style="color:#c0392b;">⚠ 近4年无高相似形态日，以下为最接近参考</div>{% endif %}
 <table class="ex-hist-table">
 <tr><th>历史日</th><th>当日</th><th>次1日</th><th>次5日</th></tr>
 {% for d in hi.matches %}
@@ -283,7 +284,11 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 {% endfor %}
 </table>
 {% set ks = hi.stat|default({}) %}
+{% if hi.source == 'kline_pattern' %}
+<div class="ex-stat">上证日K近5日形态相似日(位置分位{{ hi.target_pos|default('—') }}±30, 近4年{{ ks.n|default(0) }}例):
+{% else %}
 <div class="ex-stat">上证日K相似涨跌幅日({{ hi.target_pct|default(0) }}%±1pct, 近2年{{ ks.n|default(0) }}例):
+{% endif %}
 次日平均 {{ "%+.2f"|format(ks.next1_avg) if ks.next1_avg is not none else '—' }}% (上涨概率{{ ks.next1_up_rate if ks.next1_up_rate is not none else '—' }}%) ·
 5日平均 {{ "%+.2f"|format(ks.next5_avg) if ks.next5_avg is not none else '—' }}% (上涨概率{{ ks.next5_up_rate if ks.next5_up_rate is not none else '—' }}%)</div>
 {% endif %}

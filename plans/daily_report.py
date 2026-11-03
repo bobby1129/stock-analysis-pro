@@ -201,6 +201,8 @@ def _fetch_index_kline(code, days=60):
         data = json.loads(json_str)
     except:
         return []
+    if not data:
+        return []  # datalen过大(如2000)时新浪返回null, 实测1000可用
     # 转换为 calc_technical_indicators 期望的格式: [date, open, close, high, low, volume]
     klines = []
     for item in data:
