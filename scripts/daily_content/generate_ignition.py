@@ -811,16 +811,42 @@ def main():
         else:
             e['verdict'] = '👁观察'
 
-    # ── 概念主力净流入 (ths_mainforce当日缓存, 缺失不阻塞) ──
+    # ── 概念/行业主力净流入 (Phase 2: 885概念 + 881行业双源, 2026-11-02) ──
     mf = {}
     try:
-        from collectors.ths_mainforce import fetch_concept_main_force
-        mf = fetch_concept_main_force(names=[e['name'] for e in events],
-                                      verbose=False, use_cache=True)
+        from collectors.ths_mainforce import (fetch_concept_main_force,
+                                               fetch_industry_main_force)
+        # 885概念资金流 (概念事件直接查)
+        concept_names = [e['name'] for e in events if e.get('level') == 'concept']
+        if concept_names:
+            mf_concept = fetch_concept_main_force(names=concept_names,
+                                                   verbose=False, use_cache=True)
+            for n, d in mf_concept.items():
+                mf[n] = d['main_net']
+        # 881行业资金流 (LLM兜底事件通过别名表/精确匹配查)
+        from collectors.ths_board_hist import load_industry_volume_ratio
+        industry_ratios = load_industry_volume_ratio()
+        industry_names_needed = set()
+        for e in events:
+            if e.get('level') != 'concept':
+                # LLM兜底事件: 复用板块量比的匹配链找对应行业名
+                matched = match_board_vr(e['name'], industry_ratios)
+                if matched:
+                    industry_names_needed.add(matched['concept'])
+                    e['_industry_match'] = matched['concept']
+        if industry_names_needed:
+            mf_industry = fetch_industry_main_force(names=list(industry_names_needed),
+                                                     verbose=False, use_cache=True)
+            for n, d in mf_industry.items():
+                mf[n] = d['main_net']
     except Exception as ex:
         print(f"  (主力净流入不可用: {ex})")
     for e in events:
-        e['main_net'] = mf.get(e['name'], {}).get('main_net')
+        net = mf.get(e['name'])
+        if net is None and e.get('_industry_match'):
+            net = mf.get(e['_industry_match'])
+        e['main_net'] = net
+        e.pop('_industry_match', None)   # 清理临时字段
 
     # ── 板块量比: v5事件=概念, 直查自身885量比(全量线); LLM兜底事件走旧匹配链 ──
     try:

@@ -77,6 +77,57 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 .ti-levels .tl { text-align: center; }
 .ti-levels .tl-label { font-size: 11px; color: #999; }
 .ti-levels .tl-value { font-size: 14px; font-weight: 600; margin-top: 2px; }
+/* S4 thesis判定 + 信息解读 */
+.thesis-row { margin-top: 10px; background: #f8f7ff; border-radius: 10px; padding: 10px 12px; }
+.thesis-badge { display: inline-block; font-size: 12px; font-weight: 700; border-radius: 6px; padding: 2px 8px; margin-right: 6px; color: #fff; }
+.thesis-badge.unchanged { background: #7f8c9b; }
+.thesis-badge.strengthened { background: #c0392b; }
+.thesis-badge.weakened { background: #e67e22; }
+.thesis-badge.invalid_risk { background: #a02020; }
+.thesis-reason { font-size: 12px; color: #555; line-height: 1.5; }
+.interp-line { font-size: 11px; color: #888; margin-top: 2px; line-height: 1.4; }
+.impact-tag { display: inline-block; font-size: 10px; font-weight: 700; border-radius: 4px; padding: 0 5px; margin-right: 4px; color: #fff; }
+.impact-tag.利好 { background: #e74c3c; }
+.impact-tag.利空 { background: #27ae60; }
+.impact-tag.中性 { background: #aaa; }
+.alert-section { margin: 10px; background: #fff4f2; border: 1px solid #f2b8ae; border-radius: 12px; padding: 12px 16px; }
+.alert-section .alert-title { font-size: 15px; font-weight: 700; color: #a02020; margin-bottom: 8px; }
+.alert-item { padding: 8px 0; border-bottom: 1px dashed #f0ccc5; }
+.alert-item:last-child { border-bottom: none; }
+.alert-item .alert-name { font-size: 14px; font-weight: 700; color: #a02020; }
+.alert-item .alert-reason { font-size: 12px; color: #7a3b30; margin-top: 3px; line-height: 1.5; }
+.alert-item .alert-evidence { font-size: 11px; color: #a08580; margin-top: 3px; line-height: 1.5; }
+/* S5 昨日研判验证 */
+.vf-row { display: grid; grid-template-columns: 26px 1fr; gap: 8px; padding: 8px 16px; border-bottom: 1px solid #f5f5f5; align-items: start; }
+.vf-mark { font-size: 14px; font-weight: 700; text-align: center; line-height: 1.5; }
+.vf-mark.hit { color: #c0392b; }
+.vf-mark.miss { color: #27ae60; }
+.vf-mark.unclear { color: #aaa; }
+.vf-text { font-size: 13px; color: #333; line-height: 1.5; }
+.vf-actual { font-size: 11px; color: #999; margin-top: 2px; line-height: 1.4; }
+.vf-rate { display: flex; gap: 16px; padding: 10px 16px; background: #fafafa; }
+.vf-rate .rt { font-size: 12px; color: #666; }
+.vf-rate .rt b { font-size: 15px; color: #333; }
+.assert-box { margin: 10px 16px 14px; background: #f4f8ff; border-radius: 10px; padding: 10px 14px; }
+.assert-box .ab-title { font-size: 13px; font-weight: 700; color: #345; margin-bottom: 6px; }
+.assert-box li { font-size: 12px; color: #555; line-height: 1.7; margin-left: 16px; }
+/* S6 极端行情专区 */
+.extreme-section { margin: 10px; background: #fff9f0; border: 1px solid #f0c890; border-radius: 12px; overflow: hidden; }
+.extreme-title { font-size: 15px; font-weight: 700; color: #8a5a00; padding: 12px 16px 6px; }
+.extreme-triggers { padding: 0 16px 8px; }
+.extreme-badge { display: inline-block; font-size: 11px; font-weight: 700; background: #fdebd0; color: #9c640c; border-radius: 6px; padding: 2px 8px; margin: 2px 4px 2px 0; }
+.extreme-block { padding: 8px 16px; border-top: 1px dashed #eed9b0; }
+.extreme-block .eb-title { font-size: 12px; font-weight: 700; color: #8a5a00; margin-bottom: 4px; }
+.extreme-block .eb-text { font-size: 12px; color: #5a4a30; line-height: 1.6; }
+.extreme-news { font-size: 11px; color: #a08050; line-height: 1.6; margin-top: 4px; }
+.ex-hist-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 4px; }
+.ex-hist-table th { color: #999; font-weight: 400; text-align: right; padding: 3px 4px; border-bottom: 1px solid #eed9b0; }
+.ex-hist-table td { text-align: right; padding: 3px 4px; border-bottom: 1px solid #f5ead5; color: #444; }
+.ex-hist-table th:first-child, .ex-hist-table td:first-child { text-align: left; }
+.ex-stat { font-size: 11px; color: #8a5a00; margin-top: 5px; line-height: 1.5; }
+.ex-hint { background: #fdf3e0; border-radius: 8px; padding: 8px 10px; margin-top: 4px; }
+.ex-hint .exh-stock { font-size: 11px; color: #6a5230; line-height: 1.6; margin-top: 3px; }
+.ex-disclaimer { font-size: 10px; color: #bba070; padding: 6px 16px 12px; }
 </style>
 </head>
 <body>
@@ -85,6 +136,31 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 <h1>📊 每日股票复盘</h1>
 <div class="time">{{ data.fetch_time }}</div>
 </div>
+
+{# ── ⚠️ 顶部警示区 (S4/F1, 条件渲染: 仅weakened/invalid_risk的票) ── #}
+{% set tc = data.thesis_checks|default({}) %}
+{% set alert_stocks = [] %}
+{% for code, chk in tc.items() %}
+{% if chk.verdict in ('weakened', 'invalid_risk') %}{% set _ = alert_stocks.append((code, chk)) %}{% endif %}
+{% endfor %}
+{% if alert_stocks %}
+<div class="alert-section">
+<div class="alert-title">⚠️ 持仓逻辑警示</div>
+{% for code, chk in alert_stocks %}
+<div class="alert-item">
+<div class="alert-name">{{ chk.name|default(code) }} <span style="font-size:11px;font-weight:400;">{{ code }}</span>
+<span class="thesis-badge {{ 'invalid_risk' if chk.verdict == 'invalid_risk' else 'weakened' }}" style="margin-left:6px;">{{ '🔴 疑似失效' if chk.verdict == 'invalid_risk' else '🟡 逻辑弱化' }}</span></div>
+<div class="alert-reason">{{ chk.reason|default('') }}</div>
+{% if chk.evidence %}
+<div class="alert-evidence">依据: {% for e in chk.evidence %}· {{ e }}{% if not loop.last %}　{% endif %}{% endfor %}</div>
+{% endif %}
+</div>
+{% endfor %}
+</div>
+{% endif %}
+{% if data.llm_interpret_degraded %}
+<div style="margin:10px;background:#f0f2f5;border-radius:10px;padding:8px 14px;font-size:12px;color:#999;text-align:center;">今日LLM解读不可用，信息列表退回纯标题展示</div>
+{% endif %}
 
 {# ── 大盘指数 ── #}
 <div class="section">
@@ -149,6 +225,86 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 </div>
 </div>
 
+{# ── 🌪 极端行情专区 (S6/F5, 条件渲染: 触发才出现, 插在情绪前) ── #}
+{% set ex = data.extreme|default({}) %}
+{% if ex.triggered and ex.analysis %}
+{% set exa = ex.analysis %}
+<div class="extreme-section">
+<div class="extreme-title">🌪 极端行情模式</div>
+<div class="extreme-triggers">
+{% for t in ex.triggers %}<span class="extreme-badge">{{ t }}</span>{% endfor %}
+</div>
+{% if exa.why %}
+<div class="extreme-block">
+<div class="eb-title">🔍 今天为什么</div>
+<div class="eb-text">{{ exa.why }}</div>
+{% if exa.news %}
+<div class="extreme-news">当日新闻: {% for n in exa.news[:4] %}· {{ n }}{% if not loop.last %}<br>{% endif %}{% endfor %}</div>
+{% endif %}
+</div>
+{% endif %}
+{% set st = exa.structure|default({}) %}
+<div class="extreme-block">
+<div class="eb-title">🧩 结构拆解</div>
+<div class="eb-text">
+涨停 {{ st.limit_up|default('—') }} / 跌停 {{ st.limit_down|default('—') }}　·　涨 {{ st.up|default('—') }} / 跌 {{ st.down|default('—') }}　·　最高连板 {{ st.max_lianban|default('—') }}<br>
+{% if st.divergence %}{{ st.divergence }}{% endif %}
+</div>
+{% if st.top_gainers %}
+<div class="extreme-news">领涨板块: {% for c in st.top_gainers %}{{ c.name }}({{ "%+.2f"|format(c.pct|default(0)) }}%){% if not loop.last %}　{% endif %}{% endfor %}</div>
+{% endif %}
+{% if st.top_losers %}
+<div class="extreme-news">领跌板块: {% for c in st.top_losers %}{{ c.name }}({{ "%+.2f"|format(c.pct|default(0)) }}%){% if not loop.last %}　{% endif %}{% endfor %}</div>
+{% endif %}
+</div>
+{% set hi = exa.history %}
+{% if hi %}
+<div class="extreme-block">
+<div class="eb-title">📚 历史对照</div>
+{% if hi.source == 'library' and hi.days %}
+<table class="ex-hist-table">
+<tr><th>相似日</th><th>当日上证</th><th>次1日</th><th>次5日</th></tr>
+{% for d in hi.days %}
+<tr><td>{{ d.date }}</td>
+<td class="{{ 'up' if (d.sh_pct or 0) > 0 else 'down' if (d.sh_pct or 0) < 0 else '' }}">{% if d.sh_pct is not none %}{{ "%+.2f"|format(d.sh_pct) }}%{% else %}—{% endif %}</td>
+<td class="{{ 'up' if (d.next1 or 0) > 0 else 'down' if (d.next1 or 0) < 0 else '' }}">{% if d.next1 is not none %}{{ "%+.2f"|format(d.next1) }}%{% else %}—{% endif %}</td>
+<td class="{{ 'up' if (d.next5 or 0) > 0 else 'down' if (d.next5 or 0) < 0 else '' }}">{% if d.next5 is not none %}{{ "%+.2f"|format(d.next5) }}%{% else %}—{% endif %}</td></tr>
+{% endfor %}
+</table>
+<div class="ex-stat">情绪库相似日(上涨家数/量能相近)，共{{ hi.days|length }}条</div>
+{% elif hi.source == 'kline' and hi.matches %}
+<table class="ex-hist-table">
+<tr><th>历史日</th><th>当日</th><th>次1日</th><th>次5日</th></tr>
+{% for d in hi.matches %}
+<tr><td>{{ d.date }}</td>
+<td class="{{ 'up' if (d.sh_pct or 0) > 0 else 'down' if (d.sh_pct or 0) < 0 else '' }}">{{ "%+.2f"|format(d.sh_pct|default(0)) }}%</td>
+<td class="{{ 'up' if (d.next1 or 0) > 0 else 'down' if (d.next1 or 0) < 0 else '' }}">{% if d.next1 is not none %}{{ "%+.2f"|format(d.next1) }}%{% else %}—{% endif %}</td>
+<td class="{{ 'up' if (d.next5 or 0) > 0 else 'down' if (d.next5 or 0) < 0 else '' }}">{% if d.next5 is not none %}{{ "%+.2f"|format(d.next5) }}%{% else %}—{% endif %}</td></tr>
+{% endfor %}
+</table>
+{% set ks = hi.stat|default({}) %}
+<div class="ex-stat">上证日K相似涨跌幅日({{ hi.target_pct|default(0) }}%±1pct, 近2年{{ ks.n|default(0) }}例):
+次日平均 {{ "%+.2f"|format(ks.next1_avg) if ks.next1_avg is not none else '—' }}% (上涨概率{{ ks.next1_up_rate if ks.next1_up_rate is not none else '—' }}%) ·
+5日平均 {{ "%+.2f"|format(ks.next5_avg) if ks.next5_avg is not none else '—' }}% (上涨概率{{ ks.next5_up_rate if ks.next5_up_rate is not none else '—' }}%)</div>
+{% endif %}
+</div>
+{% endif %}
+{% set hh = exa.holdings_hint %}
+{% if hh %}
+<div class="extreme-block">
+<div class="eb-title">💼 持仓应对</div>
+<div class="ex-hint">
+<div class="eb-text">{{ hh.overall }}</div>
+{% for code, hint in hh.per_stock.items() %}
+<div class="exh-stock"><b>{{ code }}</b>: {{ hint }}</div>
+{% endfor %}
+</div>
+</div>
+{% endif %}
+<div class="ex-disclaimer">⚠️ 以上应对提示由AI生成，仅供参考，不构成投资决策</div>
+</div>
+{% endif %}
+
 {# ── 市场情绪 ── #}
 {% set breadth = data.breadth|default({}) %}
 {% set up = data.breadth.up|default(0) %}
@@ -193,6 +349,30 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 <div style="font-size:15px;font-weight:600;margin-top:4px;" class="down">{{ limit_down }}</div>
 </div>
 </div>
+
+{# ── 情绪周期定位徽章 (S3/F3, 规则引擎) ── #}
+{% set cyc = data.sentiment_cycle|default({}) %}
+{% if cyc.phase %}
+{% set phase_colors = {"冰点": "#3b82c4", "修复": "#8e6bbf", "发酵": "#f0873b", "高潮": "#e74c3c", "退潮": "#27ae60"} %}
+<div style="padding: 12px 16px 4px;">
+<div style="font-size:12px;font-weight:600;color:#666;margin-bottom:8px;">🎭 情绪周期定位</div>
+<div style="display:flex;gap:3px;margin-bottom:8px;">
+{% for ph in ["冰点", "修复", "发酵", "高潮", "退潮"] %}
+<div style="flex:1;text-align:center;padding:6px 0;border-radius:6px;font-size:12px;font-weight:600;
+{% if ph == cyc.phase %}background:{{ phase_colors[ph] }};color:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.2);{% else %}background:#f0f2f5;color:#aaa;{% endif %}">{{ ph }}</div>
+{% endfor %}
+</div>
+<div style="font-size:11px;color:#888;line-height:1.5;background:#f8f9fa;border-radius:8px;padding:8px 10px;">{{ cyc.reason }}</div>
+</div>
+{% endif %}
+
+{# ── 近20日情绪时序 (S3/F3, 内嵌SVG三联图) ── #}
+{% if data.sentiment_ts_svg %}
+<div style="padding: 12px 10px 8px;">
+<div style="font-size:12px;font-weight:600;color:#666;margin-bottom:4px;padding:0 6px;">📉 近{{ data.sentiment_ts_days|default(20) }}个交易日情绪时序</div>
+{{ data.sentiment_ts_svg|safe }}
+</div>
+{% endif %}
 </div>
 {% else %}
 <div class="section">
@@ -238,6 +418,23 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 </div>
 
 <div class="stock-detail">
+
+{# 🧠 逻辑状态行 (S4/F1) #}
+{% set chk = s.thesis_check %}
+{% if s.thesis_missing %}
+<div class="thesis-row"><span class="thesis-reason" style="color:#999;">🧠 未设置投资逻辑(config thesis)</span></div>
+{% elif chk %}
+{% set verdict_meta = {'unchanged': ('🟢 逻辑不变', 'unchanged'), 'strengthened': ('💪 逻辑强化', 'strengthened'), 'weakened': ('🟡 逻辑弱化', 'weakened'), 'invalid_risk': ('🔴 疑似失效', 'invalid_risk')} %}
+{% set vm = verdict_meta.get(chk.verdict, verdict_meta['unchanged']) %}
+<div class="thesis-row">
+<span class="thesis-badge {{ vm[1] }}">{{ vm[0] }}</span>
+<span class="thesis-reason">{{ chk.reason|default('') }}</span>
+{% if chk.evidence %}
+<div class="interp-line" style="margin-top:4px;">依据: {% for e in chk.evidence %}· {{ e }}{% if not loop.last %}　{% endif %}{% endfor %}</div>
+{% endif %}
+</div>
+{% endif %}
+
 <div class="detail-grid">
 <div class="detail-item"><div class="d-label">PE(动)</div><div class="d-value">{% if pe is not none %}{{ "%.2f"|format(pe) }}{% else %}--{% endif %}</div></div>
 <div class="detail-item"><div class="d-label">PB</div><div class="d-value">{% if pb is not none %}{{ "%.2f"|format(pb) }}{% else %}--{% endif %}</div></div>
@@ -306,12 +503,14 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 </div>
 {% endif %}
 
-{# 公告 #}
+{# 公告 (S4: major条目附解读+影响标签, noise淡化) #}
 <div class="info-section">
 <div class="info-title">📢 最新公告</div>
 {% if ann %}
 {% for a in ann %}
-<div class="info-item">{{ a.title }}<span class="info-date">{{ a.date }}</span></div>
+<div class="info-item"{% if a.level == 'noise' %} style="color:#aaa;"{% elif a.level == 'major' %} style="font-weight:600;"{% endif %}>{{ a.title }}<span class="info-date">{{ a.date }}</span>
+{% if a.level == 'major' and a.interp %}<div class="interp-line"><span class="impact-tag {{ a.impact|default('中性') }}">{{ a.impact|default('中性') }}</span>{{ a.interp }}</div>{% endif %}
+</div>
 {% endfor %}
 {% else %}
 <div class="info-item" style="color:#999;">暂无</div>
@@ -323,7 +522,9 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 <div class="info-title">📝 最新研报</div>
 {% if reports %}
 {% for r in reports %}
-<div class="info-item">{{ r.title }}<span class="info-date">{{ r.date }}</span><br><span class="info-org">机构: {{ r.org }}{% if r.rating %} | 评级: {{ r.rating }}{% endif %}</span></div>
+<div class="info-item"{% if r.level == 'noise' %} style="color:#aaa;"{% elif r.level == 'major' %} style="font-weight:600;"{% endif %}>{{ r.title }}<span class="info-date">{{ r.date }}</span><br><span class="info-org">机构: {{ r.org }}{% if r.rating %} | 评级: {{ r.rating }}{% endif %}</span>
+{% if r.level == 'major' and r.interp %}<div class="interp-line"><span class="impact-tag {{ r.impact|default('中性') }}">{{ r.impact|default('中性') }}</span>{{ r.interp }}</div>{% endif %}
+</div>
 {% endfor %}
 {% else %}
 <div class="info-item" style="color:#999;">暂无</div>
@@ -335,7 +536,9 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 <div class="info-title">📰 最新新闻</div>
 {% if news %}
 {% for n in news %}
-<div class="info-item">{{ n.title }}<span class="info-date">{{ n.date }}</span>{% if n.media %}<span class="info-org"> | {{ n.media }}</span>{% endif %}</div>
+<div class="info-item"{% if n.level == 'noise' %} style="color:#aaa;"{% elif n.level == 'major' %} style="font-weight:600;"{% endif %}>{{ n.title }}<span class="info-date">{{ n.date }}</span>{% if n.media %}<span class="info-org"> | {{ n.media }}</span>{% endif %}
+{% if n.level == 'major' and n.interp %}<div class="interp-line"><span class="impact-tag {{ n.impact|default('中性') }}">{{ n.impact|default('中性') }}</span>{{ n.interp }}</div>{% endif %}
+</div>
 {% endfor %}
 {% else %}
 <div class="info-item" style="color:#999;">暂无</div>
@@ -439,6 +642,45 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 </div>
 {% endif %}
 
+{# ── ✅ 昨日研判验证 (S5/F4, 条件渲染: 有verification才出现) ── #}
+{% set vf = data.verification %}
+{% if vf %}
+<div class="section">
+<div class="section-title">✅ 昨日研判验证（{{ vf.prev_date }}）</div>
+
+{% set vmark = {'hit': '✓', 'miss': '✗', 'unclear': '？'} %}
+{% if vf.rows %}
+<div style="font-size:12px;color:#999;padding:6px 16px 0;">📋 大盘断言</div>
+{% for r in vf.rows %}
+<div class="vf-row">
+<div class="vf-mark {{ r.verdict }}">{{ vmark.get(r.verdict, '？') }}</div>
+<div><div class="vf-text">{{ r.text }}</div>
+{% if r.actual %}<div class="vf-actual">实际: {{ r.actual }}</div>{% endif %}</div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if vf.tip_rows %}
+<div style="font-size:12px;color:#999;padding:8px 16px 0;">💼 持仓提示</div>
+{% for r in vf.tip_rows %}
+<div class="vf-row">
+<div class="vf-mark {{ r.verdict }}">{{ vmark.get(r.verdict, '？') }}</div>
+<div><div class="vf-text">{{ r.name }}（{{ r.code }}）<span style="color:#888;font-size:12px;">{{ r.advice }}</span></div>
+{% if r.actual %}<div class="vf-actual">实际: {{ r.actual }}</div>{% endif %}</div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% set hr = vf.hit_rate|default({}) %}
+<div class="vf-rate">
+{% for k, label in [('d5', '近5日命中率'), ('d20', '近20日命中率')] %}
+{% set r = hr.get(k, {}) %}
+<div class="rt">{{ label }}: <b>{% if r.pct is none %}—{% else %}{{ r.pct }}%{% endif %}</b>{% if r.total %} ({{ r.hit }}/{{ r.total }}){% endif %}</div>
+{% endfor %}
+</div>
+</div>
+{% endif %}
+
 {# ── 大盘短线指引 ── #}
 {% set ns = namespace(has_index_ti=false) %}
 {% for idx in data.indices %}
@@ -506,6 +748,59 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 {% endif %}
 {% endfor %}
 
+{# ── 今日断言(S5): 明日验证对象, 由LLM从上方规则指引改写 ── #}
+{% set at = data.assertions_today|default([]) %}
+{% if at %}
+<div class="assert-box">
+<div class="ab-title">📌 今日断言（明日验证）</div>
+<ul>
+{% for a in at %}
+<li>{{ a }}</li>
+{% endfor %}
+</ul>
+</div>
+{% endif %}
+
+</div>
+{% endif %}
+
+{# ── 📖 持仓逻辑档案 (S4/F1, 默认折叠; 有weakened/invalid_risk时自动展开且排最前) ── #}
+{% set th = data.thesis_history|default({}) %}
+{% set arch = [] %}
+{% set arch_alert = [] %}
+{% for s in data.portfolio|default([]) %}
+{% if s.thesis %}
+{% set chk0 = s.thesis_check or {} %}
+{% if chk0.verdict in ('weakened', 'invalid_risk') %}{% set _ = arch_alert.append(s) %}{% else %}{% set _ = arch.append(s) %}{% endif %}
+{% endif %}
+{% endfor %}
+{% set arch = arch_alert + arch %}
+{% if arch %}
+<div class="section">
+<details{% if arch_alert %} open{% endif %}>
+<summary style="font-size:15px;font-weight:600;padding:12px 16px 8px;cursor:pointer;">📖 持仓逻辑档案（thesis三段式+近5日判定）</summary>
+<div style="padding:0 16px 14px;">
+{% for s in arch %}
+{% set chk = s.thesis_check or {} %}
+{% set alert = chk.verdict in ('weakened', 'invalid_risk') %}
+<div style="border:1px solid {{ '#f2b8ae' if alert else '#eee' }};border-radius:10px;padding:10px 12px;margin-top:10px;{% if alert %}background:#fff8f6;{% endif %}">
+<div style="font-size:14px;font-weight:700;">{{ s.name }} <span style="font-size:11px;color:#999;font-weight:400;">{{ s.code }}</span>
+{% if chk.verdict %}<span class="thesis-badge {{ chk.verdict }}" style="margin-left:6px;">{{ {'unchanged':'🟢 不变','strengthened':'💪 强化','weakened':'🟡 弱化','invalid_risk':'🔴 疑似失效'}.get(chk.verdict, chk.verdict) }}</span>{% endif %}
+</div>
+<pre style="font-size:12px;color:#555;line-height:1.6;white-space:pre-wrap;font-family:inherit;margin-top:6px;">{{ s.thesis }}</pre>
+{% set hs = th.get(s.code, []) %}
+{% if hs %}
+<div style="margin-top:6px;border-top:1px dashed #eee;padding-top:6px;">
+<div style="font-size:11px;color:#999;margin-bottom:3px;">近5日判定</div>
+{% for h in hs %}
+<div style="font-size:11px;color:#777;padding:1px 0;">{{ h.date }} · {{ {'unchanged':'不变','strengthened':'强化','weakened':'弱化','invalid_risk':'疑似失效'}.get(h.verdict, h.verdict) }} — {{ h.reason }}</div>
+{% endfor %}
+</div>
+{% endif %}
+</div>
+{% endfor %}
+</div>
+</details>
 </div>
 {% endif %}
 

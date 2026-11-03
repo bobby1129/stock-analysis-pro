@@ -1,4 +1,77 @@
 
+## 🚧 每日复盘升级（thesis逻辑跟踪+信息解读+情绪时序+研判验证+极端行情）— 进行中 (2026-10-30 开工)
+
+设计文档: `REVIEW_UPGRADE_DESIGN.md`（S1~S7分步，每步本地验证→用户确认→下一步）。
+
+### S1 thesis入config — ✅ 完成 (2026-10-30)
+- THESIS_DRAFT.md（用户已确认版）8只持仓thesis三段式（逻辑/假设/失效）写入 `config/config.yaml` portfolio[].thesis
+- 验证: yaml.safe_load合法、8票thesis三段式齐全、daily_report._get_portfolio()读取路径不受影响（只新增字段）
+- THESIS_DRAFT.md 已按设计删除（内容已入config）
+
+### S2 落盘层 — ✅ 完成 (2026-10-30)
+- 新增 `analysis/review_history.py`: save_from_result(run结果→YYYYMMDD.json原子写入) / load / load_recent(n, before) / load_similar_days(F5相似日检索) / _calc_amount_vs_ma20(历史<5日返回None)
+- `plans/daily_report.py` 接线: run()末尾try落盘(失败不影响报告); fetch_market_breadth新增max_lianban(涨停池lianban字段max, 供S3情绪周期定位)
+- schema预留位: thesis_checks/info_digest(S4)、guidance.assertions(S5)、extreme(S6)先落空占位; 同日重跑保留已填充的非空字段
+- 验证: mock数据落盘+读取容错(缺失/损坏JSON跳过)通过; 真实run(2026-10-29收盘数据)落盘成功——涨781/跌4727、涨停39/跌停41/最高4连板、两市成交15565亿、4指数快照、8票个股提示齐全
+- `cache/` 已在.gitignore，落盘文件天然不入库; 首份历史文件 cache/review_history/20261029.json 保留作种子
+
+### S3 情绪时序+周期定位(F3) — ✅ 完成 (2026-10-30)
+- 新增 `analysis/sentiment_cycle.py`:
+  - 热度打分(规则引擎, 可解释): 上涨家数0-30 + 涨停数0-25 + 最高连板0-20 + 成交额vs MA20偏离0-25 = 0-100分, 每分项带中文理由
+  - 五档定位: H<30冰点 / 30-45修复 / 45-70发酵 / >=70高潮; 趋势T=今日H-前3日H均值, T<-8判退潮(历史<3日只按水平定位)
+  - 硬覆盖: 上涨家数<800直接冰点(实测校准: 10-29大跌日涨停39/4连板仍拿中位分, 纯打分H=27~44不够冷, 普跌必须一票否决)
+  - `build_timeseries_svg`: 纯字符串内嵌SVG三联图(上涨家数柱状红/涨跌停折线红绿/成交额蓝线+MA20黄虚线), 无外部库, 有多少天画多少天(冷启动首日1个点)
+  - `attach_sentiment_cycle(result)`: 读落盘历史→写result[sentiment_cycle/sentiment_ts_svg/sentiment_ts_days], 任何异常只降级
+- `plans/daily_report.py` 接线: run()中"7b情绪周期"先于"8落盘"执行; review_history.save_from_result 从 result.sentiment_cycle 取 phase 写入 sentiment.cycle_phase
+- `templates/review_report.html`: 市场情绪板块内新增五档刻度条(当前档高亮着色)+依据句灰底卡片+SVG时序图(标题显示实际天数); 无数据时整块不渲染(现有元素全保留)
+- 验证 `scripts/test_sentiment_cycle.py` 24项全过: 打分单调性/五档定档/退潮趋势/硬覆盖/缺失字段容错/SVG空+单点+20点/损坏历史文件跳过/模板三要素渲染; 落盘接线(cycle_phase写入+无cycle兼容None)单独验证; 浏览器vision质检SVG无重叠溢出
+- 定档阈值校准记录: 初版(涨停45→10分/4连板12分/H档20/40/65)被10-29真实数据证伪——大跌日H=30越过冰点线, 校准为涨停45→8分/4连板11分/档位30/45/70
+
+### S7 cron接线+全链路验证 — ✅ 完成 (2026-11-03)
+- job 6c7b513b6407 提示词已更新: 强制后台运行(terminal background + process wait 900s, 时长预期8-12分钟)、保留NON_TRADING_DAY静默与MEDIA交付、最终回复附当日要点摘要(涨跌/情绪档位/极端触发/验证命中率)、子模块降级警告不阻塞交付
+- 全链路sanity: 5个analysis新模块(review_history/sentiment_cycle/llm_interpret/verify_guidance/extreme_mode) import 全过
+- **实跑验证通过**: 10-30(五)/11-02(一)/11-03(二) 连续3个交易日18:30 cron实跑——报告HTML正常生成(120-122KB)、JSON落盘完整(sentiment.cycle_phase/guidance.assertions/verification.rows/extreme字段齐全)、cron status=ok无delivery error。REVIEW_UPGRADE_DRAFT.md 已删除(内容已并入正式文档)。
+
+### S6 极端行情(F5) — ✅ 完成 (2026-10-30)
+- 新增 `analysis/extreme_mode.py`:
+  - `check_triggers(result)`: 纯规则触发判断——上证/创业板≥±2%、上涨家数<1000或>4000、跌停>30或涨停>150、成交额较20日均值偏离>±30%(现算, 与落盘层同口径_calc_amount_vs_ma20); 数据缺失项跳过不误报
+  - 归因: Google News RSS三组关键词(A股大跌/大涨、央行 政策、股市 今日, 走proxy, 同generate_ignition模式)→LLM 2-3句"今天为什么"(禁止编造, 新闻不足时只描述结构特征)
+  - 结构拆解(纯规则): 涨跌停/涨跌家数/最高连板 + 权重vs题材分化(创业板-上证 gap≥1pct判定) + 领涨TOP5/领跌BOTTOM5(daily_report新增concepts_decline, 同一数据源零额外请求)
+  - 历史对照: 情绪库相似日(load_similar_days≥2条时, 附其后1/5日上证表现) → 不足时上证日K兜底(近500根找±1pct相似涨跌幅日≤10例, 统计次1/5日平均+上涨概率; **只用close**, 红线: 严禁碰volume)
+  - 持仓应对: LLM基于thesis+当日行情, overall+per_stock(过滤非持仓码+名称映射), 固定免责"仅供参考不构成投资决策"
+  - 缓存 `cache/review_history/extreme_cache_YYYYMMDD.json`(why/hint两段, 输入hash); 各子项独立降级(失败=None), 整体失败不阻塞报告
+- `plans/daily_report.py`: 7e步接线(7d研判验证后、8落盘前); concepts_decline领跌榜入result(降级路径空列表)
+- `analysis/review_history.py`: extreme从result提取落盘(原固定占位改为data.get), 同日重跑保留已触发记录(原有逻辑)
+- 模板: 🌪极端行情专区(暖橙警示配色)插在宏观环境后、市场情绪前; 触发才渲染; 徽章触发原因+🔍归因(附新闻)+🧩结构+📚历史对照表(library/kline双分支)+💼持仓应对+免责; extreme缺失(旧数据)兼容
+- 验证: `scripts/test_extreme_mode.py` mock测试37项全过(触发边界±2.0%/1000家/跌停31/大涨3条/空数据/缓存命中0次LLM/LLM宕机降级/RSS宕机降级/library分支/落盘保留/模板5分支渲染); S3/S4/S5旧测试无回归
+- **10-29真实大跌日回测**: 触发3条(创业板-4.45%/上涨781<1000/跌停41>30); RSS归因命中实因("美股纳指大跌超500点，半导体、存储股全线跳水"); 领跌F5G/CPO/光刻机与题材弱于权重(-3.63pct)一致; 情绪库仅1天不足→日K兜底10相似日(次5日平均-1.56%上涨概率0%); 8票应对提示质量好(瑞芯微"破位则减仓"、伊利"逆势收涨底仓拿住"); 浏览器vision质检通过(位置/配色红涨绿跌/表格无溢出)
+- 测试产物已清理(/tmp/s6_*全删, 真实cache未污染)
+
+### S5 研判验证(F4) — ✅ 完成 (2026-10-30)
+- 新增 `analysis/verify_guidance.py`（共用 llm_interpret 的 _call_llm_json/qwen3.6-flash, 缓存 `cache/review_history/verify_cache_YYYYMMDD.json`）:
+  - `generate_assertions(result)`: 当日规则引擎指引(market_view打分+advice)+市场数据 → LLM改写3-5条次日可验证断言 → result['assertions_today'] → 落盘 guidance.assertions（规则引擎本身不动, 符合DESIGN §五.10）
+  - `verify_previous(result)`: 读前一交易日落盘的 assertions+stock_tips, 对照今日实际数据(指数/宽度/成交额/概念/个股涨跌) LLM逐条判 hit/miss/unclear(漏判兜底unclear, 越界序号忽略); 提示判定规则: 偏多→涨hit跌miss, 偏空→跌hit涨miss, 中性→±1%内hit/±1~3%unclear/超±3%miss; 命中率近5/20日滚动(扫历史verification字段+今日, unclear不计入分母)
+- `plans/daily_report.py` 7d步接线(verify_previous→generate_assertions, 在7c LLM解读后、8落盘前); 失败降级verification=None/断言空, 不阻塞报告
+- `analysis/review_history.py`: assertions/verification入record; 同日重跑不覆盖已有非空值
+- 模板: 「✅ 昨日研判验证」板块插在指引之前(✓红✗绿？灰, A股配色; 断言区+持仓提示区+命中率栏); 指引板块末尾「📌 今日断言（明日验证）」蓝底盒; 无verification整块不渲染
+- 验证: `scripts/test_verify_guidance.py` mock测试25项全过(断言缓存/无指引跳过/LLM宕机降级/验证缓存/漏判兜底/命中率滚动/落盘保留/模板渲染); 真实双日run: 10-29生成4断言, 10-30实跑验证12条(✓7 ✗3 ?2)命中率70%, 浏览器vision质检通过; S3/S4旧测试无回归
+- 测试产物已清理(20261030.json盘前测试文件删除, 避免污染真实历史; 10-30收盘cron会重新落盘)
+
+### S4 LLM解读流水线(F1+F2) — ✅ 完成 (2026-10-30)
+- 新增 `analysis/llm_interpret.py`（两段式, 沿用llm_industry成熟模式: qwen3.6-flash/temp=0/config读key/scheme拼接防脱敏）:
+  - 初筛: thesis+当日全部条目(公告/研报/新闻标题) → 每条 {level: major/neutral/noise, need_content}; LLM漏判条目按neutral兜底
+  - 抓正文: 仅major且need_content, 每票≤4条——公告走东财PDF(art_code→pdf.dfcfw.com/H2_{art_code}_1.pdf+pymupdf, 三样本打印验证通过: 瑞芯微三季报12页/天赐董事会决议/生益业绩说明会), 新闻trafilatura(已装入hermes venv)失败降级正则抽<p>, 研报无正文源仅标题+机构+评级
+  - 判定: thesis+条目(含正文摘录2500字/条)+近3日verdict历史 → {verdict: unchanged/strengthened/weakened/invalid_risk, reason≤40字, evidence≤3} + 每条major一句解读+影响标签; prompt明确要求同一信息不重复报警、连续weakened有新增证据才升级invalid_risk
+  - 缓存 `cache/review_history/llm_cache_YYYYMMDD.json`(输入hash=thesis+条目标题集, 同日重跑0次LLM, 输入变化自动重调)
+  - 降级: 单票LLM失败跳过该票(退回纯标题), 整体失败 result.llm_interpret_degraded=True 模板顶部灰条提示, 不阻塞报告
+- `plans/daily_report.py` 接线: fetch_announcements 增加 art_code 字段; fetch_single_stock 新增 max_info 参数(持仓8条供初筛, 自选保持3条)且透传config thesis; run() 7c步(情绪周期后、落盘前)挂 attach_interpretations
+- `analysis/review_history.py`: thesis_checks/info_digest 从 result 消费落盘(不再空占位)
+- `templates/review_report.html`: ①顶部警示区(仅weakened/invalid_risk渲染, 红卡片+依据) ②卡片内🧠逻辑状态行(四色徽章+reason+evidence; 无thesis显示"未设置") ③信息条目分级(major加粗+灰字解读+利好红/利空绿/中性灰标签, noise淡化灰色, A股配色) ④底部📖持仓逻辑档案(details折叠, 有警示票自动open且排最前, thesis三段式pre+近5日判定历史)
+- 验证: `scripts/test_llm_interpret.py` 28项全过(mock LLM两段式/缓存命中与失效/无thesis跳过/无条目unchanged/LLM失败降级/历史注入prompt/PDF抓取/模板五要素渲染+computed style核对); 真实端到端run(10-29收盘数据) 8票全过零降级——瑞芯微/柯力/先导strengthened、天赐weakened(Q3环比-13%命中thesis预警线, 判定与人工认知一致)、4票unchanged; 落盘JSON thesis_checks/info_digest各8条; 浏览器质检警示区/徽章/解读行/档案渲染正常
+- 已知边界: run()不带date参数在盘前(0点后)会把当日数据标成今天——cron在18:30跑不受影响, 盘前手动补跑须显式传date
+
+---
+
 ## ✅ v3.23 点火雷达v6：LLM标签净化 + 绝对数量排序 — 已完成 (2026-10-13)
 
 ### 原因

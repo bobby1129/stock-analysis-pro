@@ -51,3 +51,4 @@ scripts/daily_content/ffmpeg_static
 
 # 数据产物输出（图片/HTML/视频等，永不入库）
 output/
+analysis/ignition_backtest_result.json

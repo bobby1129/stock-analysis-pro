@@ -248,7 +248,8 @@ def fetch_announcements(code, max_items=3):
             if ":" in title:
                 title = title.split(":", 1)[1]
             date = item.get("notice_date", "")[:10] if item.get("notice_date") else ""
-            result.append({"title": title, "date": date})
+            # art_code: 东财公告PDF定位码(2026-10-30实测验证 H2_{art_code}_1.pdf 可下载), S4正文抓取用
+            result.append({"title": title, "date": date, "art_code": item.get("art_code")})
         return result
     except:
         return []
@@ -324,6 +325,11 @@ def fetch_market_breadth():
     limits = fetch_limit_stats()
     result["limit_up"] = limits.get("zt_count", result.get("limit_up", 0))
     result["limit_down"] = limits.get("dt_count", result.get("limit_down", 0))
+    # 最高连板数(情绪周期定位用, 涨停池全量遍历已含 lianban 字段)
+    try:
+        result["max_lianban"] = max((z.get("lianban", 1) for z in limits.get("zt_stocks", [])), default=None)
+    except Exception:
+        result["max_lianban"] = None
     return result
 
 
@@ -700,11 +706,13 @@ def calc_technical_indicators(klines):
     return result
 
 
-def fetch_single_stock(s, sina_data=None):
-    """获取单只持仓的完整数据"""
+def fetch_single_stock(s, sina_data=None, max_info=3):
+    """获取单只持仓的完整数据。max_info: 公告/研报/新闻条数(持仓8条供S4初筛, 自选保持3条)"""
     code = s["code"]
     stock = {"code": code, "name": s.get("name", ""), "note": s.get("note", ""),
              "cost": s.get("cost", 0), "shares": s.get("shares", 0)}
+    if s.get("thesis"):
+        stock["thesis"] = s["thesis"]   # S4 thesis判定输入(模板不直接展示, 底部档案从config读)
 
     # 腾讯详情
     detail = tencent_detail(code)
@@ -746,9 +754,9 @@ def fetch_single_stock(s, sina_data=None):
             stock['technical_indicators'] = indicators
 
     # 公告/研报/新闻
-    stock["announcements"] = fetch_announcements(code, max_items=3)
-    stock["research_reports"] = fetch_research_reports(code, max_items=3)
-    stock["news"] = fetch_stock_news(s.get("name", code), max_items=3)
+    stock["announcements"] = fetch_announcements(code, max_items=max_info)
+    stock["research_reports"] = fetch_research_reports(code, max_items=max_info)
+    stock["news"] = fetch_stock_news(s.get("name", code), max_items=max_info)
 
     time.sleep(0.15)
     return stock
@@ -872,6 +880,8 @@ def run(date=None, verbose=True):
         concepts_change_all = fetch_concept_flow_combined(top_n=None, verbose=False)
         concepts_change = sorted(concepts_change_all, key=lambda x: x['change_pct'], reverse=True)[:10]
         result['concepts_change'] = concepts_change
+        # S6/F5: 领跌板块Bottom5(极端行情专区结构拆解用, 同一数据源零额外请求)
+        result['concepts_decline'] = sorted(concepts_change_all, key=lambda x: x['change_pct'])[:5]
     except Exception as e:
         if verbose:
             print(f"  ⚠️ 概念涨幅榜异常: {e}", file=sys.stderr)
@@ -881,6 +891,7 @@ def run(date=None, verbose=True):
                 c['active_net'] = c.get('net')  # 降级路径net为全口径
                 c['diverge'] = ''
             result['concepts_change'] = concepts_change
+            result['concepts_decline'] = []     # 降级路径无领跌榜, S6结构拆解容忍缺失
         except Exception:
             result['concepts_change'] = []
 
@@ -919,7 +930,7 @@ def run(date=None, verbose=True):
         sina_all = sina_fetch(pf_codes)
         result['portfolio'] = []
         for p in portfolio:
-            stock = fetch_single_stock(p, sina_all)
+            stock = fetch_single_stock(p, sina_all, max_info=8)   # S4: 持仓信息条目3→8供初筛
             result['portfolio'].append(stock)
     else:
         result['portfolio'] = []
@@ -946,6 +957,57 @@ def run(date=None, verbose=True):
 
     if verbose:
         print("✅ 每日复盘完成", file=sys.stderr)
+
+    # 7b. 情绪周期定位+近20日时序SVG (S3/F3, 规则引擎; 失败自动降级不影响报告)
+    try:
+        from analysis.sentiment_cycle import attach_sentiment_cycle
+        attach_sentiment_cycle(result)
+        if verbose and result.get("sentiment_cycle", {}).get("phase"):
+            sc = result["sentiment_cycle"]
+            print(f"🎭 情绪周期: {sc['phase']} (热度{sc['score']}/100)", file=sys.stderr)
+    except Exception as e:
+        if verbose:
+            print(f"  ⚠️ 情绪周期计算失败(不影响报告): {e}", file=sys.stderr)
+
+    # 7c. LLM解读流水线 (S4/F1+F2: thesis判定+信息分级解读; 失败自动降级纯标题, 不影响报告)
+    try:
+        from analysis.llm_interpret import attach_interpretations
+        if verbose:
+            print("🧠 LLM解读持仓信息(thesis判定+分级)...", file=sys.stderr)
+        attach_interpretations(result, verbose=verbose)
+    except Exception as e:
+        result['llm_interpret_degraded'] = True
+        if verbose:
+            print(f"  ⚠️ LLM解读失败(降级纯标题): {e}", file=sys.stderr)
+
+    # 7d. 昨日研判验证 + 今日断言生成 (S5/F4; 失败自动降级, 不影响报告)
+    try:
+        from analysis.verify_guidance import verify_previous, generate_assertions
+        if verbose:
+            print("✅ 昨日研判验证…", file=sys.stderr)
+        verify_previous(result, verbose=verbose)
+        generate_assertions(result, verbose=verbose)
+    except Exception as e:
+        if verbose:
+            print(f"  ⚠️ 研判验证失败(不影响报告): {e}", file=sys.stderr)
+
+    # 7e. 极端行情专区 (S6/F5; 未触发时只挂占位; 失败自动降级, 不影响报告)
+    try:
+        from analysis.extreme_mode import attach_extreme
+        attach_extreme(result, verbose=verbose)
+    except Exception as e:
+        if verbose:
+            print(f"  ⚠️ 极端行情模块失败(不影响报告): {e}", file=sys.stderr)
+
+    # 8. 复盘数据落盘 (cache/review_history/YYYYMMDD.json, 供情绪时序/研判验证/极端对照)
+    try:
+        from analysis.review_history import save_from_result
+        hist_path = save_from_result(result)
+        if verbose:
+            print(f"💾 复盘落盘: {hist_path}", file=sys.stderr)
+    except Exception as e:
+        if verbose:
+            print(f"  ⚠️ 复盘落盘失败(不影响报告): {e}", file=sys.stderr)
 
     return result
 

@@ -134,6 +134,74 @@ def fetch_concept_main_force(names=None, verbose=True, use_cache=True):
     return result
 
 
+# ── 881行业资金流 (Phase 2, 2026-11-02) ──
+_INDUSTRY_881_MAPPING_FILE = os.path.join(_BASE, 'data', 'ths_industry_881_mapping.json')
+_INDUSTRY_CACHE_FILE = os.path.join(CACHE_DIR, f'ths_mainforce_industry_{datetime.now().strftime("%Y%m%d")}.json')
+
+
+def load_881_mapping():
+    """{行业名: 881板块码}"""
+    with open(_INDUSTRY_881_MAPPING_FILE, encoding='utf-8') as f:
+        return json.load(f)['industries']
+
+
+def fetch_industry_main_force(names=None, verbose=True, use_cache=True):
+    """批量抓取881行业主力资金 (接口与885概念完全一致, 2026-11-02验证通过)
+
+    Args:
+        names: 行业名列表; None=映射表全量(90行业)
+        use_cache: 当日缓存命中则直接返回
+    Returns:
+        {行业名: {super_net, big_net, medium_net, small_net, main_net, main_in, main_out}}
+    """
+    for k in ['HTTPS_PROXY', 'https_proxy', 'HTTP_PROXY', 'http_proxy']:
+        os.environ.pop(k, None)
+
+    date_key = datetime.now().strftime('%Y%m%d')
+    cache_file = os.path.join(CACHE_DIR, f'ths_mainforce_industry_{date_key}.json')
+    if use_cache and os.path.exists(cache_file) and _cache_is_post_close(cache_file):
+        try:
+            with open(cache_file, encoding='utf-8') as f:
+                cached = json.load(f)
+            if names is None or set(names) <= set(cached):
+                if verbose:
+                    print(f'[mainforce_industry] 命中当日缓存: {cache_file} ({len(cached)}行业)')
+                return cached
+        except Exception:
+            pass
+
+    mapping = load_881_mapping()
+    targets = names if names else list(mapping.keys())
+    missing = [n for n in targets if n not in mapping]
+    if missing and verbose:
+        print(f'[mainforce_industry] ⚠ 映射缺失{len(missing)}个: {missing[:5]}')
+
+    session = requests.Session()
+    result = {}
+    t0 = time.time()
+    for i, name in enumerate(targets):
+        code = mapping.get(name)
+        if not code:
+            continue
+        d = fetch_one(code, session)
+        if d:
+            result[name] = d
+        if (i + 1) % 30 == 0 and verbose:
+            print(f'[mainforce_industry] {i+1}/{len(targets)} ok={len(result)} {time.time()-t0:.0f}s')
+        time.sleep(GAP)
+
+    if verbose:
+        print(f'[mainforce_industry] 完成: {len(result)}/{len(targets)} 行业, 耗时{time.time()-t0:.0f}s')
+
+    if names is None and result:
+        os.makedirs(CACHE_DIR, exist_ok=True)
+        with open(cache_file, 'w', encoding='utf-8') as f:
+            json.dump(result, f, ensure_ascii=False)
+        if verbose:
+            print(f'[mainforce_industry] 已缓存: {cache_file}')
+    return result
+
+
 def fetch_concept_flow_combined(top_n=None, verbose=True):
     """复盘报告用: 概念资金流(主力口径+全口径主动净额合并)
 
