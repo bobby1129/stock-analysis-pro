@@ -16,7 +16,23 @@ import json
 from datetime import datetime, timedelta
 from stock_short_names import get_short_name
 from generate_stock_amount import get_episode_vol
-from cache_dates import get_prev_cache_date, get_cache_file
+from cache_dates import get_prev_cache_date, get_cache_file, load_cache_dates
+
+RECENT_DAYS = 5  # 新进定义: 近5个交易日都没进过TOP50 (2026-11-06, 过滤边缘徘徊票)
+
+
+def _load_top50_codes(date_key):
+    """读取某日缓存的top50代码集合，失败返回空集"""
+    cache_file = get_cache_file(date_key)
+    if not os.path.exists(cache_file):
+        return set()
+    try:
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            cached = json.load(f)
+        return set(item['code'] for item in cached[:50])
+    except Exception as e:
+        print(f"⚠ 读取{date_key}缓存失败: {e}")
+        return set()
 
 
 def fetch_stock_amount():
@@ -65,25 +81,27 @@ def fetch_stock_amount():
 
 
 def fetch_yesterday_top50_codes(prev_date=None):
-    """从本地缓存文件读取昨日top50的代码集合。prev_date可指定YYYYMMDD(测试用)"""
+    """从本地缓存读取近RECENT_DAYS个交易日的top50代码并集。
+    新进定义(2026-11-06): 今日在榜、且近5个交易日都没进过榜，过滤边缘徘徊票。
+    prev_date可指定YYYYMMDD作为"最近一日"(测试用)。"""
     if prev_date:
-        date_key = prev_date
+        anchor = prev_date
     else:
         # 通过缓存日期指针定位上一交易日（长假后仍可靠，2026-10-08改造）
-        date_key = get_prev_cache_date()
-    if date_key:
-        cache_file = get_cache_file(date_key)
-        if os.path.exists(cache_file):
-            try:
-                with open(cache_file, 'r', encoding='utf-8') as f:
-                    cached = json.load(f)
-                top50_codes = set(item['code'] for item in cached[:50])
-                print(f"✓ 读取昨日top50缓存: {date_key}, {len(top50_codes)} 只")
-                return top50_codes
-            except Exception as e:
-                print(f"读取缓存失败: {e}")
-    print("⚠ 未找到昨日top50缓存")
-    return set()
+        anchor = get_prev_cache_date()
+    if not anchor:
+        print("⚠ 未找到历史top50缓存")
+        return set()
+    # 取anchor及之前共RECENT_DAYS个缓存日期（缺日自动跳过，长假无需干预）
+    all_dates = load_cache_dates()
+    hist_dates = [d for d in all_dates if d <= anchor][-RECENT_DAYS:]
+    recent_codes = set()
+    for d in hist_dates:
+        codes = _load_top50_codes(d)
+        recent_codes |= codes
+        print(f"✓ 读取{d} top50缓存: {len(codes)} 只")
+    print(f"✓ 近{len(hist_dates)}个交易日top50并集: {len(recent_codes)} 只（新进须全部不在其中）")
+    return recent_codes
 
 
 def fetch_tencent_extras(codes):
@@ -485,7 +503,7 @@ body {{
         <div class="kicker">盘后情报局</div>
         <div class="date">{date_str}</div>
         <div class="title">新进成交额TOP50</div>
-        <div class="subtitle">首次进入成交额前50 · 共{count}只 {page_info}</div>
+        <div class="subtitle">近5日首次进入成交额前50 · 共{count}只 {page_info}</div>
     </div>
     
     <div class="verdict">💡 {verdict}</div>
