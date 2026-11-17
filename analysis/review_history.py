@@ -96,6 +96,7 @@ def save_from_result(data: dict) -> str:
         "info_digest": data.get("info_digest") or {},       # S4 llm_interpret填充
         "verification": data.get("verification"),           # S5: 昨日断言/提示验证结果+命中率
         "extreme": data.get("extreme") or {"triggered": False, "triggers": [], "analysis": None},  # S6
+        "opportunity_scan": _extract_opportunity(data),     # 7f 新机会扫描(OPPORTUNITY_SCAN_DESIGN.md)
     }
 
     # 保留后续步骤可能已写入的字段(同日重跑时不覆盖非空值)
@@ -110,6 +111,8 @@ def save_from_result(data: dict) -> str:
             record["guidance"]["assertions"] = old["guidance"]["assertions"]
         if not record["verification"] and old.get("verification"):
             record["verification"] = old["verification"]
+        if not record["opportunity_scan"].get("candidates") and (old.get("opportunity_scan") or {}).get("candidates"):
+            record["opportunity_scan"] = old["opportunity_scan"]
 
     os.makedirs(HISTORY_DIR, exist_ok=True)
     path = _path(date)
@@ -118,6 +121,21 @@ def save_from_result(data: dict) -> str:
         json.dump(record, f, ensure_ascii=False, indent=1)
     os.replace(tmp, path)
     return path
+
+
+def _extract_opportunity(data: dict) -> dict:
+    """从run()结果提取机会扫描落盘结构(精简: 剔除公告/新闻原文等富化字段, 只留判定所需)。"""
+    scan = data.get("opportunity_scan") or {}
+    cands = []
+    for c in scan.get("candidates") or []:
+        cands.append({
+            "code": c.get("code"), "name": c.get("name"),
+            "source": c.get("source"), "event_name": c.get("event_name"),
+            "change_pct": c.get("change_pct"), "p60": c.get("p60"),
+            "amount": c.get("amount"), "amount_w": c.get("amount_w"),
+            "judge": c.get("judge"),
+        })
+    return {"date": scan.get("date"), "candidates": cands}
 
 
 def _calc_amount_vs_ma20(total_amount, date: str):

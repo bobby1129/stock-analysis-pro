@@ -120,6 +120,19 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 .extreme-block .eb-title { font-size: 12px; font-weight: 700; color: #8a5a00; margin-bottom: 4px; }
 .extreme-block .eb-text { font-size: 12px; color: #5a4a30; line-height: 1.6; }
 .extreme-news { font-size: 11px; color: #a08050; line-height: 1.6; margin-top: 4px; }
+/* 🔭 新机会扫描 (OPPORTUNITY_SCAN_DESIGN.md) */
+.opp-row { padding: 10px 16px; border-bottom: 1px solid #f5f5f5; }
+.opp-head { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.opp-name { font-size: 14px; font-weight: 600; color: #333; }
+.opp-badge { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 6px; padding: 2px 8px; }
+.opp-badge.watchlist { background: #fdeaea; color: #c0392b; border: 1px solid #f2b8ae; }
+.opp-badge.observe { background: #fff6e5; color: #9c640c; border: 1px solid #eed9a0; }
+.opp-badge.skip { background: #f0f0f0; color: #999; }
+.opp-src { display: inline-block; font-size: 10px; color: #667; background: #eef2ff; border-radius: 5px; padding: 2px 6px; }
+.opp-meta { font-size: 11px; color: #999; margin-top: 3px; }
+.opp-reason { font-size: 12px; color: #555; line-height: 1.6; margin-top: 4px; }
+.opp-value { font-size: 11px; color: #8a5a00; line-height: 1.5; margin-top: 2px; }
+.opp-note { font-size: 11px; color: #aaa; padding: 6px 16px 12px; }
 .ex-hist-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 4px; }
 .ex-hist-table th { color: #999; font-weight: 400; text-align: right; padding: 3px 4px; border-bottom: 1px solid #eed9b0; }
 .ex-hist-table td { text-align: right; padding: 3px 4px; border-bottom: 1px solid #f5ead5; color: #444; }
@@ -588,6 +601,49 @@ body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
 </div>
 </div>
 {% endfor %}
+</div>
+{% endif %}
+
+{# ── 🔭 新机会扫描 (OPPORTUNITY_SCAN_DESIGN.md, 条件渲染) ── #}
+{% set opp = data.opportunity_scan %}
+{% if opp and opp.candidates %}
+{% set action_name = {'watchlist': '⭐ 进自选', 'observe': '👀 观察', 'skip': '✗ 放弃'} %}
+{% set sig_name = {'strong': '强', 'medium': '中', 'weak': '弱'} %}
+{% set val_name = {'high': '高', 'medium': '中', 'low': '低', 'unclear': '?'} %}
+{% set cat_name = {'announcement': '📢公告', 'news': '📰新闻', 'none': '💸纯资金'} %}
+<div class="section">
+<div class="section-title">🔭 新机会扫描（短期信号 × 长期价值）</div>
+{% for c in opp.candidates %}
+{% set j = c.judge %}
+{% if j and j.action != 'skip' %}
+<div class="opp-row">
+<div class="opp-head">
+<span class="opp-name">{{ c.name }}<span style="font-size:11px;color:#999;font-weight:400;">({{ c.code }})</span></span>
+<span class="opp-badge {{ j.action }}">{{ action_name.get(j.action, j.action) }}</span>
+{% if c.source == 'new_top50' %}<span class="opp-src">新进TOP50</span>{% else %}<span class="opp-src">点火首放·{{ c.event_name }}</span>{% endif %}
+{% set cp = c.change_pct %}
+{% if cp is not none %}<span style="font-size:12px;font-weight:600;color:{{ '#e74c3c' if cp > 0 else '#27ae60' if cp < 0 else '#999' }};">{{ "{:+.2f}%".format(cp) }}</span>{% endif %}
+</div>
+<div class="opp-meta">信号{{ sig_name.get(j.signal_quality, j.signal_quality) }} · 价值{{ val_name.get(j.value_rating, j.value_rating) }} · {% if j.catalyst %}{{ cat_name.get(j.catalyst.type, '') }}{% if j.catalyst.summary %} {{ j.catalyst.summary }}{% endif %}{% endif %}{% if c.p60 is not none %} · 60日分位{{ "{:.0f}".format(c.p60) }}{% endif %}</div>
+<div class="opp-reason">{{ j.reason }}</div>
+{% if j.value_logic %}<div class="opp-value">📌 长期逻辑: {{ j.value_logic }}</div>{% endif %}
+</div>
+{% endif %}
+{% endfor %}
+{% set has_skip = opp.candidates|selectattr('judge.action', 'equalto', 'skip')|list %}
+{% if has_skip %}
+<details style="padding: 4px 16px 10px;">
+<summary style="font-size:12px;color:#999;cursor:pointer;">✗ 放弃 {{ has_skip|length }}只（点击展开）</summary>
+{% for c in opp.candidates %}
+{% if c.judge and c.judge.action == 'skip' %}
+<div class="opp-row" style="padding:6px 0;border-bottom:none;">
+<span style="font-size:12px;color:#999;">{{ c.name }}({{ c.code }}) — {{ c.judge.reason }}</span>
+</div>
+{% endif %}
+{% endfor %}
+</details>
+{% endif %}
+<div class="opp-note">入池: 新进TOP50(≤10) + 点火首放低位p60≤50(补至15) ｜ ⭐进自选仅为提示, 需人工加入 ｜ {% if data.opportunity_degraded %}⚠️ 部分票LLM判定降级{% endif %}</div>
 </div>
 {% endif %}
 

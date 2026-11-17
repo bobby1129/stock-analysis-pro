@@ -1,4 +1,14 @@
 
+## ✅ 新机会扫描上线：短期信号×长期价值 (2026-11-18)
+
+- 动机: 复盘报告只对持仓票做thesis验证, 用户提出对点火首放/新进TOP50的低位股也梳理逻辑寻找新机会——短期信号为导火索, 最终找长期值得投资的票。
+- 设计文档 `OPPORTUNITY_SCAN_DESIGN.md`(先文档后实现, 用户确认三项决议: 低位阈值宽口径p60≤50 / 金融权重票不硬剔交LLM判 / watchlist只提示不自动写入自选)。
+- 新增 `analysis/opportunity_scan.py`: 入池≤15只(A类新进TOP50≤10优先 + B类点火首放低位补足, 事件top1往前取) → 富化(腾讯批量实时+K线分位+主营缓存+公告/新闻标题) → 每票一次轻量LLM判定(catalyst/signal_quality/value_rating/value_logic/action, watchlist规则兜底校验) → 当日缓存。
+- 挂载: daily_report.run() 7f步(7e极端行情后、8落盘前, 失败降级不阻塞); review_history落盘opportunity_scan字段(精简结构); 模板🔭板块插自选股后概念板块前(watchlist/observe逐票+skip折叠)。
+- 11-17数据实测: 8只入池(A类4+B类4), 判定5 watchlist(中能电气/华丰科技/东方财富/冠石科技/容大感光) + 1 observe(长华化学, 业绩下滑长期逻辑存疑) + 2 skip(东方海洋/冰山冷热, 高位巨量换手纯题材)——skip票位置风险被正确识别。耗时约2分钟, token在预估内(25~35k/天)。
+- 修复: 模板`"%.0f".format`在Jinja2中输出字面量, 改`"{:.0f}".format`(与模板内既有`"{:+.2f}%".format`风格一致)。
+- 文档同步: AGENTS.md(报告要求节) / OPPORTUNITY_SCAN_DESIGN.md。
+
 ## ✅ 新进TOP50口径升级：近5日未进榜才算新进 (2026-11-06)
 
 - 动机: 旧口径只对比昨日缓存，成交额在榜边徘徊的票一会进一会出、反复被报"新进"，信息价值低；一直不在榜的票进榜才有意义（用户提出）。

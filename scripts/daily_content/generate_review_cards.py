@@ -112,6 +112,40 @@ def card_why(d, date_str):
 
 def card_history(d, date_str):
     h = d["extreme"]["analysis"]["history"]
+    # 情绪库口径(source=library): days列表, 无stat统计块
+    if h.get("source") == "library":
+        days = h.get("days") or []
+        rows = ""
+        for m in days:
+            rows += (
+                f'<div class="hrow"><span class="hdate">{m["date"]}</span>'
+                f'<span class="hcell">{_fmt_pct(m.get("sh_pct"))}</span>'
+                f'<span class="hcell">{_fmt_pct(m.get("next1"))}</span>'
+                f'<span class="hcell">{_fmt_pct(m.get("next5"))}</span></div>'
+            )
+        sub = f'情绪库相似日（上涨家数/量能相近），共 {len(days)} 条'
+        return f"""<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+{BASE_CSS}
+.sub {{ text-align: center; font-size: 30px; color: #8a6d1a; margin-bottom: 34px; }}
+.htable {{ background: #fff; border: 2px solid #d4af37; border-radius: 16px; padding: 20px 30px; box-shadow: 0 4px 14px rgba(184,134,11,0.10); }}
+.hrow {{ display: flex; align-items: center; padding: 17px 6px; border-bottom: 1px dashed #eee4cc; }}
+.hrow:last-child {{ border-bottom: none; }}
+.hrow.head {{ border-bottom: 2px solid #d4af37; padding: 10px 6px 16px; }}
+.hdate {{ width: 250px; font-size: 30px; font-weight: 700; color: #444; }}
+.hcell {{ flex: 1; text-align: right; font-size: 31px; font-weight: 800; }}
+.hrow.head .hcell, .hrow.head .hdate {{ color: #b8860b; font-size: 28px; }}
+.note {{ margin-top: 30px; text-align: center; font-size: 26px; color: #999; }}
+</style></head><body>
+<div class="kicker"><span>📚 复盘 · 极端行情</span></div>
+<div class="date">{date_str}</div>
+<div class="title">历史对照</div>
+<div class="sub">{sub}</div>
+<div class="htable">
+  <div class="hrow head"><span class="hdate">相似日</span><span class="hcell">当日上证</span><span class="hcell">次1日</span><span class="hcell">次5日</span></div>
+  {rows}
+</div>
+<div class="note">历史统计仅供参考，不构成投资建议</div>
+</body></html>"""
     stat = h["stat"]
     rows = ""
     for m in h["matches"]:

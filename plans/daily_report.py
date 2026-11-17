@@ -1001,6 +1001,15 @@ def run(date=None, verbose=True):
         if verbose:
             print(f"  ⚠️ 极端行情模块失败(不影响报告): {e}", file=sys.stderr)
 
+    # 7f. 新机会扫描 (OPPORTUNITY_SCAN_DESIGN.md; 新进TOP50+点火首放低位, LLM短期信号×长期价值判定; 失败降级不阻塞)
+    try:
+        from analysis.opportunity_scan import attach_opportunity
+        attach_opportunity(result, verbose=verbose)
+    except Exception as e:
+        if verbose:
+            print(f"  ⚠️ 机会扫描模块失败(不影响报告): {e}", file=sys.stderr)
+        result['opportunity_degraded'] = True
+
     # 8. 复盘数据落盘 (cache/review_history/YYYYMMDD.json, 供情绪时序/研判验证/极端对照)
     try:
         from analysis.review_history import save_from_result
