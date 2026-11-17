@@ -111,6 +111,7 @@ CLI command
 | `stock_picker.py` | ~400 | 成分股+K线+deep_analysis | 双轨评分: 轨道A板块强度(100分) + 轨道B选股决策(100分) + 精选标的(入场信号分类+entry_score) + 跨概念共振 | ✅ |
 | ~~`concept_rank.py`~~ | — | — | 已删除(v3.7清理死代码), 功能由concept_analysis.py直接调用fetch_concept_list+fetch_concept_stocks替代 | 🗑️ |
 | `macro.py` | 351 | macro.py (collectors) | analyze_global(环境定性) + analyze_domestic(经济周期/流动性) + analyze_event(市场情绪) + synthesize(综合研判) | ✅ |
+| `opportunity_scan.py` | ~440 | 新进TOP50缓存 + 点火雷达落盘 + 腾讯行情 + F10主营 + 公告/新闻标题 + LLM | 新机会扫描(≤15只): catalyst/signal_quality/value_rating/value_logic/action(watchlist·observe·skip) | ✅ |
 
 ### 3.3 Plans (编排层)
 
@@ -118,7 +119,7 @@ CLI command
 |------|------|----------|------|
 | `stock_analysis.py` | 175 | 行情→公司概况→技术面→基本面→资金面→舆情面→估值→综合评分→业务深度分析(LLM) | ✅ |
 | `concept_analysis.py` | 340 | 概念排行→趋势定性(100只成分股,剔除北交所)→新闻归因→机会筛选(涨跌分布+综合评分), 含地域过滤+龙头去重 | ✅ |
-| `daily_report.py` | 619 | 每日复盘: 指数行情→涨跌家数→概念板块TOP10(同花顺资金净流入+涨幅)→宏观数据→持仓分析→自选股→格式化输出 | ✅ |
+| `daily_report.py` | ~1030 | 每日复盘: 指数行情→涨跌家数→概念板块TOP10(同花顺资金净流入+涨幅)→宏观数据→持仓分析→自选股→情绪周期(7b)→LLM解读(7c)→研判验证(7d)→极端行情(7e)→**新机会扫描(7f)**→落盘→格式化输出 | ✅ |
 | `industry_screener.py` | ~500 | 行业异动筛选: 涨幅>5%股票→同花顺F10主营业务→二级行业归类→Top5行业详细指标 | ✅ |
 | `options_scan.py` | ~270 | ETF期权全市场扫描: 合约数据→HV计算→D/R/S风险收益排序→卖方Top10→买方Top10(BS胜率) | ✅ |
 

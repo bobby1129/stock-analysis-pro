@@ -1,7 +1,7 @@
 # stock-analysis-pro Agent备忘
 
 项目核心文档。Agent 动本项目前先读此文件；改动代码必须同步更新此文档。
-相关文档: DESIGN.md(设计)、USAGE.md(用法)、DAILY_CONTENT.md / DAILY_CONTENT_PROJECT.md(抖音内容)、IGNITION_RADAR_DESIGN.md(点火雷达)、PROGRESS.md。
+相关文档: DESIGN.md(设计)、USAGE.md(用法)、DAILY_CONTENT.md / DAILY_CONTENT_PROJECT.md(抖音内容)、IGNITION_RADAR_DESIGN.md(点火雷达)、REVIEW_UPGRADE_DESIGN.md(复盘升级S1~S8)、OPPORTUNITY_SCAN_DESIGN.md(新机会扫描7f)、PROGRESS.md。
 
 ## 数据源与接口
 

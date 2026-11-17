@@ -3,6 +3,7 @@
 > 状态：**设计中，待确认**（2026-10-07）
 > 替代对象：`scripts/daily_content/generate_anomaly.py` 的异常信号捕捉栏目（放量滞涨/缩量新高/放量急拉 3张）
 > 相关文档：DAILY_CONTENT.md（抖音内容）、AGENTS.md（数据源备忘）
+> 下游消费方（2026-11-18新增）：每日复盘"🔭新机会扫描"（`analysis/opportunity_scan.py`，设计文档 `OPPORTUNITY_SCAN_DESIGN.md`）读取当日落盘 `output/daily_content/ignition_data_YYYYMMDD.json`，取事件卡片内 vol_tag=首放 且 p60≤50 的成员股作为B类入池候选（每日≤15只中的补足名额，事件top1往前取）。**修改 members 字段结构(vol_tag/p60/concepts_clean/business等)需同步检查该消费方。**
 
 ## 1. 背景与动机
 
